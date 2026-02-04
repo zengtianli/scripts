@@ -1,0 +1,1 @@
+../../../../.assets/scripts/docx_apply_watermark.py

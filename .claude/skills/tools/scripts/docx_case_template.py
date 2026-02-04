@@ -1,0 +1,1 @@
+../../../../.assets/scripts/docx_case_template.py

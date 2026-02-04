@@ -1,0 +1,1 @@
+../.assets/scripts/app_open.py

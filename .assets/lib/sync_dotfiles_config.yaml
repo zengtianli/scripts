@@ -1,0 +1,83 @@
+# Dotfiles 同步配置
+# 格式: source (配置仓库) ↔ target (Obsidian)
+
+sync_mappings:
+
+  # Neovim 配置
+  neovim_architecture:
+    source: /Users/tianli/Documents/sync/nvim/NVIM_ARCHITECTURE.md
+    target: /Users/tianli/obs/⚙️ 配置指南/nvim/NVIM_ARCHITECTURE.md
+    description: Neovim架构配置
+
+  neovim_readme_cn:
+    source: /Users/tianli/Documents/sync/nvim/README_cn.md
+    target: /Users/tianli/obs/⚙️ 配置指南/nvim/README_cn.md
+    description: Neovim中文说明
+
+  neovim_guide:
+    source: /Users/tianli/Documents/sync/nvim/Neovim配置指南.md
+    target: /Users/tianli/obs/⚙️ 配置指南/nvim/Neovim配置指南.md
+    description: Neovim配置指南
+
+  # Zsh 配置
+  zsh_functions:
+    source: /Users/tianli/Documents/sync/zsh/zsh-功能汇总.md
+    target: /Users/tianli/obs/⚙️ 配置指南/zsh/zsh-功能汇总.md
+    description: Zsh功能汇总
+
+  zsh_readme:
+    source: /Users/tianli/Documents/sync/zsh/readme.md
+    target: /Users/tianli/obs/⚙️ 配置指南/zsh/zsh_readme.md
+    description: Zsh使用说明
+
+  # Yabai 配置
+  yabai_functions:
+    source: /Users/tianli/Documents/sync/yabai/yabai-功能汇总.md
+    target: /Users/tianli/obs/⚙️ 配置指南/yabai/yabai-功能汇总.md
+    description: Yabai功能汇总
+
+  yabai_readme:
+    source: /Users/tianli/Documents/sync/yabai/yabai_readme.md
+    target: /Users/tianli/obs/⚙️ 配置指南/yabai/yabai_readme.md
+    description: Yabai说明文档
+
+  yabai_simple_readme:
+    source: /Users/tianli/Documents/sync/yabai/readme.md
+    target: /Users/tianli/obs/⚙️ 配置指南/yabai/yabai_简易说明.md
+    description: Yabai简易说明
+
+  # Hammerspoon 配置
+  hammerspoon_functions:
+    source: /Users/tianli/.config/hammerspoon/Hammerspoon-功能汇总.md
+    target: /Users/tianli/obs/⚙️ 配置指南/hammerspoon/Hammerspoon-功能汇总.md
+    description: Hammerspoon功能汇总
+
+  hammerspoon_rules:
+    source: /Users/tianli/.config/hammerspoon/Hammerspoon_rule.md
+    target: /Users/tianli/obs/⚙️ 配置指南/hammerspoon/Hammerspoon_rule.md
+    description: Hammerspoon规则配置
+
+  hammerspoon_readme:
+    source: /Users/tianli/.config/hammerspoon/readme.md
+    target: /Users/tianli/obs/⚙️ 配置指南/hammerspoon/hammerspoon_readme.md
+    description: Hammerspoon使用说明
+
+  hammerspoon_refactor:
+    source: /Users/tianli/.config/hammerspoon/REFACTOR_GUIDE.md
+    target: /Users/tianli/obs/⚙️ 配置指南/hammerspoon/Hammerspoon_REFACTOR_GUIDE.md
+    description: Hammerspoon重构指南
+
+  # Yazi 配置
+  yazi_readme:
+    source: /Users/tianli/.config/yazi/yazi_readme.md
+    target: /Users/tianli/obs/⚙️ 配置指南/yazi/yazi_readme.md
+    description: Yazi使用说明
+
+  yazi_functions:
+    source: /Users/tianli/.config/yazi/Yazi-功能汇总.md
+    target: /Users/tianli/obs/⚙️ 配置指南/yazi/Yazi-功能汇总.md
+    description: Yazi功能汇总
+
+settings:
+  default_mode: smart  # smart / force_to_target / force_to_source
+

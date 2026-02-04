@@ -1,0 +1,1 @@
+../../../.assets/scripts/clashx_proxy.sh

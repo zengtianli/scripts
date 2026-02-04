@@ -1,0 +1,1 @@
+../../../.assets/scripts/pdf_to_md.sh

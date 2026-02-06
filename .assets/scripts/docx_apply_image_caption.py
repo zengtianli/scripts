@@ -28,8 +28,7 @@ from pathlib import Path
 from docx import Document
 from docx.oxml.ns import qn
 
-from common_utils import get_input_files
-
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import get_input_files
 
 def find_style_fuzzy(doc, style_name):

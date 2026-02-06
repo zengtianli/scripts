@@ -21,6 +21,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import multiprocessing
 import time
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import (
     show_success, show_error, show_warning, show_info, show_processing,
     validate_input_file, check_file_extension, get_file_basename,

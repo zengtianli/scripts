@@ -24,8 +24,8 @@ Office文档文本小写化工具
 import sys
 from pathlib import Path
 
-# 添加 _lib 到搜索路径
-sys.path.insert(0, str(Path(__file__).parent / "_lib"))
+# 添加 lib 到搜索路径
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 
 from finder import get_input_files
 

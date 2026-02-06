@@ -6,7 +6,7 @@
 # @raycast.packageName PDF
 # @raycast.description 图片合并转 PDF（ImageMagick）
 
-source "$(dirname "${BASH_SOURCE[0]}")/_lib/common.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/common.sh"
 
 readonly SCRIPT_VERSION="1.0.0"
 readonly SCRIPT_AUTHOR="tianli"

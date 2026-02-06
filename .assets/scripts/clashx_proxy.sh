@@ -10,8 +10,8 @@
 # Documentation:
 # @raycast.description Toggle ClashX Pro system proxy
 
-source "$(dirname "$0")/_lib/common.sh"
-source "$(dirname "$0")/_lib/clashx.sh"
+source "$(dirname "$0")/../lib/common.sh"
+source "$(dirname "$0")/../lib/clashx.sh"
 
 log_script_usage "clashx_proxy.sh" "network"
 clashx_toggle_proxy

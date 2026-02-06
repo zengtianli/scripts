@@ -19,6 +19,7 @@ import argparse
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import (
     show_success, show_error, show_warning, show_info, show_processing,
     validate_input_file, check_file_extension, ProgressTracker,

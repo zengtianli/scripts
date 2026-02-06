@@ -15,6 +15,7 @@ import csv
 import re
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import (
     show_success, show_error, show_info, fatal_error, ProgressTracker,
     show_version_info, show_help_header, show_help_footer, get_finder_current_dir

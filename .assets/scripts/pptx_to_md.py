@@ -16,6 +16,7 @@ import argparse
 from pathlib import Path
 from pptx import Presentation
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import (
     show_success, show_error, show_warning, show_info, show_processing,
     validate_input_file, ensure_directory, ProgressTracker, fatal_error,

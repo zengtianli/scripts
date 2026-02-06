@@ -17,8 +17,9 @@ import subprocess
 import json
 import sys
 import os
+from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '_lib'))
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common import log_usage
 
 def main():

@@ -28,6 +28,7 @@ import os
 import shutil
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import get_input_files
 
 try:

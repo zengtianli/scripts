@@ -6,7 +6,7 @@
 # @raycast.packageName PDF
 # @raycast.description 将PDF转换为Markdown
 
-source "$(dirname "$0")/_lib/common.sh"
+source "$(dirname "$0")/../lib/common.sh"
 log_script_usage "pdf/to_md" "pdf"
 
 SELECTED_FILE=$(get_finder_selection_single)

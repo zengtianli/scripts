@@ -6,7 +6,7 @@
 # @raycast.packageName DOCX
 # @raycast.description DOCX转Markdown（使用markitdown）- 支持多选
 
-source "$(dirname "$0")/_lib/common.sh"
+source "$(dirname "$0")/../lib/common.sh"
 log_script_usage "docx/to_md" "docx"
 
 # ===== 检查依赖 =====

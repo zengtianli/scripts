@@ -26,6 +26,7 @@ import subprocess
 import shutil
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import get_input_files
 
 # 获取当前脚本所在目录

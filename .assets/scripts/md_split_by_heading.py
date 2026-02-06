@@ -13,6 +13,7 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from common_utils import (
     show_success, show_info, fatal_error,
     show_version_info, show_help_header, show_help_footer,

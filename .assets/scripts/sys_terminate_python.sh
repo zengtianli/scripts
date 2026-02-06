@@ -11,7 +11,7 @@
 # @raycast.description Terminate all running Python processes
 
 # 引入通用函数库
-source "$(dirname "$0")/_lib/common.sh"
+source "$(dirname "$0")/../lib/common.sh"
 
 # 记录使用统计
 log_script_usage "system/manage_terminate_python.sh" "managers"

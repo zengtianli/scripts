@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title md-split
 # @raycast.mode fullOutput
@@ -14,11 +14,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import (
-    show_success, show_info, fatal_error,
-    show_version_info, show_help_header, show_help_footer,
-    validate_input_file, check_file_extension, get_input_files
-)
+from display import show_success, show_info
+from file_ops import (fatal_error, show_version_info, show_help_header, show_help_footer,
+                      validate_input_file, check_file_extension)
+from finder import get_input_files
 
 SCRIPT_VERSION = "1.0.0"
 SCRIPT_AUTHOR = "tianli"

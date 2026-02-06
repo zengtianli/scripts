@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title folder-move-up-remove
 # @raycast.mode fullOutput

@@ -1,1 +1,0 @@
-../../../../.assets/scripts/md_to_qmd.py

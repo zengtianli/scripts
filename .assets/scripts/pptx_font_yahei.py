@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title pptx-font
 # @raycast.mode fullOutput
@@ -29,7 +29,7 @@ import shutil
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import get_input_files
+from finder import get_input_files
 
 try:
     from pptx import Presentation

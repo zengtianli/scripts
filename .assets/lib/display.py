@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 """
 消息显示模块
 提供统一的控制台输出格式

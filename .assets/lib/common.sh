@@ -1,38 +1,27 @@
 #!/bin/bash
 # ============================================================
 # 通用函数库 - Raycast 脚本公共库
-# 位置：execute/raycast/_lib/common.sh
-# 更新：2025-12-28
+# 位置：.assets/lib/common.sh
 # ============================================================
-# 使用说明: source "$(dirname "$0")/_lib/common.sh"
+# 使用说明: source "$(dirname "$0")/../lib/common.sh"
 # ============================================================
+
+# ===== 动态路径检测 =====
+# LIB_DIR: 本文件所在目录
+readonly _COMMON_SH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# PROJECT_ROOT: 项目根目录 (.assets 的上级)
+readonly PROJECT_ROOT="$(cd "$_COMMON_SH_DIR/../.." && pwd)"
+# SCRIPTS_DIR: 脚本目录
+readonly SCRIPTS_DIR="$_COMMON_SH_DIR/../scripts"
 
 # ===== 环境变量设置 =====
-export PATH="/Users/tianli/miniforge3/bin:$PATH"
-
-# ===== 基础路径常量 =====
-readonly PYTHON_PATH="/Users/tianli/miniforge3/bin/python3"
-readonly MINIFORGE_BIN="/Users/tianli/miniforge3/bin"
-readonly EXECUTE_DIR="/Users/tianli/useful_scripts/execute"
-readonly SCRIPTS_BASE="$EXECUTE_DIR/scripts"
-readonly TOOLS_DIR="$EXECUTE_DIR/tools"
-readonly RAYCAST_DIR="$EXECUTE_DIR/raycast"
-
-# ===== 脚本目录常量 =====
-readonly DOCX_DIR="$SCRIPTS_BASE/docx"
-readonly XLSX_DIR="$SCRIPTS_BASE/xlsx"
-readonly PPTX_DIR="$SCRIPTS_BASE/pptx"
-readonly PDF_DIR="$SCRIPTS_BASE/pdf"
-readonly CSV_DIR="$SCRIPTS_BASE/csv"
-readonly MARKDOWN_DIR="$SCRIPTS_BASE/markdown"
-readonly LLM_DIR="$SCRIPTS_BASE/llm"
-readonly COMPARE_DIR="$SCRIPTS_BASE/compare"
-readonly FILES_DIR="$SCRIPTS_BASE/files"
-readonly FOLDERS_DIR="$SCRIPTS_BASE/folders"
-readonly APPS_DIR="$SCRIPTS_BASE/apps"
-readonly SYSTEM_DIR="$SCRIPTS_BASE/system"
-readonly YABAI_DIR="$SCRIPTS_BASE/yabai"
-readonly SYNC_DIR="$SCRIPTS_BASE/sync"
+# 动态检测 Python 路径
+if command -v python3 &>/dev/null; then
+    readonly PYTHON_PATH="$(command -v python3)"
+else
+    readonly PYTHON_PATH="/usr/bin/env python3"
+fi
+export PATH="$(dirname "$PYTHON_PATH"):$PATH"
 
 # ===== 使用统计 =====
 readonly USAGE_LOG="$HOME/.useful_scripts_usage.log"

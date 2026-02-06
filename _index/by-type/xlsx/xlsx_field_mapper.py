@@ -1,1 +1,0 @@
-../../../.assets/scripts/xlsx_field_mapper.py

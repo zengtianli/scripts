@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title csv-to-txt
 # @raycast.mode fullOutput
@@ -19,11 +19,11 @@ from pathlib import Path
 from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import (
-    show_success, show_error, show_warning, show_info, show_processing,
-    validate_input_file, check_file_extension, ProgressTracker,
-    fatal_error, show_version_info, find_files_by_extension, get_input_files
-)
+from display import show_success, show_error, show_warning, show_info, show_processing
+from file_ops import (validate_input_file, check_file_extension, fatal_error,
+                      show_version_info, find_files_by_extension)
+from finder import get_input_files
+from progress import ProgressTracker
 
 SCRIPT_VERSION = "2.0.0"
 SCRIPT_AUTHOR = "tianli"

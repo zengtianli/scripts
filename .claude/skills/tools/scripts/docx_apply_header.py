@@ -1,1 +1,0 @@
-../../../../.assets/scripts/docx_apply_header.py

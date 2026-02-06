@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title csv-merge-txt
 # @raycast.mode fullOutput
@@ -16,10 +16,10 @@ import re
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import (
-    show_success, show_error, show_info, fatal_error, ProgressTracker,
-    show_version_info, show_help_header, show_help_footer, get_finder_current_dir
-)
+from display import show_success, show_error, show_info
+from file_ops import fatal_error, show_version_info, show_help_header, show_help_footer
+from finder import get_finder_current_dir
+from progress import ProgressTracker
 
 SCRIPT_VERSION = "1.0.0"
 SCRIPT_AUTHOR = "tianli"

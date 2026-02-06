@@ -1,1 +1,0 @@
-../../../../.assets/scripts/yabai_focus_follow.py

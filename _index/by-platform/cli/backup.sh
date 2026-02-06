@@ -1,1 +1,0 @@
-../../../.assets/scripts/backup.sh

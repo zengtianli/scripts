@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title xlsx-split
 # @raycast.mode fullOutput
@@ -22,11 +22,10 @@ import multiprocessing
 import time
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import (
-    show_success, show_error, show_warning, show_info, show_processing,
-    validate_input_file, check_file_extension, get_file_basename,
-    fatal_error, check_python_packages, show_version_info, get_input_files
-)
+from display import show_success, show_error, show_warning, show_info, show_processing
+from file_ops import (validate_input_file, check_file_extension, get_file_basename,
+                      fatal_error, check_python_packages, show_version_info)
+from finder import get_input_files
 
 SCRIPT_VERSION = "3.0.0"
 SCRIPT_AUTHOR = "tianli"

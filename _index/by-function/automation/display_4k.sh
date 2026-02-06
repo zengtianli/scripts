@@ -1,0 +1,1 @@
+/Users/tianli/useful_scripts/.assets/scripts/display_4k.sh

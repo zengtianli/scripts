@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title pptx-all
 # @raycast.mode fullOutput
@@ -27,7 +27,7 @@ import shutil
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import get_input_files
+from finder import get_input_files
 
 # 获取当前脚本所在目录
 SCRIPT_DIR = Path(__file__).parent

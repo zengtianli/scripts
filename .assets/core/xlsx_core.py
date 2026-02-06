@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 """
 Excel 核心功能模块
 提供所有 xlsx 相关的转换和处理功能

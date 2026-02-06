@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title docx-image-caption
 # @raycast.mode fullOutput
@@ -29,7 +29,7 @@ from docx import Document
 from docx.oxml.ns import qn
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import get_input_files
+from finder import get_input_files
 
 def find_style_fuzzy(doc, style_name):
     """

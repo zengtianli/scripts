@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 """
 Word 文档操作公共模块
 提供 docx XML 操作的公共函数

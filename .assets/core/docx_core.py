@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 """
 Word 文档核心功能模块
 提供所有 docx 相关的转换和格式化功能

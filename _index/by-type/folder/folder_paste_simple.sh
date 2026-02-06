@@ -1,1 +1,0 @@
-../../../.assets/scripts/folder_paste_simple.sh

@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title pptx-to-md
 # @raycast.mode fullOutput
@@ -17,12 +17,11 @@ from pathlib import Path
 from pptx import Presentation
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
-from common_utils import (
-    show_success, show_error, show_warning, show_info, show_processing,
-    validate_input_file, ensure_directory, ProgressTracker, fatal_error,
-    check_python_packages, find_files_by_extension, get_file_basename,
-    get_input_files
-)
+from display import show_success, show_error, show_warning, show_info, show_processing
+from file_ops import (validate_input_file, ensure_directory, fatal_error,
+                      check_python_packages, find_files_by_extension, get_file_basename)
+from finder import get_input_files
+from progress import ProgressTracker
 
 SCRIPT_VERSION = "2.0.0"
 

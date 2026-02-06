@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 # @raycast.schemaVersion 1
 # @raycast.title file-run
 # @raycast.mode fullOutput
@@ -13,7 +13,9 @@ import stat
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-PYTHON_PATH = "/Users/tianli/miniforge3/bin/python3"
+import shutil
+
+PYTHON_PATH = shutil.which("python3") or "python3"
 
 def get_finder_selection(multiple=False):
     """获取 Finder 选中的文件"""

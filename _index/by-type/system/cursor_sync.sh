@@ -1,1 +1,0 @@
-../../../.assets/scripts/cursor_sync.sh

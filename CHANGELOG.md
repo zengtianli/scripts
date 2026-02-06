@@ -1,1 +1,0 @@
-/Users/tianli/cursor-shared/work/logs/changelog.md

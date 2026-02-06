@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 """
 Finder 交互模块
 提供与 macOS Finder 交互的函数

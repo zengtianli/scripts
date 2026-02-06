@@ -1,1 +1,0 @@
-../.assets/scripts/clashx_status.sh

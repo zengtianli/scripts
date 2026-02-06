@@ -1,1 +1,0 @@
-../.assets/scripts/docx_style_extractor.py

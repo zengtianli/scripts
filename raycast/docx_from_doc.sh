@@ -1,1 +1,0 @@
-../.assets/scripts/docx_from_doc.sh

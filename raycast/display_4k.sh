@@ -1,1 +1,0 @@
-../.assets/scripts/display_4k.sh

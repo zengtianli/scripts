@@ -1,0 +1,318 @@
+{
+  "scripts": {
+    "app_open.py": [
+      "subprocess",
+      "os",
+      "sys"
+    ],
+    "clashx_enhanced.sh": [
+      "$(dirname",
+      "$(dirname"
+    ],
+    "clashx_mode_direct.sh": [
+      "$(dirname",
+      "$(dirname"
+    ],
+    "clashx_mode_global.sh": [
+      "$(dirname",
+      "$(dirname"
+    ],
+    "clashx_mode_rule.sh": [
+      "$(dirname",
+      "$(dirname"
+    ],
+    "clashx_proxy.sh": [
+      "$(dirname",
+      "$(dirname"
+    ],
+    "clashx_status.sh": [
+      "$(dirname",
+      "$(dirname"
+    ],
+    "common_utils.py": [
+      "pathlib",
+      "typing",
+      "os",
+      "sys",
+      "shutil",
+      "subprocess"
+    ],
+    "csv_from_txt.py": [
+      "pathlib",
+      "typing",
+      "common_utils",
+      "sys",
+      "csv",
+      "re",
+      "argparse"
+    ],
+    "csv_merge_txt.py": [
+      "pathlib",
+      "common_utils",
+      "sys",
+      "csv",
+      "re"
+    ],
+    "csv_to_txt.py": [
+      "pathlib",
+      "typing",
+      "common_utils",
+      "sys",
+      "csv",
+      "argparse"
+    ],
+    "display_1080.sh": [],
+    "display_4k.sh": [],
+    "docx_apply_image_caption.py": [
+      "pathlib",
+      "docx",
+      "docx.oxml.ns",
+      "common_utils",
+      "common_utils",
+      "docx.oxml",
+      "docx.text.paragraph",
+      "sys"
+    ],
+    "docx_text_formatter.py": [
+      "pathlib",
+      "docx",
+      "docx.oxml.ns",
+      "re",
+      "sys"
+    ],
+    "docx_to_md.sh": [
+      "$(dirname"
+    ],
+    "docx_zdwp_all.py": [
+      "pathlib",
+      "common_utils",
+      "sys",
+      "subprocess"
+    ],
+    "file_copy.py": [
+      "subprocess",
+      "os",
+      "sys"
+    ],
+    "file_run.py": [
+      "concurrent.futures",
+      "subprocess",
+      "os",
+      "stat",
+      "sys"
+    ],
+    "folder_add_prefix.py": [
+      "subprocess",
+      "os"
+    ],
+    "folder_create.py": [
+      "subprocess",
+      "os"
+    ],
+    "folder_move_up_remove.py": [
+      "subprocess",
+      "os",
+      "shutil"
+    ],
+    "folder_paste.sh": [
+      "$(dirname"
+    ],
+    "gantt_timeline.py": [
+      "matplotlib.font_manager",
+      "datetime",
+      "matplotlib.pyplot",
+      "matplotlib",
+      "matplotlib.font_manager",
+      "matplotlib.dates",
+      "seaborn",
+      "pandas",
+      "numpy",
+      "matplotlib.patches",
+      "os"
+    ],
+    "md_docx_template.py": [
+      "pathlib",
+      "copy",
+      "lxml",
+      "docx",
+      "docx.shared",
+      "docx.oxml.ns",
+      "docx.oxml",
+      "docx.enum.text",
+      "docx.enum.table",
+      "os",
+      "sys",
+      "re",
+      "json",
+      "zipfile",
+      "tempfile",
+      "shutil",
+      "argparse"
+    ],
+    "md_formatter.py": [
+      "pathlib",
+      "common_utils",
+      "re",
+      "sys"
+    ],
+    "md_merge.py": [
+      "pathlib",
+      "common_utils",
+      "sys"
+    ],
+    "md_split_by_heading.py": [
+      "pathlib",
+      "common_utils",
+      "re",
+      "sys"
+    ],
+    "pdf_from_images.sh": [
+      "$(dirname"
+    ],
+    "pdf_to_md.sh": [
+      "$(dirname"
+    ],
+    "pptx_apply_all.py": [
+      "pathlib",
+      "common_utils",
+      "sys",
+      "subprocess",
+      "shutil"
+    ],
+    "pptx_font_yahei.py": [
+      "pathlib",
+      "common_utils",
+      "pptx",
+      "pptx.util",
+      "pptx.dml.color",
+      "pptx.oxml.ns",
+      "lxml",
+      "sys",
+      "os",
+      "shutil"
+    ],
+    "pptx_table_style.py": [
+      "common_utils",
+      "pptx",
+      "pptx.util",
+      "sys",
+      "os",
+      "shutil"
+    ],
+    "pptx_text_formatter.py": [
+      "pathlib",
+      "common_utils",
+      "pptx",
+      "re",
+      "sys",
+      "shutil"
+    ],
+    "pptx_to_md.py": [
+      "pathlib",
+      "pptx",
+      "common_utils",
+      "sys",
+      "argparse"
+    ],
+    "quarto_init.py": [
+      "pathlib",
+      "argparse",
+      "os",
+      "sys",
+      "yaml",
+      "sys"
+    ],
+    "sys_terminate_python.sh": [
+      "$(dirname"
+    ],
+    "xlsx_from_csv.py": [
+      "pathlib",
+      "typing",
+      "common_utils",
+      "openpyxl",
+      "sys",
+      "csv",
+      "argparse"
+    ],
+    "xlsx_from_txt.py": [
+      "pathlib",
+      "typing",
+      "common_utils",
+      "sys",
+      "argparse"
+    ],
+    "xlsx_lowercase.py": [
+      "pathlib",
+      "finder",
+      "docx",
+      "openpyxl",
+      "sys"
+    ],
+    "xlsx_merge_tables.py": [
+      "pathlib",
+      "ai_name_matcher",
+      "json",
+      "argparse",
+      "sys"
+    ],
+    "xlsx_splitsheets.py": [
+      "pathlib",
+      "copy",
+      "openpyxl",
+      "concurrent.futures",
+      "common_utils",
+      "sys",
+      "argparse",
+      "multiprocessing",
+      "time"
+    ],
+    "xlsx_to_csv.py": [
+      "pathlib",
+      "typing",
+      "common_utils",
+      "openpyxl",
+      "sys",
+      "csv",
+      "argparse"
+    ],
+    "xlsx_to_txt.py": [
+      "pathlib",
+      "typing",
+      "common_utils",
+      "sys",
+      "argparse"
+    ],
+    "yabai_float.py": [
+      "subprocess"
+    ],
+    "yabai_focus_follow.py": [
+      "subprocess"
+    ],
+    "yabai_mouse_follow.py": [
+      "subprocess"
+    ],
+    "yabai_move.py": [
+      "sys"
+    ],
+    "yabai_next.py": [
+      "subprocess"
+    ],
+    "yabai_org.py": [
+      "common",
+      "subprocess",
+      "json",
+      "sys",
+      "os"
+    ],
+    "yabai_prev.py": [
+      "subprocess"
+    ],
+    "yabai_space.py": [
+      "sys"
+    ],
+    "yabai_toggle.py": [
+      "subprocess"
+    ]
+  },
+  "modules": {}
+}

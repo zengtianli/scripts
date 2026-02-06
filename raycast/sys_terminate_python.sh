@@ -1,1 +1,0 @@
-../.assets/scripts/sys_terminate_python.sh

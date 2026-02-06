@@ -1,1 +1,0 @@
-../.assets/scripts/pdf_from_images.sh

@@ -1,1 +1,0 @@
-../.assets/scripts/docx_fill_template.py

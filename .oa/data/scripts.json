@@ -1,0 +1,1934 @@
+{
+  "generated_at": "2026-02-06T08:28:42.707376",
+  "stats": {
+    "total": 53,
+    "by_type": {
+      "app": 1,
+      "clashx": 6,
+      "other": 1,
+      "csv": 3,
+      "display": 2,
+      "docx": 4,
+      "file": 2,
+      "folder": 4,
+      "gantt": 1,
+      "md": 4,
+      "pdf": 2,
+      "pptx": 5,
+      "quarto": 1,
+      "sys": 1,
+      "xlsx": 7,
+      "yabai": 9
+    },
+    "by_function": {
+      "automation": 17,
+      "other": 14,
+      "convert": 10,
+      "analyze": 5,
+      "format": 7
+    },
+    "by_platform": {
+      "raycast": 50,
+      "cli": 3
+    }
+  },
+  "types": {
+    "docx": {
+      "icon": "📄",
+      "color": "#2563EB",
+      "name": "Word 文档"
+    },
+    "xlsx": {
+      "icon": "📊",
+      "color": "#059669",
+      "name": "Excel 表格"
+    },
+    "csv": {
+      "icon": "📋",
+      "color": "#0891B2",
+      "name": "CSV 数据"
+    },
+    "md": {
+      "icon": "📝",
+      "color": "#7C3AED",
+      "name": "Markdown"
+    },
+    "pptx": {
+      "icon": "📽️",
+      "color": "#DC2626",
+      "name": "PowerPoint"
+    },
+    "pdf": {
+      "icon": "📕",
+      "color": "#B91C1C",
+      "name": "PDF 文档"
+    },
+    "yabai": {
+      "icon": "🪟",
+      "color": "#F59E0B",
+      "name": "窗口管理"
+    },
+    "clashx": {
+      "icon": "🌐",
+      "color": "#6366F1",
+      "name": "代理控制"
+    },
+    "file": {
+      "icon": "📁",
+      "color": "#8B5CF6",
+      "name": "文件操作"
+    },
+    "folder": {
+      "icon": "📂",
+      "color": "#A855F7",
+      "name": "文件夹操作"
+    },
+    "app": {
+      "icon": "🚀",
+      "color": "#EC4899",
+      "name": "应用启动"
+    },
+    "sys": {
+      "icon": "⚙️",
+      "color": "#64748B",
+      "name": "系统工具"
+    },
+    "display": {
+      "icon": "🖥️",
+      "color": "#0EA5E9",
+      "name": "显示设置"
+    },
+    "gantt": {
+      "icon": "📅",
+      "color": "#14B8A6",
+      "name": "甘特图"
+    },
+    "quarto": {
+      "icon": "📚",
+      "color": "#F97316",
+      "name": "报告构建"
+    }
+  },
+  "functions": {
+    "convert": {
+      "icon": "🔄",
+      "color": "#3B82F6",
+      "name": "格式转换",
+      "patterns": [
+        "_to_",
+        "_from_"
+      ]
+    },
+    "format": {
+      "icon": "✨",
+      "color": "#8B5CF6",
+      "name": "格式化",
+      "patterns": [
+        "_apply_",
+        "_format",
+        "_style",
+        "_font"
+      ]
+    },
+    "analyze": {
+      "icon": "🔍",
+      "color": "#10B981",
+      "name": "分析",
+      "patterns": [
+        "_extract",
+        "_analyze",
+        "_split",
+        "_merge"
+      ]
+    },
+    "automation": {
+      "icon": "⚡",
+      "color": "#F59E0B",
+      "name": "自动化",
+      "patterns": [
+        "yabai_",
+        "clashx_",
+        "app_",
+        "sys_"
+      ]
+    }
+  },
+  "scripts": [
+    {
+      "id": "app_open.py",
+      "name": "app_open.py",
+      "title": "app-open",
+      "description": "Open selected folder in specified app",
+      "type": "app",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🚀",
+      "mode": "silent",
+      "lines": 74,
+      "size": 2386,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/app_open.py",
+      "imports": [
+        "subprocess",
+        "os",
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess",
+        "os",
+        "sys"
+      ],
+      "tags": [
+        "app",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "clashx_enhanced.sh",
+      "name": "clashx_enhanced.sh",
+      "title": "clashx_enhanced",
+      "description": "Toggle ClashX Pro Enhanced Mode (TUN)",
+      "type": "clashx",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "⚙️",
+      "mode": "fullOutput",
+      "lines": 17,
+      "size": 407,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_enhanced.sh",
+      "imports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "tags": [
+        "clashx",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "clashx_mode_direct.sh",
+      "name": "clashx_mode_direct.sh",
+      "title": "clashx_mode_direct",
+      "description": "Set ClashX Pro to Direct mode",
+      "type": "clashx",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "⚡",
+      "mode": "fullOutput",
+      "lines": 17,
+      "size": 404,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_mode_direct.sh",
+      "imports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "tags": [
+        "clashx",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "clashx_mode_global.sh",
+      "name": "clashx_mode_global.sh",
+      "title": "clashx_mode_global",
+      "description": "Set ClashX Pro to Global mode",
+      "type": "clashx",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🌍",
+      "mode": "fullOutput",
+      "lines": 17,
+      "size": 405,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_mode_global.sh",
+      "imports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "tags": [
+        "clashx",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "clashx_mode_rule.sh",
+      "name": "clashx_mode_rule.sh",
+      "title": "clashx_mode_rule",
+      "description": "Set ClashX Pro to Rule mode",
+      "type": "clashx",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "📋",
+      "mode": "fullOutput",
+      "lines": 17,
+      "size": 397,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_mode_rule.sh",
+      "imports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "tags": [
+        "clashx",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "clashx_proxy.sh",
+      "name": "clashx_proxy.sh",
+      "title": "clashx_proxy",
+      "description": "Toggle ClashX Pro system proxy",
+      "type": "clashx",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🔄",
+      "mode": "fullOutput",
+      "lines": 17,
+      "size": 389,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_proxy.sh",
+      "imports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "tags": [
+        "clashx",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "clashx_status.sh",
+      "name": "clashx_status.sh",
+      "title": "clashx_status",
+      "description": "Show ClashX Pro status",
+      "type": "clashx",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🌐",
+      "mode": "fullOutput",
+      "lines": 17,
+      "size": 382,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_status.sh",
+      "imports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname",
+        "$(dirname"
+      ],
+      "tags": [
+        "clashx",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "common_utils.py",
+      "name": "common_utils.py",
+      "title": "common-utils",
+      "description": "",
+      "type": "other",
+      "function": "other",
+      "platform": "cli",
+      "icon": "📜",
+      "mode": "",
+      "lines": 362,
+      "size": 10099,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/common_utils.py",
+      "imports": [
+        "pathlib",
+        "typing",
+        "os",
+        "sys",
+        "shutil",
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "typing",
+        "os",
+        "sys",
+        "shutil",
+        "subprocess"
+      ],
+      "tags": [
+        "other",
+        "other",
+        "cli"
+      ],
+      "linkedBy": [
+        "csv_from_txt.py",
+        "csv_merge_txt.py",
+        "csv_to_txt.py",
+        "docx_apply_image_caption.py",
+        "docx_zdwp_all.py",
+        "md_formatter.py",
+        "md_merge.py",
+        "md_split_by_heading.py",
+        "pptx_apply_all.py",
+        "pptx_font_yahei.py",
+        "pptx_table_style.py",
+        "pptx_text_formatter.py",
+        "pptx_to_md.py",
+        "xlsx_from_csv.py",
+        "xlsx_from_txt.py",
+        "xlsx_splitsheets.py",
+        "xlsx_to_csv.py",
+        "xlsx_to_txt.py"
+      ]
+    },
+    {
+      "id": "csv_from_txt.py",
+      "name": "csv_from_txt.py",
+      "title": "csv-from-txt",
+      "description": "Convert TXT to CSV",
+      "type": "csv",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 148,
+      "size": 4648,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/csv_from_txt.py",
+      "imports": [
+        "pathlib",
+        "typing",
+        "common_utils",
+        "sys",
+        "csv",
+        "re",
+        "argparse"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "typing",
+        "sys",
+        "csv",
+        "re",
+        "argparse"
+      ],
+      "tags": [
+        "csv",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "csv_merge_txt.py",
+      "name": "csv_merge_txt.py",
+      "title": "csv-merge-txt",
+      "description": "Merge TXT files",
+      "type": "csv",
+      "function": "analyze",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 131,
+      "size": 4165,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/csv_merge_txt.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "sys",
+        "csv",
+        "re"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "sys",
+        "csv",
+        "re"
+      ],
+      "tags": [
+        "csv",
+        "analyze",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "csv_to_txt.py",
+      "name": "csv_to_txt.py",
+      "title": "csv-to-txt",
+      "description": "Convert CSV to TXT",
+      "type": "csv",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 138,
+      "size": 4396,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/csv_to_txt.py",
+      "imports": [
+        "pathlib",
+        "typing",
+        "common_utils",
+        "sys",
+        "csv",
+        "argparse"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "typing",
+        "sys",
+        "csv",
+        "argparse"
+      ],
+      "tags": [
+        "csv",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "display_1080.sh",
+      "name": "display_1080.sh",
+      "title": "display_1080",
+      "description": "Set external displays to 1080p (1920x1080) for presentation",
+      "type": "display",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "📺",
+      "mode": "fullOutput",
+      "lines": 37,
+      "size": 848,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/display_1080.sh",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "tags": [
+        "display",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "display_4k.sh",
+      "name": "display_4k.sh",
+      "title": "display_4k",
+      "description": "Set external displays to 4K (3840x2160)",
+      "type": "display",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "🖥️",
+      "mode": "fullOutput",
+      "lines": 37,
+      "size": 808,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/display_4k.sh",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "tags": [
+        "display",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "docx_apply_image_caption.py",
+      "name": "docx_apply_image_caption.py",
+      "title": "docx-image-caption",
+      "description": "Apply image captions",
+      "type": "docx",
+      "function": "format",
+      "platform": "raycast",
+      "icon": "📄",
+      "mode": "fullOutput",
+      "lines": 307,
+      "size": 9727,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_apply_image_caption.py",
+      "imports": [
+        "pathlib",
+        "docx",
+        "docx.oxml.ns",
+        "common_utils",
+        "common_utils",
+        "docx.oxml",
+        "docx.text.paragraph",
+        "sys"
+      ],
+      "localImports": [
+        "common_utils",
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "docx",
+        "docx",
+        "docx",
+        "docx",
+        "sys"
+      ],
+      "tags": [
+        "docx",
+        "format",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "docx_text_formatter.py",
+      "name": "docx_text_formatter.py",
+      "title": "docx-text-format",
+      "description": "Format text in Word",
+      "type": "docx",
+      "function": "format",
+      "platform": "raycast",
+      "icon": "📄",
+      "mode": "fullOutput",
+      "lines": 360,
+      "size": 10809,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_text_formatter.py",
+      "imports": [
+        "pathlib",
+        "docx",
+        "docx.oxml.ns",
+        "re",
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "docx",
+        "docx",
+        "re",
+        "sys"
+      ],
+      "tags": [
+        "docx",
+        "format",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "docx_to_md.sh",
+      "name": "docx_to_md.sh",
+      "title": "docx-to-md",
+      "description": "DOCX转Markdown（使用markitdown）- 支持多选",
+      "type": "docx",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📄",
+      "mode": "fullOutput",
+      "lines": 114,
+      "size": 2987,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_to_md.sh",
+      "imports": [
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname"
+      ],
+      "tags": [
+        "docx",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "docx_zdwp_all.py",
+      "name": "docx_zdwp_all.py",
+      "title": "docx-zdwp-all",
+      "description": "Apply all ZDWP styles",
+      "type": "docx",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "✨",
+      "mode": "fullOutput",
+      "lines": 198,
+      "size": 5814,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_zdwp_all.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "sys",
+        "subprocess"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "sys",
+        "subprocess"
+      ],
+      "tags": [
+        "docx",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "file_copy.py",
+      "name": "file_copy.py",
+      "title": "file-copy",
+      "description": "Copy selected file's filename (and optionally content) to clipboard",
+      "type": "file",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "📋",
+      "mode": "fullOutput",
+      "lines": 70,
+      "size": 2537,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/file_copy.py",
+      "imports": [
+        "subprocess",
+        "os",
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess",
+        "os",
+        "sys"
+      ],
+      "tags": [
+        "file",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "file_run.py",
+      "name": "file_run.py",
+      "title": "file-run",
+      "description": "Run selected shell or python scripts",
+      "type": "file",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "🚀",
+      "mode": "fullOutput",
+      "lines": 124,
+      "size": 4484,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/file_run.py",
+      "imports": [
+        "concurrent.futures",
+        "subprocess",
+        "os",
+        "stat",
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "concurrent",
+        "subprocess",
+        "os",
+        "stat",
+        "sys"
+      ],
+      "tags": [
+        "file",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "folder_add_prefix.py",
+      "name": "folder_add_prefix.py",
+      "title": "folder-add-prefix",
+      "description": "将文件夹名称作为前缀添加到文件名",
+      "type": "folder",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "📝",
+      "mode": "fullOutput",
+      "lines": 89,
+      "size": 2808,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_add_prefix.py",
+      "imports": [
+        "subprocess",
+        "os"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess",
+        "os"
+      ],
+      "tags": [
+        "folder",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "folder_create.py",
+      "name": "folder_create.py",
+      "title": "folder-create",
+      "description": "Create a new folder in current Finder location",
+      "type": "folder",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "📁",
+      "mode": "fullOutput",
+      "lines": 64,
+      "size": 1796,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_create.py",
+      "imports": [
+        "subprocess",
+        "os"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess",
+        "os"
+      ],
+      "tags": [
+        "folder",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "folder_move_up_remove.py",
+      "name": "folder_move_up_remove.py",
+      "title": "folder-move-up-remove",
+      "description": "将选中文件夹内容移到上一级并删除空文件夹",
+      "type": "folder",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "🗂️",
+      "mode": "fullOutput",
+      "lines": 116,
+      "size": 3770,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_move_up_remove.py",
+      "imports": [
+        "subprocess",
+        "os",
+        "shutil"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess",
+        "os",
+        "shutil"
+      ],
+      "tags": [
+        "folder",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "folder_paste.sh",
+      "name": "folder_paste.sh",
+      "title": "folder_paste",
+      "description": "",
+      "type": "folder",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "📋",
+      "mode": "fullOutput",
+      "lines": 16,
+      "size": 387,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_paste.sh",
+      "imports": [
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname"
+      ],
+      "tags": [
+        "folder",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "gantt_timeline.py",
+      "name": "gantt_timeline.py",
+      "title": "gantt-timeline",
+      "description": "",
+      "type": "gantt",
+      "function": "other",
+      "platform": "cli",
+      "icon": "📅",
+      "mode": "",
+      "lines": 436,
+      "size": 21589,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/gantt_timeline.py",
+      "imports": [
+        "matplotlib.font_manager",
+        "datetime",
+        "matplotlib.pyplot",
+        "matplotlib",
+        "matplotlib.font_manager",
+        "matplotlib.dates",
+        "seaborn",
+        "pandas",
+        "numpy",
+        "matplotlib.patches",
+        "os"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "matplotlib",
+        "datetime",
+        "matplotlib",
+        "matplotlib",
+        "matplotlib",
+        "matplotlib",
+        "seaborn",
+        "pandas",
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "tags": [
+        "gantt",
+        "other",
+        "cli"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "md_docx_template.py",
+      "name": "md_docx_template.py",
+      "title": "md-to-docx-template",
+      "description": "Markdown 转 Docx（样式复刻版）",
+      "type": "md",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "📄",
+      "mode": "fullOutput",
+      "lines": 819,
+      "size": 28266,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/md_docx_template.py",
+      "imports": [
+        "pathlib",
+        "copy",
+        "lxml",
+        "docx",
+        "docx.shared",
+        "docx.oxml.ns",
+        "docx.oxml",
+        "docx.enum.text",
+        "docx.enum.table",
+        "os",
+        "sys",
+        "re",
+        "json",
+        "zipfile",
+        "tempfile",
+        "shutil",
+        "argparse"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "copy",
+        "lxml",
+        "docx",
+        "docx",
+        "docx",
+        "docx",
+        "docx",
+        "docx",
+        "os",
+        "sys",
+        "re",
+        "json",
+        "zipfile",
+        "tempfile",
+        "shutil",
+        "argparse"
+      ],
+      "tags": [
+        "md",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "md_formatter.py",
+      "name": "md_formatter.py",
+      "title": "md-format",
+      "description": "Format markdown",
+      "type": "md",
+      "function": "format",
+      "platform": "raycast",
+      "icon": "📝",
+      "mode": "fullOutput",
+      "lines": 239,
+      "size": 6698,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/md_formatter.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "re",
+        "sys"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "re",
+        "sys"
+      ],
+      "tags": [
+        "md",
+        "format",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "md_merge.py",
+      "name": "md_merge.py",
+      "title": "md-merge",
+      "description": "Merge markdown files",
+      "type": "md",
+      "function": "analyze",
+      "platform": "raycast",
+      "icon": "📝",
+      "mode": "fullOutput",
+      "lines": 115,
+      "size": 3693,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/md_merge.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "sys"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "sys"
+      ],
+      "tags": [
+        "md",
+        "analyze",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "md_split_by_heading.py",
+      "name": "md_split_by_heading.py",
+      "title": "md-split",
+      "description": "Split markdown by heading level 1",
+      "type": "md",
+      "function": "analyze",
+      "platform": "raycast",
+      "icon": "✂️",
+      "mode": "fullOutput",
+      "lines": 139,
+      "size": 4049,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/md_split_by_heading.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "re",
+        "sys"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "re",
+        "sys"
+      ],
+      "tags": [
+        "md",
+        "analyze",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "pdf_from_images.sh",
+      "name": "pdf_from_images.sh",
+      "title": "pdf-from-images",
+      "description": "图片合并转 PDF（ImageMagick）",
+      "type": "pdf",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "🖼️",
+      "mode": "fullOutput",
+      "lines": 119,
+      "size": 3298,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/pdf_from_images.sh",
+      "imports": [
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "pdf_to_md.sh",
+      "name": "pdf_to_md.sh",
+      "title": "pdf-to-md",
+      "description": "将PDF转换为Markdown",
+      "type": "pdf",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📕",
+      "mode": "fullOutput",
+      "lines": 38,
+      "size": 946,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/pdf_to_md.sh",
+      "imports": [
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname"
+      ],
+      "tags": [
+        "pdf",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "pptx_apply_all.py",
+      "name": "pptx_apply_all.py",
+      "title": "pptx-all",
+      "description": "Apply all PPT styles",
+      "type": "pptx",
+      "function": "format",
+      "platform": "raycast",
+      "icon": "📽️",
+      "mode": "fullOutput",
+      "lines": 207,
+      "size": 5371,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_apply_all.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "sys",
+        "subprocess",
+        "shutil"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "sys",
+        "subprocess",
+        "shutil"
+      ],
+      "tags": [
+        "pptx",
+        "format",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "pptx_font_yahei.py",
+      "name": "pptx_font_yahei.py",
+      "title": "pptx-font",
+      "description": "Set PPT font to YaHei",
+      "type": "pptx",
+      "function": "format",
+      "platform": "raycast",
+      "icon": "📽️",
+      "mode": "fullOutput",
+      "lines": 389,
+      "size": 11532,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_font_yahei.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "pptx",
+        "pptx.util",
+        "pptx.dml.color",
+        "pptx.oxml.ns",
+        "lxml",
+        "sys",
+        "os",
+        "shutil"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "pptx",
+        "pptx",
+        "pptx",
+        "pptx",
+        "lxml",
+        "sys",
+        "os",
+        "shutil"
+      ],
+      "tags": [
+        "pptx",
+        "format",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "pptx_table_style.py",
+      "name": "pptx_table_style.py",
+      "title": "pptx-table",
+      "description": "Apply PPT table style",
+      "type": "pptx",
+      "function": "format",
+      "platform": "raycast",
+      "icon": "📽️",
+      "mode": "fullOutput",
+      "lines": 209,
+      "size": 5948,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_table_style.py",
+      "imports": [
+        "common_utils",
+        "pptx",
+        "pptx.util",
+        "sys",
+        "os",
+        "shutil"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pptx",
+        "pptx",
+        "sys",
+        "os",
+        "shutil"
+      ],
+      "tags": [
+        "pptx",
+        "format",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "pptx_text_formatter.py",
+      "name": "pptx_text_formatter.py",
+      "title": "pptx-text",
+      "description": "Format PPT text",
+      "type": "pptx",
+      "function": "format",
+      "platform": "raycast",
+      "icon": "📽️",
+      "mode": "fullOutput",
+      "lines": 331,
+      "size": 8793,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_text_formatter.py",
+      "imports": [
+        "pathlib",
+        "common_utils",
+        "pptx",
+        "re",
+        "sys",
+        "shutil"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "pptx",
+        "re",
+        "sys",
+        "shutil"
+      ],
+      "tags": [
+        "pptx",
+        "format",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "pptx_to_md.py",
+      "name": "pptx_to_md.py",
+      "title": "pptx-to-md",
+      "description": "Convert PPT to Markdown",
+      "type": "pptx",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📽️",
+      "mode": "fullOutput",
+      "lines": 131,
+      "size": 4417,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_to_md.py",
+      "imports": [
+        "pathlib",
+        "pptx",
+        "common_utils",
+        "sys",
+        "argparse"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "pptx",
+        "sys",
+        "argparse"
+      ],
+      "tags": [
+        "pptx",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "quarto_init.py",
+      "name": "quarto_init.py",
+      "title": "quarto-init",
+      "description": "",
+      "type": "quarto",
+      "function": "other",
+      "platform": "cli",
+      "icon": "📚",
+      "mode": "",
+      "lines": 251,
+      "size": 5808,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/quarto_init.py",
+      "imports": [
+        "pathlib",
+        "argparse",
+        "os",
+        "sys",
+        "yaml",
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "argparse",
+        "os",
+        "sys",
+        "yaml",
+        "sys"
+      ],
+      "tags": [
+        "quarto",
+        "other",
+        "cli"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "sys_terminate_python.sh",
+      "name": "sys_terminate_python.sh",
+      "title": "manage_terminate_python",
+      "description": "Terminate all running Python processes",
+      "type": "sys",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "⏹️",
+      "mode": "fullOutput",
+      "lines": 26,
+      "size": 559,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/sys_terminate_python.sh",
+      "imports": [
+        "$(dirname"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "$(dirname"
+      ],
+      "tags": [
+        "sys",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "xlsx_from_csv.py",
+      "name": "xlsx_from_csv.py",
+      "title": "xlsx-from-csv",
+      "description": "Convert CSV to Excel",
+      "type": "xlsx",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 158,
+      "size": 4747,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_from_csv.py",
+      "imports": [
+        "pathlib",
+        "typing",
+        "common_utils",
+        "openpyxl",
+        "sys",
+        "csv",
+        "argparse"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "typing",
+        "openpyxl",
+        "sys",
+        "csv",
+        "argparse"
+      ],
+      "tags": [
+        "xlsx",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "xlsx_from_txt.py",
+      "name": "xlsx_from_txt.py",
+      "title": "xlsx-from-txt",
+      "description": "Convert TXT to Excel",
+      "type": "xlsx",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 151,
+      "size": 4646,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_from_txt.py",
+      "imports": [
+        "pathlib",
+        "typing",
+        "common_utils",
+        "sys",
+        "argparse"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "typing",
+        "sys",
+        "argparse"
+      ],
+      "tags": [
+        "xlsx",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "xlsx_lowercase.py",
+      "name": "xlsx_lowercase.py",
+      "title": "xlsx-lowercase",
+      "description": "Lowercase Excel data",
+      "type": "xlsx",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 264,
+      "size": 8573,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_lowercase.py",
+      "imports": [
+        "pathlib",
+        "finder",
+        "docx",
+        "openpyxl",
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "finder",
+        "docx",
+        "openpyxl",
+        "sys"
+      ],
+      "tags": [
+        "xlsx",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "xlsx_merge_tables.py",
+      "name": "xlsx_merge_tables.py",
+      "title": "xlsx-merge",
+      "description": "Merge Excel tables",
+      "type": "xlsx",
+      "function": "analyze",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 515,
+      "size": 16023,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_merge_tables.py",
+      "imports": [
+        "pathlib",
+        "ai_name_matcher",
+        "json",
+        "argparse",
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "ai_name_matcher",
+        "json",
+        "argparse",
+        "sys"
+      ],
+      "tags": [
+        "xlsx",
+        "analyze",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "xlsx_splitsheets.py",
+      "name": "xlsx_splitsheets.py",
+      "title": "xlsx-split",
+      "description": "Split Excel sheets",
+      "type": "xlsx",
+      "function": "analyze",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 353,
+      "size": 11784,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_splitsheets.py",
+      "imports": [
+        "pathlib",
+        "copy",
+        "openpyxl",
+        "concurrent.futures",
+        "common_utils",
+        "sys",
+        "argparse",
+        "multiprocessing",
+        "time"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "copy",
+        "openpyxl",
+        "concurrent",
+        "sys",
+        "argparse",
+        "multiprocessing",
+        "time"
+      ],
+      "tags": [
+        "xlsx",
+        "analyze",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "xlsx_to_csv.py",
+      "name": "xlsx_to_csv.py",
+      "title": "xlsx-to-csv",
+      "description": "Convert Excel to CSV",
+      "type": "xlsx",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 178,
+      "size": 5937,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_to_csv.py",
+      "imports": [
+        "pathlib",
+        "typing",
+        "common_utils",
+        "openpyxl",
+        "sys",
+        "csv",
+        "argparse"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "typing",
+        "openpyxl",
+        "sys",
+        "csv",
+        "argparse"
+      ],
+      "tags": [
+        "xlsx",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "xlsx_to_txt.py",
+      "name": "xlsx_to_txt.py",
+      "title": "xlsx-to-txt",
+      "description": "Convert Excel to TXT",
+      "type": "xlsx",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📊",
+      "mode": "fullOutput",
+      "lines": 161,
+      "size": 5010,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_to_txt.py",
+      "imports": [
+        "pathlib",
+        "typing",
+        "common_utils",
+        "sys",
+        "argparse"
+      ],
+      "localImports": [
+        "common_utils"
+      ],
+      "externalImports": [
+        "pathlib",
+        "typing",
+        "sys",
+        "argparse"
+      ],
+      "tags": [
+        "xlsx",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_float.py",
+      "name": "yabai_float.py",
+      "title": "yabai-float",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🪟",
+      "mode": "silent",
+      "lines": 8,
+      "size": 205,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_float.py",
+      "imports": [
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_focus_follow.py",
+      "name": "yabai_focus_follow.py",
+      "title": "yabai-focus-follow",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🎯",
+      "mode": "compact",
+      "lines": 27,
+      "size": 732,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_focus_follow.py",
+      "imports": [
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_mouse_follow.py",
+      "name": "yabai_mouse_follow.py",
+      "title": "yabai-mouse-follow",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🖱️",
+      "mode": "compact",
+      "lines": 26,
+      "size": 725,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_mouse_follow.py",
+      "imports": [
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_move.py",
+      "name": "yabai_move.py",
+      "title": "yabai-move",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🪟",
+      "mode": "silent",
+      "lines": 10,
+      "size": 326,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_move.py",
+      "imports": [
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "sys"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_next.py",
+      "name": "yabai_next.py",
+      "title": "yabai-next",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🪟",
+      "mode": "silent",
+      "lines": 8,
+      "size": 267,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_next.py",
+      "imports": [
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_org.py",
+      "name": "yabai_org.py",
+      "title": "yabai-org",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🪟",
+      "mode": "silent",
+      "lines": 38,
+      "size": 920,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_org.py",
+      "imports": [
+        "common",
+        "subprocess",
+        "json",
+        "sys",
+        "os"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "common",
+        "subprocess",
+        "json",
+        "sys",
+        "os"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_prev.py",
+      "name": "yabai_prev.py",
+      "title": "yabai-prev",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🪟",
+      "mode": "silent",
+      "lines": 8,
+      "size": 266,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_prev.py",
+      "imports": [
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_space.py",
+      "name": "yabai_space.py",
+      "title": "yabai-space",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🪟",
+      "mode": "silent",
+      "lines": 10,
+      "size": 326,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_space.py",
+      "imports": [
+        "sys"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "sys"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "yabai_toggle.py",
+      "name": "yabai_toggle.py",
+      "title": "yabai-toggle",
+      "description": "",
+      "type": "yabai",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🪟",
+      "mode": "fullOutput",
+      "lines": 14,
+      "size": 400,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_toggle.py",
+      "imports": [
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "subprocess"
+      ],
+      "tags": [
+        "yabai",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    }
+  ]
+}

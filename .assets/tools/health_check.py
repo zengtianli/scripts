@@ -17,11 +17,13 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 SCRIPTS_DIR = PROJECT_ROOT / ".assets" / "scripts"
 LIB_DIR = PROJECT_ROOT / ".assets" / "lib"
+PROJECTS_DIR = PROJECT_ROOT / ".assets" / "projects"
 
 # lib/ 下可用的模块名
 LIB_MODULES = {
     "display", "finder", "clipboard", "progress", "usage_log",
     "file_ops", "env", "docx_utils", "common_utils", "common",
+    "excel_ops",
 }
 
 
@@ -155,6 +157,86 @@ class HealthChecker:
                 pass
         return count
 
+    def check_projects_shebangs(self):
+        """检查 projects/ 下 Python shebang 规范"""
+        count = 0
+        if not PROJECTS_DIR.exists():
+            return count
+        for script in sorted(PROJECTS_DIR.rglob("*.py")):
+            try:
+                first_line = script.read_text(encoding="utf-8").split('\n')[0]
+            except Exception:
+                continue
+            if first_line.startswith('#!') and '/env ' not in first_line:
+                self.warnings.append(
+                    f"projects/{script.relative_to(PROJECTS_DIR)}: shebang 未使用 env ({first_line})"
+                )
+                count += 1
+        return count
+
+    def check_projects_hardcoded_paths(self):
+        """检查 projects/ 下硬编码路径"""
+        count = 0
+        if not PROJECTS_DIR.exists():
+            return count
+        patterns = [
+            '/Users/tianli/miniforge3',
+            '/Users/tianli/useful_scripts/execute',
+        ]
+        for script in sorted(PROJECTS_DIR.rglob("*")):
+            if script.suffix not in ('.py', '.sh'):
+                continue
+            if not script.is_file():
+                continue
+            try:
+                content = script.read_text(encoding="utf-8")
+            except Exception:
+                continue
+            for pattern in patterns:
+                if pattern in content:
+                    self.warnings.append(
+                        f"projects/{script.relative_to(PROJECTS_DIR)}: 包含硬编码路径 '{pattern}'"
+                    )
+                    count += 1
+        return count
+
+    def check_projects_imports(self):
+        """检查 projects/ 下 Python 脚本的 import 引用有效性"""
+        count = 0
+        if not PROJECTS_DIR.exists():
+            return count
+        # 检查 risk_data/ 下的脚本
+        risk_dir = PROJECTS_DIR / "risk_data"
+        if risk_dir.exists():
+            for script in sorted(risk_dir.glob("*.py")):
+                try:
+                    content = script.read_text(encoding="utf-8")
+                    ast.parse(content)
+                except SyntaxError as e:
+                    self.errors.append(
+                        f"projects/risk_data/{script.name}: 语法错误 - {e}"
+                    )
+                    count += 1
+                except Exception:
+                    pass
+        # 检查 qgis/ 下的脚本
+        for subdir in ['pipeline', 'tools', '_util']:
+            qgis_dir = PROJECTS_DIR / "qgis" / subdir
+            if not qgis_dir.exists():
+                continue
+            for script in sorted(qgis_dir.glob("*.py")):
+                try:
+                    content = script.read_text(encoding="utf-8")
+                    ast.parse(content)
+                except SyntaxError as e:
+                    self.errors.append(
+                        f"projects/qgis/{subdir}/{script.name}: 语法错误 - {e}"
+                    )
+                    count += 1
+                except Exception:
+                    pass
+        return count
+
     def run(self):
         """运行所有检查"""
         print("=" * 60)
@@ -168,6 +250,9 @@ class HealthChecker:
             ("硬编码路径", self.check_hardcoded_paths),
             ("Shebang 规范", self.check_shebang),
             ("Python 语法", self.check_import_syntax),
+            ("Projects shebang", self.check_projects_shebangs),
+            ("Projects 硬编码路径", self.check_projects_hardcoded_paths),
+            ("Projects import", self.check_projects_imports),
         ]
 
         for name, check_fn in checks:

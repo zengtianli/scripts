@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-扫描 .assets/scripts/ 目录，生成 scripts.json 和 dependencies.json
+扫描 .assets/scripts/ 和 .assets/projects/ 目录，生成 scripts.json 和 dependencies.json
 """
 
 import os
@@ -9,7 +9,14 @@ import json
 from pathlib import Path
 from datetime import datetime
 
+try:
+    import yaml
+    HAS_YAML = True
+except ImportError:
+    HAS_YAML = False
+
 SCRIPTS_DIR = Path(__file__).parent.parent.parent / ".assets" / "scripts"
+PROJECTS_DIR = Path(__file__).parent.parent.parent / ".assets" / "projects"
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 # 类型映射
@@ -29,6 +36,7 @@ TYPE_MAP = {
     "display": {"icon": "🖥️", "color": "#0EA5E9", "name": "显示设置"},
     "gantt": {"icon": "📅", "color": "#14B8A6", "name": "甘特图"},
     "quarto": {"icon": "📚", "color": "#F97316", "name": "报告构建"},
+    "hydraulic": {"icon": "🌊", "color": "#0284C7", "name": "水利工具"},
 }
 
 # 功能映射
@@ -37,6 +45,7 @@ FUNCTION_MAP = {
     "format": {"icon": "✨", "color": "#8B5CF6", "name": "格式化", "patterns": ["_apply_", "_format", "_style", "_font"]},
     "analyze": {"icon": "🔍", "color": "#10B981", "name": "分析", "patterns": ["_extract", "_analyze", "_split", "_merge"]},
     "automation": {"icon": "⚡", "color": "#F59E0B", "name": "自动化", "patterns": ["yabai_", "clashx_", "app_", "sys_"]},
+    "project": {"icon": "🏗️", "color": "#0284C7", "name": "项目工具", "patterns": []},
 }
 
 def extract_raycast_metadata(content: str) -> dict:
@@ -181,6 +190,106 @@ def scan_scripts():
 
     return scripts, dependencies
 
+
+def scan_projects():
+    """扫描 .assets/projects/ 下的项目，生成与 scripts 相同格式的条目"""
+    scripts = []
+
+    if not PROJECTS_DIR.exists():
+        print(f"⚠️ 项目目录不存在: {PROJECTS_DIR}")
+        return scripts
+
+    for project_dir in sorted(PROJECTS_DIR.iterdir()):
+        if not project_dir.is_dir():
+            continue
+        if project_dir.name.startswith("_") or project_dir.name.startswith("."):
+            continue
+
+        metadata = {}
+        yaml_path = project_dir / "_project.yaml"
+
+        # 尝试读取 _project.yaml
+        if yaml_path.exists():
+            try:
+                content = yaml_path.read_text(encoding="utf-8")
+                if HAS_YAML:
+                    metadata = yaml.safe_load(content) or {}
+                else:
+                    for line in content.splitlines():
+                        line = line.strip()
+                        if ":" in line and not line.startswith("#"):
+                            key, _, val = line.partition(":")
+                            key = key.strip()
+                            val = val.strip().strip('"').strip("'")
+                            if val and not val.startswith("[") and not val.startswith("{"):
+                                metadata[key] = val
+            except Exception:
+                pass
+
+        # 找到入口文件，计算 lines 和 size
+        entry = metadata.get("entry", {})
+        entry_web = entry.get("web", "") if isinstance(entry, dict) else ""
+        entry_cli = entry.get("cli", "") if isinstance(entry, dict) else ""
+        entry_file = entry_web or entry_cli or ""
+
+        # 入口文件的路径
+        if entry_file and not entry_file.startswith("*"):
+            entry_path = project_dir / entry_file
+        else:
+            entry_path = None
+
+        # 统计项目总行数和大小
+        total_lines = 0
+        total_size = 0
+        py_files = list(project_dir.rglob("*.py"))
+        sh_files = list(project_dir.rglob("*.sh"))
+        for f in py_files + sh_files:
+            try:
+                total_lines += len(f.read_text(encoding="utf-8", errors="ignore").splitlines())
+                total_size += f.stat().st_size
+            except Exception:
+                pass
+
+        # 确定 platform
+        if entry_web:
+            platform = "streamlit"
+        elif entry_cli:
+            platform = "cli"
+        else:
+            platform = "cli"
+
+        # 确定 function
+        status = metadata.get("status", "active")
+        if status == "data":
+            func = "analyze"
+        else:
+            func = "project"
+
+        # 生成与 Script 完全相同格式的条目
+        script_info = {
+            "id": f"hy_{project_dir.name}",
+            "name": f"hy_{project_dir.name}",
+            "title": metadata.get("title", project_dir.name),
+            "description": metadata.get("description", ""),
+            "type": "hydraulic",
+            "function": func,
+            "platform": platform,
+            "icon": metadata.get("icon", "🌊"),
+            "mode": "silent" if entry_web else "",
+            "lines": total_lines,
+            "size": total_size,
+            "path": str(entry_path) if entry_path and entry_path.exists() else str(project_dir),
+            "imports": [],
+            "localImports": [],
+            "externalImports": [],
+            "linkedBy": [],
+            "tags": ["hydraulic", func, platform, status],
+        }
+        scripts.append(script_info)
+
+    return scripts
+
+
 def generate_stats(scripts: list) -> dict:
     """生成统计信息"""
     stats = {
@@ -191,13 +300,10 @@ def generate_stats(scripts: list) -> dict:
     }
 
     for s in scripts:
-        # 按类型
         t = s["type"]
         stats["by_type"][t] = stats["by_type"].get(t, 0) + 1
-        # 按功能
         f = s["function"]
         stats["by_function"][f] = stats["by_function"].get(f, 0) + 1
-        # 按平台
         p = s["platform"]
         stats["by_platform"][p] = stats["by_platform"].get(p, 0) + 1
 
@@ -206,10 +312,16 @@ def generate_stats(scripts: list) -> dict:
 def main():
     print("🔍 扫描脚本目录...")
     scripts, dependencies = scan_scripts()
-
     print(f"📊 找到 {len(scripts)} 个脚本")
 
-    stats = generate_stats(scripts)
+    print("🔍 扫描项目目录...")
+    project_scripts = scan_projects()
+    print(f"📊 找到 {len(project_scripts)} 个项目")
+
+    # 合并：projects 作为 scripts 的一部分
+    all_scripts = scripts + project_scripts
+
+    stats = generate_stats(all_scripts)
 
     # 生成 scripts.json
     data = {
@@ -217,7 +329,7 @@ def main():
         "stats": stats,
         "types": TYPE_MAP,
         "functions": FUNCTION_MAP,
-        "scripts": scripts,
+        "scripts": all_scripts,
     }
 
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -235,6 +347,7 @@ def main():
 
     # 打印统计
     print("\n📈 统计:")
+    print(f"  总计: {stats['total']} ({len(scripts)} 脚本 + {len(project_scripts)} 项目)")
     print(f"  按类型: {stats['by_type']}")
     print(f"  按功能: {stats['by_function']}")
     print(f"  按平台: {stats['by_platform']}")

@@ -41,6 +41,27 @@ interface Stats {
 const platformColors: Record<string, string> = {
   'raycast': 'bg-purple-100 text-purple-800',
   'cli': 'bg-gray-100 text-gray-800',
+  'streamlit': 'bg-teal-100 text-teal-800',
+}
+
+// 类型颜色（用于卡片内的类型标签）
+const typeColors: Record<string, string> = {
+  'docx': 'bg-blue-50 text-blue-700',
+  'xlsx': 'bg-emerald-50 text-emerald-700',
+  'csv': 'bg-cyan-50 text-cyan-700',
+  'md': 'bg-violet-50 text-violet-700',
+  'pptx': 'bg-red-50 text-red-700',
+  'pdf': 'bg-rose-50 text-rose-700',
+  'yabai': 'bg-amber-50 text-amber-700',
+  'clashx': 'bg-indigo-50 text-indigo-700',
+  'file': 'bg-purple-50 text-purple-700',
+  'folder': 'bg-fuchsia-50 text-fuchsia-700',
+  'app': 'bg-pink-50 text-pink-700',
+  'sys': 'bg-slate-100 text-slate-700',
+  'display': 'bg-sky-50 text-sky-700',
+  'gantt': 'bg-teal-50 text-teal-700',
+  'quarto': 'bg-orange-50 text-orange-700',
+  'hydraulic': 'bg-cyan-50 text-cyan-800',
 }
 
 // 功能颜色
@@ -49,6 +70,7 @@ const functionColors: Record<string, string> = {
   'format': 'bg-violet-100 text-violet-800',
   'analyze': 'bg-green-100 text-green-800',
   'automation': 'bg-amber-100 text-amber-800',
+  'project': 'bg-cyan-100 text-cyan-800',
   'other': 'bg-gray-100 text-gray-600',
 }
 
@@ -62,7 +84,6 @@ function formatSize(bytes: number): string {
 export default function Home() {
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState('')
-  const [filterFunction, setFilterFunction] = useState('')
   const [filterPlatform, setFilterPlatform] = useState('')
   const [selectedScript, setSelectedScript] = useState<Script | null>(null)
 
@@ -84,7 +105,6 @@ export default function Home() {
   // 过滤脚本
   const filteredScripts = useMemo(() => {
     return data.scripts.filter(s => {
-      // 搜索
       if (search) {
         const q = search.toLowerCase()
         const matchName = s.name.toLowerCase().includes(q)
@@ -93,25 +113,11 @@ export default function Home() {
         const matchTags = s.tags.some(t => t.toLowerCase().includes(q))
         if (!matchName && !matchTitle && !matchDesc && !matchTags) return false
       }
-      // 类型过滤
       if (filterType && s.type !== filterType) return false
-      // 功能过滤
-      if (filterFunction && s.function !== filterFunction) return false
-      // 平台过滤
       if (filterPlatform && s.platform !== filterPlatform) return false
       return true
     })
-  }, [data.scripts, search, filterType, filterFunction, filterPlatform])
-
-  // 按类型分组
-  const groupedByType = useMemo(() => {
-    const groups: Record<string, Script[]> = {}
-    filteredScripts.forEach(s => {
-      if (!groups[s.type]) groups[s.type] = []
-      groups[s.type].push(s)
-    })
-    return groups
-  }, [filteredScripts])
+  }, [data.scripts, search, filterType, filterPlatform])
 
   // 打开脚本文件
   const openScript = async (path: string) => {
@@ -136,12 +142,12 @@ export default function Home() {
   }
 
   // 运行脚本
-  const runScript = async (path: string) => {
+  const runScript = async (path: string, mode?: string) => {
     try {
       const res = await fetch('/api/run-script', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path }),
+        body: JSON.stringify({ path, mode }),
       })
       const result = await res.json()
       alert(result.success ? `✅ ${result.output || '执行成功'}` : `❌ ${result.error}`)
@@ -153,20 +159,15 @@ export default function Home() {
   // 发送聊天消息
   const sendMessage = async () => {
     if (!chatInput.trim() || chatLoading) return
-
     const userMessage = chatInput.trim()
     setChatInput('')
     setChatMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setChatLoading(true)
-
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: userMessage,
-          scripts: data.scripts,
-        }),
+        body: JSON.stringify({ message: userMessage, scripts: data.scripts }),
       })
       const result = await res.json()
       setChatMessages(prev => [...prev, { role: 'assistant', content: result.reply || '抱歉，我无法回答这个问题。' }])
@@ -177,146 +178,108 @@ export default function Home() {
     }
   }
 
-  // 滚动到底部
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages])
 
+  // 类型选项（用于筛选栏）
+  const typeOptions = useMemo(() => {
+    return Object.entries(data.stats.by_type)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type]) => {
+        const info = data.types[type] || { icon: '📜', name: type }
+        return { value: type, label: `${info.icon} ${info.name}` }
+      })
+  }, [data.stats.by_type, data.types])
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
-      {/* Header */}
-      <header className="mb-8 flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            🛠️ 开发部脚本看板
-          </h1>
-          <p className="text-gray-500">
-            共 {data.stats.total} 个脚本 · Raycast {data.stats.by_platform.raycast || 0} 个 · CLI {data.stats.by_platform.cli || 0} 个 · 更新于 {new Date(data.generated_at).toLocaleString('zh-CN')}
-          </p>
-        </div>
-      </header>
-
-      {/* 统计卡片 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {Object.entries(data.stats.by_type)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 8)
-          .map(([type, count]) => {
-            const info = data.types[type] || { icon: '📜', color: '#6B7280', name: type }
-            return (
-              <div
-                key={type}
-                className={`rounded-lg p-4 cursor-pointer transition hover:shadow-md border-l-4 bg-white ${
-                  filterType === type ? 'ring-2 ring-blue-500' : ''
-                }`}
-                style={{ borderLeftColor: info.color }}
-                onClick={() => setFilterType(filterType === type ? '' : type)}
-              >
-                <div className="text-2xl font-bold">{count}</div>
-                <div className="text-sm text-gray-600">{info.icon} {info.name}</div>
-              </div>
-            )
-          })}
-      </div>
-
-      {/* 搜索和过滤 */}
-      <div className="flex flex-wrap gap-4 mb-6">
+    <div className="w-full px-4 py-3">
+      {/* 顶栏：标题 + 搜索 + 筛选，一行搞定 */}
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <h1 className="text-xl font-bold text-gray-900 whitespace-nowrap">
+          🛠️ 脚本看板
+        </h1>
+        <span className="text-sm text-gray-400 whitespace-nowrap">
+          {filteredScripts.length}/{data.stats.total}
+        </span>
         <input
           type="text"
-          placeholder="搜索脚本..."
-          className="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="搜索..."
+          className="flex-1 min-w-[150px] px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <select
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={filterFunction}
-          onChange={e => setFilterFunction(e.target.value)}
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={filterType}
+          onChange={e => setFilterType(e.target.value)}
         >
-          <option value="">全部功能</option>
-          {Object.entries(data.functions).map(([name, info]) => (
-            <option key={name} value={name}>
-              {info.icon} {info.name}
-            </option>
+          <option value="">全部类型</option>
+          {typeOptions.map(opt => (
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
         <select
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={filterPlatform}
           onChange={e => setFilterPlatform(e.target.value)}
         >
           <option value="">全部平台</option>
           <option value="raycast">🚀 Raycast</option>
           <option value="cli">💻 CLI</option>
+          <option value="streamlit">🌐 Streamlit</option>
         </select>
-        {(search || filterType || filterFunction || filterPlatform) && (
+        {(search || filterType || filterPlatform) && (
           <button
-            className="px-4 py-2 text-gray-600 hover:text-gray-900"
-            onClick={() => {
-              setSearch('')
-              setFilterType('')
-              setFilterFunction('')
-              setFilterPlatform('')
-            }}
+            className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-900"
+            onClick={() => { setSearch(''); setFilterType(''); setFilterPlatform('') }}
           >
-            清除筛选
+            清除
           </button>
         )}
       </div>
 
-      {/* 脚本列表 - 按类型分组 */}
-      <div className="space-y-8">
-        {Object.entries(groupedByType)
-          .sort((a, b) => b[1].length - a[1].length)
-          .map(([type, scripts]) => {
-            const info = data.types[type] || { icon: '📜', color: '#6B7280', name: type }
-            return (
-              <div key={type}>
-                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <span style={{ color: info.color }}>{info.icon}</span>
-                  {info.name}
-                  <span className="text-sm font-normal text-gray-400">({scripts.length})</span>
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {scripts.map(script => (
-                    <div
-                      key={script.id}
-                      className="bg-white rounded-lg shadow-sm border p-4 hover:shadow-md transition cursor-pointer"
-                      onClick={() => setSelectedScript(script)}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <span className="text-lg">{script.icon}</span>
-                        <div className="flex gap-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${functionColors[script.function] || functionColors.other}`}>
-                            {data.functions[script.function]?.name || script.function}
-                          </span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${platformColors[script.platform]}`}>
-                            {script.platform}
-                          </span>
-                        </div>
-                      </div>
-                      <h3 className="font-medium text-gray-900 mb-1">{script.title}</h3>
-                      <p className="text-sm text-gray-500 line-clamp-2">{script.description || script.name}</p>
-                      <div className="mt-2 text-xs text-gray-400">
-                        {script.lines} 行 · {formatSize(script.size)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      {/* 卡片墙：auto-fill 自适应列数 */}
+      <div
+        className="gap-2.5"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}
+      >
+        {filteredScripts.map(script => {
+          const typeInfo = data.types[script.type] || { icon: '📜', name: script.type, color: '#6B7280' }
+          return (
+            <div
+              key={script.id}
+              className="bg-white rounded-lg border p-3 hover:shadow-md transition cursor-pointer flex flex-col"
+              style={{ borderLeft: `3px solid ${typeInfo.color}` }}
+              onClick={() => setSelectedScript(script)}
+            >
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <span className="text-base">{script.icon}</span>
+                <h3 className="font-medium text-gray-900 text-sm truncate flex-1">{script.title}</h3>
               </div>
-            )
-          })}
+              {script.description && (
+                <p className="text-xs text-gray-400 line-clamp-1 mb-1.5">{script.description}</p>
+              )}
+              <div className="flex items-center gap-1 mt-auto flex-wrap">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded ${typeColors[script.type] || 'bg-gray-100 text-gray-600'}`}>
+                  {typeInfo.name}
+                </span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded ${platformColors[script.platform] || platformColors.cli}`}>
+                  {script.platform}
+                </span>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       {filteredScripts.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          没有找到匹配的脚本
-        </div>
+        <div className="text-center py-12 text-gray-500">没有找到匹配的脚本</div>
       )}
 
       {/* AI 聊天按钮 */}
       <button
-        className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition flex items-center justify-center text-2xl z-40"
+        className="fixed bottom-6 right-6 w-12 h-12 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition flex items-center justify-center text-xl z-40"
         onClick={() => setChatOpen(!chatOpen)}
       >
         {chatOpen ? '×' : '💬'}
@@ -324,17 +287,11 @@ export default function Home() {
 
       {/* AI 聊天窗口 */}
       {chatOpen && (
-        <div className="fixed bottom-24 right-6 w-96 h-[500px] bg-white rounded-xl shadow-2xl border flex flex-col z-40">
+        <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-white rounded-xl shadow-2xl border flex flex-col z-40">
           <div className="px-4 py-3 bg-blue-600 text-white rounded-t-xl flex items-center justify-between">
             <span className="font-medium">AI 助手</span>
-            <button
-              className="text-xs opacity-80 hover:opacity-100"
-              onClick={() => setChatMessages([])}
-            >
-              清空
-            </button>
+            <button className="text-xs opacity-80 hover:opacity-100" onClick={() => setChatMessages([])}>清空</button>
           </div>
-
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {chatMessages.length === 0 && (
               <div className="text-center text-gray-400 py-8">
@@ -343,31 +300,19 @@ export default function Home() {
               </div>
             )}
             {chatMessages.map((msg, i) => (
-              <div
-                key={i}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[85%] px-3 py-2 rounded-lg text-sm ${
-                    msg.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
+              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] px-3 py-2 rounded-lg text-sm ${msg.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800'}`}>
                   <pre className="whitespace-pre-wrap font-sans">{msg.content}</pre>
                 </div>
               </div>
             ))}
             {chatLoading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-500">
-                  思考中...
-                </div>
+                <div className="bg-gray-100 px-3 py-2 rounded-lg text-sm text-gray-500">思考中...</div>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
-
           <div className="p-3 border-t">
             <div className="flex gap-2">
               <input
@@ -376,12 +321,7 @@ export default function Home() {
                 placeholder="输入问题..."
                 value={chatInput}
                 onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    sendMessage()
-                  }
-                }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
                 disabled={chatLoading}
               />
               <button
@@ -403,7 +343,6 @@ export default function Home() {
             className="absolute right-0 top-0 bottom-0 w-full max-w-lg bg-white shadow-xl overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
-            {/* 顶部导航 */}
             <div className="sticky top-0 bg-white border-b px-4 py-3 flex items-center justify-between z-10">
               <button
                 className="flex items-center gap-1 text-gray-600 hover:text-gray-900"
@@ -425,6 +364,14 @@ export default function Home() {
                 >
                   打开目录
                 </button>
+                {selectedScript.platform === 'streamlit' && (
+                  <button
+                    className="px-3 py-1 text-sm bg-teal-600 text-white rounded hover:bg-teal-700"
+                    onClick={() => runScript(selectedScript.path, 'streamlit')}
+                  >
+                    启动
+                  </button>
+                )}
                 {selectedScript.platform === 'cli' && (
                   <button
                     className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
@@ -437,15 +384,12 @@ export default function Home() {
             </div>
 
             <div className="p-6 space-y-4">
-              {/* 标题 */}
               <div>
                 <div className="text-4xl mb-2">{selectedScript.icon}</div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  {selectedScript.title}
-                </h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedScript.title}</h2>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`px-3 py-1 rounded-full text-sm ${platformColors[selectedScript.platform]}`}>
-                    {selectedScript.platform === 'raycast' ? '🚀 Raycast' : '💻 CLI'}
+                  <span className={`px-3 py-1 rounded-full text-sm ${platformColors[selectedScript.platform] || platformColors.cli}`}>
+                    {selectedScript.platform === 'raycast' ? '🚀 Raycast' : selectedScript.platform === 'streamlit' ? '🌐 Streamlit' : '💻 CLI'}
                   </span>
                   <span className={`px-3 py-1 rounded-full text-sm ${functionColors[selectedScript.function] || functionColors.other}`}>
                     {data.functions[selectedScript.function]?.icon} {data.functions[selectedScript.function]?.name || selectedScript.function}
@@ -453,7 +397,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 描述 */}
               {selectedScript.description && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-500 mb-2">描述</h4>
@@ -461,7 +404,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* 信息 */}
               <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-500">文件名</span>
@@ -479,32 +421,19 @@ export default function Home() {
                   <span className="text-gray-500">文件大小</span>
                   <span>{formatSize(selectedScript.size)}</span>
                 </div>
-                {selectedScript.mode && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Raycast 模式</span>
-                    <span>{selectedScript.mode}</span>
-                  </div>
-                )}
               </div>
 
-              {/* 依赖 */}
               {selectedScript.externalImports && selectedScript.externalImports.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-500 mb-2">依赖模块</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedScript.externalImports.map(imp => (
-                      <span
-                        key={imp}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-mono"
-                      >
-                        {imp}
-                      </span>
+                      <span key={imp} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-mono">{imp}</span>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* 双链 - Link Out */}
               {selectedScript.localImports && selectedScript.localImports.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-2">
@@ -515,20 +444,14 @@ export default function Home() {
                     {selectedScript.localImports.map(imp => {
                       const linkedScript = data.scripts.find(s => s.name.startsWith(imp))
                       return (
-                        <span
-                          key={imp}
-                          className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm cursor-pointer hover:bg-blue-100"
-                          onClick={() => linkedScript && setSelectedScript(linkedScript)}
-                        >
-                          {imp}
-                        </span>
+                        <span key={imp} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm cursor-pointer hover:bg-blue-100"
+                          onClick={() => linkedScript && setSelectedScript(linkedScript)}>{imp}</span>
                       )
                     })}
                   </div>
                 </div>
               )}
 
-              {/* 双链 - Link In */}
               {selectedScript.linkedBy && selectedScript.linkedBy.length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-2">
@@ -539,39 +462,24 @@ export default function Home() {
                     {selectedScript.linkedBy.map(scriptId => {
                       const linkedScript = data.scripts.find(s => s.id === scriptId)
                       return (
-                        <span
-                          key={scriptId}
-                          className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm cursor-pointer hover:bg-green-100"
-                          onClick={() => linkedScript && setSelectedScript(linkedScript)}
-                        >
-                          {linkedScript?.title || scriptId}
-                        </span>
+                        <span key={scriptId} className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm cursor-pointer hover:bg-green-100"
+                          onClick={() => linkedScript && setSelectedScript(linkedScript)}>{linkedScript?.title || scriptId}</span>
                       )
                     })}
                   </div>
                 </div>
               )}
 
-              {/* 标签 */}
               <div>
                 <h4 className="text-sm font-medium text-gray-500 mb-2">标签</h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedScript.tags.map(tag => (
-                    <span
-                      key={tag}
-                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm cursor-pointer hover:bg-blue-100"
-                      onClick={() => {
-                        setSelectedScript(null)
-                        setSearch(tag)
-                      }}
-                    >
-                      #{tag}
-                    </span>
+                    <span key={tag} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm cursor-pointer hover:bg-blue-100"
+                      onClick={() => { setSelectedScript(null); setSearch(tag) }}>#{tag}</span>
                   ))}
                 </div>
               </div>
 
-              {/* 路径 */}
               <div className="p-3 bg-gray-100 rounded-lg">
                 <p className="text-xs text-gray-500 mb-1">文件路径</p>
                 <code className="text-xs text-gray-700 break-all">{selectedScript.path}</code>

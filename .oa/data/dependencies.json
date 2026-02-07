@@ -29,18 +29,13 @@
       "$(dirname",
       "$(dirname"
     ],
-    "common_utils.py": [
-      "pathlib",
-      "typing",
-      "os",
-      "sys",
-      "shutil",
-      "subprocess"
-    ],
     "csv_from_txt.py": [
       "pathlib",
       "typing",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "sys",
       "csv",
       "re",
@@ -48,7 +43,10 @@
     ],
     "csv_merge_txt.py": [
       "pathlib",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "sys",
       "csv",
       "re"
@@ -56,7 +54,10 @@
     "csv_to_txt.py": [
       "pathlib",
       "typing",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "sys",
       "csv",
       "argparse"
@@ -67,8 +68,7 @@
       "pathlib",
       "docx",
       "docx.oxml.ns",
-      "common_utils",
-      "common_utils",
+      "finder",
       "docx.oxml",
       "docx.text.paragraph",
       "sys"
@@ -85,7 +85,7 @@
     ],
     "docx_zdwp_all.py": [
       "pathlib",
-      "common_utils",
+      "finder",
       "sys",
       "subprocess"
     ],
@@ -99,7 +99,8 @@
       "subprocess",
       "os",
       "stat",
-      "sys"
+      "sys",
+      "shutil"
     ],
     "folder_add_prefix.py": [
       "subprocess",
@@ -151,37 +152,36 @@
     ],
     "md_formatter.py": [
       "pathlib",
-      "common_utils",
+      "finder",
       "re",
       "sys"
     ],
     "md_merge.py": [
       "pathlib",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "sys"
     ],
     "md_split_by_heading.py": [
       "pathlib",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
       "re",
       "sys"
     ],
-    "pdf_from_images.sh": [
-      "$(dirname"
-    ],
-    "pdf_to_md.sh": [
-      "$(dirname"
-    ],
     "pptx_apply_all.py": [
       "pathlib",
-      "common_utils",
+      "finder",
       "sys",
       "subprocess",
       "shutil"
     ],
     "pptx_font_yahei.py": [
       "pathlib",
-      "common_utils",
+      "finder",
       "pptx",
       "pptx.util",
       "pptx.dml.color",
@@ -192,7 +192,8 @@
       "shutil"
     ],
     "pptx_table_style.py": [
-      "common_utils",
+      "pathlib",
+      "finder",
       "pptx",
       "pptx.util",
       "sys",
@@ -201,7 +202,7 @@
     ],
     "pptx_text_formatter.py": [
       "pathlib",
-      "common_utils",
+      "finder",
       "pptx",
       "re",
       "sys",
@@ -210,7 +211,10 @@
     "pptx_to_md.py": [
       "pathlib",
       "pptx",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "sys",
       "argparse"
     ],
@@ -222,13 +226,19 @@
       "yaml",
       "sys"
     ],
-    "sys_terminate_python.sh": [
-      "$(dirname"
+    "sys_app_launcher.py": [
+      "pathlib",
+      "subprocess",
+      "os",
+      "re"
     ],
     "xlsx_from_csv.py": [
       "pathlib",
       "typing",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "openpyxl",
       "sys",
       "csv",
@@ -237,7 +247,10 @@
     "xlsx_from_txt.py": [
       "pathlib",
       "typing",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "sys",
       "argparse"
     ],
@@ -260,7 +273,9 @@
       "copy",
       "openpyxl",
       "concurrent.futures",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
       "sys",
       "argparse",
       "multiprocessing",
@@ -269,7 +284,10 @@
     "xlsx_to_csv.py": [
       "pathlib",
       "typing",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "openpyxl",
       "sys",
       "csv",
@@ -278,37 +296,26 @@
     "xlsx_to_txt.py": [
       "pathlib",
       "typing",
-      "common_utils",
+      "display",
+      "file_ops",
+      "finder",
+      "progress",
       "sys",
       "argparse"
     ],
     "yabai_float.py": [
       "subprocess"
     ],
-    "yabai_focus_follow.py": [
-      "subprocess"
-    ],
     "yabai_mouse_follow.py": [
       "subprocess"
     ],
-    "yabai_move.py": [
-      "sys"
-    ],
-    "yabai_next.py": [
-      "subprocess"
-    ],
     "yabai_org.py": [
+      "pathlib",
       "common",
       "subprocess",
       "json",
       "sys",
       "os"
-    ],
-    "yabai_prev.py": [
-      "subprocess"
-    ],
-    "yabai_space.py": [
-      "sys"
     ],
     "yabai_toggle.py": [
       "subprocess"

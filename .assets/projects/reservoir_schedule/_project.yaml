@@ -1,0 +1,9 @@
+name: reservoir_schedule
+title: 水库发电调度
+description: 水库发电调度计算与优化工具，支持 Streamlit 可视化界面
+type: hydraulic
+icon: "\U0001F3D7\uFE0F"
+status: active
+entry:
+  web: app.py
+tags: [水库调度, 发电, 水资源]

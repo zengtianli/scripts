@@ -1,11 +1,10 @@
 {
-  "generated_at": "2026-02-06T08:28:42.707376",
+  "generated_at": "2026-02-06T17:04:33.993497",
   "stats": {
-    "total": 53,
+    "total": 56,
     "by_type": {
       "app": 1,
       "clashx": 6,
-      "other": 1,
       "csv": 3,
       "display": 2,
       "docx": 4,
@@ -13,23 +12,25 @@
       "folder": 4,
       "gantt": 1,
       "md": 4,
-      "pdf": 2,
       "pptx": 5,
       "quarto": 1,
       "sys": 1,
       "xlsx": 7,
-      "yabai": 9
+      "yabai": 4,
+      "hydraulic": 11
     },
     "by_function": {
-      "automation": 17,
-      "other": 14,
-      "convert": 10,
-      "analyze": 5,
-      "format": 7
+      "automation": 12,
+      "convert": 8,
+      "analyze": 7,
+      "other": 13,
+      "format": 7,
+      "project": 9
     },
     "by_platform": {
-      "raycast": 50,
-      "cli": 3
+      "raycast": 43,
+      "cli": 8,
+      "streamlit": 5
     }
   },
   "types": {
@@ -107,6 +108,11 @@
       "icon": "📚",
       "color": "#F97316",
       "name": "报告构建"
+    },
+    "hydraulic": {
+      "icon": "🌊",
+      "color": "#0284C7",
+      "name": "水利工具"
     }
   },
   "functions": {
@@ -151,6 +157,12 @@
         "app_",
         "sys_"
       ]
+    },
+    "project": {
+      "icon": "🏗️",
+      "color": "#0284C7",
+      "name": "项目工具",
+      "patterns": []
     }
   },
   "scripts": [
@@ -165,7 +177,7 @@
       "icon": "🚀",
       "mode": "silent",
       "lines": 74,
-      "size": 2386,
+      "size": 2370,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/app_open.py",
       "imports": [
         "subprocess",
@@ -196,7 +208,7 @@
       "icon": "⚙️",
       "mode": "fullOutput",
       "lines": 17,
-      "size": 407,
+      "size": 411,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_enhanced.sh",
       "imports": [
         "$(dirname",
@@ -225,7 +237,7 @@
       "icon": "⚡",
       "mode": "fullOutput",
       "lines": 17,
-      "size": 404,
+      "size": 408,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_mode_direct.sh",
       "imports": [
         "$(dirname",
@@ -254,7 +266,7 @@
       "icon": "🌍",
       "mode": "fullOutput",
       "lines": 17,
-      "size": 405,
+      "size": 409,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_mode_global.sh",
       "imports": [
         "$(dirname",
@@ -283,7 +295,7 @@
       "icon": "📋",
       "mode": "fullOutput",
       "lines": 17,
-      "size": 397,
+      "size": 401,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_mode_rule.sh",
       "imports": [
         "$(dirname",
@@ -312,7 +324,7 @@
       "icon": "🔄",
       "mode": "fullOutput",
       "lines": 17,
-      "size": 389,
+      "size": 393,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_proxy.sh",
       "imports": [
         "$(dirname",
@@ -341,7 +353,7 @@
       "icon": "🌐",
       "mode": "fullOutput",
       "lines": 17,
-      "size": 382,
+      "size": 386,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/clashx_status.sh",
       "imports": [
         "$(dirname",
@@ -360,62 +372,6 @@
       "linkedBy": []
     },
     {
-      "id": "common_utils.py",
-      "name": "common_utils.py",
-      "title": "common-utils",
-      "description": "",
-      "type": "other",
-      "function": "other",
-      "platform": "cli",
-      "icon": "📜",
-      "mode": "",
-      "lines": 362,
-      "size": 10099,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/common_utils.py",
-      "imports": [
-        "pathlib",
-        "typing",
-        "os",
-        "sys",
-        "shutil",
-        "subprocess"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "pathlib",
-        "typing",
-        "os",
-        "sys",
-        "shutil",
-        "subprocess"
-      ],
-      "tags": [
-        "other",
-        "other",
-        "cli"
-      ],
-      "linkedBy": [
-        "csv_from_txt.py",
-        "csv_merge_txt.py",
-        "csv_to_txt.py",
-        "docx_apply_image_caption.py",
-        "docx_zdwp_all.py",
-        "md_formatter.py",
-        "md_merge.py",
-        "md_split_by_heading.py",
-        "pptx_apply_all.py",
-        "pptx_font_yahei.py",
-        "pptx_table_style.py",
-        "pptx_text_formatter.py",
-        "pptx_to_md.py",
-        "xlsx_from_csv.py",
-        "xlsx_from_txt.py",
-        "xlsx_splitsheets.py",
-        "xlsx_to_csv.py",
-        "xlsx_to_txt.py"
-      ]
-    },
-    {
       "id": "csv_from_txt.py",
       "name": "csv_from_txt.py",
       "title": "csv-from-txt",
@@ -425,24 +381,29 @@
       "platform": "raycast",
       "icon": "📊",
       "mode": "fullOutput",
-      "lines": 148,
-      "size": 4648,
+      "lines": 149,
+      "size": 4755,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/csv_from_txt.py",
       "imports": [
         "pathlib",
         "typing",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "csv",
         "re",
         "argparse"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "typing",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "csv",
         "re",
@@ -465,21 +426,26 @@
       "platform": "raycast",
       "icon": "📊",
       "mode": "fullOutput",
-      "lines": 131,
-      "size": 4165,
+      "lines": 132,
+      "size": 4252,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/csv_merge_txt.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "csv",
         "re"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "csv",
         "re"
@@ -501,23 +467,28 @@
       "platform": "raycast",
       "icon": "📊",
       "mode": "fullOutput",
-      "lines": 138,
-      "size": 4396,
+      "lines": 139,
+      "size": 4503,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/csv_to_txt.py",
       "imports": [
         "pathlib",
         "typing",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "csv",
         "argparse"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "typing",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "csv",
         "argparse"
@@ -539,8 +510,8 @@
       "platform": "raycast",
       "icon": "📺",
       "mode": "fullOutput",
-      "lines": 37,
-      "size": 848,
+      "lines": 53,
+      "size": 1317,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/display_1080.sh",
       "imports": [],
       "localImports": [],
@@ -562,8 +533,8 @@
       "platform": "raycast",
       "icon": "🖥️",
       "mode": "fullOutput",
-      "lines": 37,
-      "size": 808,
+      "lines": 53,
+      "size": 1277,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/display_4k.sh",
       "imports": [],
       "localImports": [],
@@ -585,27 +556,24 @@
       "platform": "raycast",
       "icon": "📄",
       "mode": "fullOutput",
-      "lines": 307,
-      "size": 9727,
+      "lines": 306,
+      "size": 9725,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_apply_image_caption.py",
       "imports": [
         "pathlib",
         "docx",
         "docx.oxml.ns",
-        "common_utils",
-        "common_utils",
+        "finder",
         "docx.oxml",
         "docx.text.paragraph",
         "sys"
       ],
-      "localImports": [
-        "common_utils",
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "docx",
         "docx",
+        "finder",
         "docx",
         "docx",
         "sys"
@@ -628,7 +596,7 @@
       "icon": "📄",
       "mode": "fullOutput",
       "lines": 360,
-      "size": 10809,
+      "size": 10793,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_text_formatter.py",
       "imports": [
         "pathlib",
@@ -663,7 +631,7 @@
       "icon": "📄",
       "mode": "fullOutput",
       "lines": 114,
-      "size": 2987,
+      "size": 2989,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_to_md.sh",
       "imports": [
         "$(dirname"
@@ -689,20 +657,19 @@
       "platform": "raycast",
       "icon": "✨",
       "mode": "fullOutput",
-      "lines": 198,
-      "size": 5814,
+      "lines": 199,
+      "size": 5854,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_zdwp_all.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "finder",
         "sys",
         "subprocess"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "finder",
         "sys",
         "subprocess"
       ],
@@ -724,7 +691,7 @@
       "icon": "📋",
       "mode": "fullOutput",
       "lines": 70,
-      "size": 2537,
+      "size": 2521,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/file_copy.py",
       "imports": [
         "subprocess",
@@ -754,15 +721,16 @@
       "platform": "raycast",
       "icon": "🚀",
       "mode": "fullOutput",
-      "lines": 124,
-      "size": 4484,
+      "lines": 126,
+      "size": 4481,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/file_run.py",
       "imports": [
         "concurrent.futures",
         "subprocess",
         "os",
         "stat",
-        "sys"
+        "sys",
+        "shutil"
       ],
       "localImports": [],
       "externalImports": [
@@ -770,7 +738,8 @@
         "subprocess",
         "os",
         "stat",
-        "sys"
+        "sys",
+        "shutil"
       ],
       "tags": [
         "file",
@@ -790,7 +759,7 @@
       "icon": "📝",
       "mode": "fullOutput",
       "lines": 89,
-      "size": 2808,
+      "size": 2792,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_add_prefix.py",
       "imports": [
         "subprocess",
@@ -812,14 +781,14 @@
       "id": "folder_create.py",
       "name": "folder_create.py",
       "title": "folder-create",
-      "description": "Create a new folder in current Finder location",
+      "description": "Create a new folder inside selected folder in Finder",
       "type": "folder",
       "function": "other",
       "platform": "raycast",
       "icon": "📁",
       "mode": "fullOutput",
-      "lines": 64,
-      "size": 1796,
+      "lines": 76,
+      "size": 2331,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_create.py",
       "imports": [
         "subprocess",
@@ -848,7 +817,7 @@
       "icon": "🗂️",
       "mode": "fullOutput",
       "lines": 116,
-      "size": 3770,
+      "size": 3754,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_move_up_remove.py",
       "imports": [
         "subprocess",
@@ -872,14 +841,14 @@
       "id": "folder_paste.sh",
       "name": "folder_paste.sh",
       "title": "folder_paste",
-      "description": "",
+      "description": "将剪贴板中的文件粘贴到 Finder 当前目录",
       "type": "folder",
       "function": "other",
       "platform": "raycast",
       "icon": "📋",
       "mode": "fullOutput",
-      "lines": 16,
-      "size": 387,
+      "lines": 76,
+      "size": 2143,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/folder_paste.sh",
       "imports": [
         "$(dirname"
@@ -953,7 +922,7 @@
       "icon": "📄",
       "mode": "fullOutput",
       "lines": 819,
-      "size": 28266,
+      "size": 28250,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/md_docx_template.py",
       "imports": [
         "pathlib",
@@ -1011,20 +980,19 @@
       "platform": "raycast",
       "icon": "📝",
       "mode": "fullOutput",
-      "lines": 239,
-      "size": 6698,
+      "lines": 240,
+      "size": 6738,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/md_formatter.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "finder",
         "re",
         "sys"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "finder",
         "re",
         "sys"
       ],
@@ -1045,19 +1013,24 @@
       "platform": "raycast",
       "icon": "📝",
       "mode": "fullOutput",
-      "lines": 115,
-      "size": 3693,
+      "lines": 116,
+      "size": 3799,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/md_merge.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys"
       ],
       "tags": [
@@ -1078,79 +1051,28 @@
       "icon": "✂️",
       "mode": "fullOutput",
       "lines": 139,
-      "size": 4049,
+      "size": 4136,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/md_split_by_heading.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
         "re",
         "sys"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "display",
+        "file_ops",
+        "finder",
         "re",
         "sys"
       ],
       "tags": [
         "md",
         "analyze",
-        "raycast"
-      ],
-      "linkedBy": []
-    },
-    {
-      "id": "pdf_from_images.sh",
-      "name": "pdf_from_images.sh",
-      "title": "pdf-from-images",
-      "description": "图片合并转 PDF（ImageMagick）",
-      "type": "pdf",
-      "function": "convert",
-      "platform": "raycast",
-      "icon": "🖼️",
-      "mode": "fullOutput",
-      "lines": 119,
-      "size": 3298,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/pdf_from_images.sh",
-      "imports": [
-        "$(dirname"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "$(dirname"
-      ],
-      "tags": [
-        "pdf",
-        "convert",
-        "raycast"
-      ],
-      "linkedBy": []
-    },
-    {
-      "id": "pdf_to_md.sh",
-      "name": "pdf_to_md.sh",
-      "title": "pdf-to-md",
-      "description": "将PDF转换为Markdown",
-      "type": "pdf",
-      "function": "convert",
-      "platform": "raycast",
-      "icon": "📕",
-      "mode": "fullOutput",
-      "lines": 38,
-      "size": 946,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/pdf_to_md.sh",
-      "imports": [
-        "$(dirname"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "$(dirname"
-      ],
-      "tags": [
-        "pdf",
-        "convert",
         "raycast"
       ],
       "linkedBy": []
@@ -1165,21 +1087,20 @@
       "platform": "raycast",
       "icon": "📽️",
       "mode": "fullOutput",
-      "lines": 207,
-      "size": 5371,
+      "lines": 208,
+      "size": 5411,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_apply_all.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "finder",
         "sys",
         "subprocess",
         "shutil"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "finder",
         "sys",
         "subprocess",
         "shutil"
@@ -1201,12 +1122,12 @@
       "platform": "raycast",
       "icon": "📽️",
       "mode": "fullOutput",
-      "lines": 389,
-      "size": 11532,
+      "lines": 390,
+      "size": 11572,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_font_yahei.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "finder",
         "pptx",
         "pptx.util",
         "pptx.dml.color",
@@ -1216,11 +1137,10 @@
         "os",
         "shutil"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "finder",
         "pptx",
         "pptx",
         "pptx",
@@ -1247,21 +1167,22 @@
       "platform": "raycast",
       "icon": "📽️",
       "mode": "fullOutput",
-      "lines": 209,
-      "size": 5948,
+      "lines": 211,
+      "size": 6013,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_table_style.py",
       "imports": [
-        "common_utils",
+        "pathlib",
+        "finder",
         "pptx",
         "pptx.util",
         "sys",
         "os",
         "shutil"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
+        "pathlib",
+        "finder",
         "pptx",
         "pptx",
         "sys",
@@ -1285,22 +1206,21 @@
       "platform": "raycast",
       "icon": "📽️",
       "mode": "fullOutput",
-      "lines": 331,
-      "size": 8793,
+      "lines": 332,
+      "size": 8833,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_text_formatter.py",
       "imports": [
         "pathlib",
-        "common_utils",
+        "finder",
         "pptx",
         "re",
         "sys",
         "shutil"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
+        "finder",
         "pptx",
         "re",
         "sys",
@@ -1324,21 +1244,26 @@
       "icon": "📽️",
       "mode": "fullOutput",
       "lines": 131,
-      "size": 4417,
+      "size": 4520,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/pptx_to_md.py",
       "imports": [
         "pathlib",
         "pptx",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "argparse"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "pptx",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "argparse"
       ],
@@ -1387,24 +1312,30 @@
       "linkedBy": []
     },
     {
-      "id": "sys_terminate_python.sh",
-      "name": "sys_terminate_python.sh",
-      "title": "manage_terminate_python",
-      "description": "Terminate all running Python processes",
+      "id": "sys_app_launcher.py",
+      "name": "sys_app_launcher.py",
+      "title": "sys-app-launcher",
+      "description": "根据桌面上的essential_apps.txt列表启动必要的应用程序",
       "type": "sys",
       "function": "automation",
       "platform": "raycast",
-      "icon": "⏹️",
+      "icon": "🚀",
       "mode": "fullOutput",
-      "lines": 26,
-      "size": 559,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/sys_terminate_python.sh",
+      "lines": 147,
+      "size": 4668,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/sys_app_launcher.py",
       "imports": [
-        "$(dirname"
+        "pathlib",
+        "subprocess",
+        "os",
+        "re"
       ],
       "localImports": [],
       "externalImports": [
-        "$(dirname"
+        "pathlib",
+        "subprocess",
+        "os",
+        "re"
       ],
       "tags": [
         "sys",
@@ -1424,23 +1355,28 @@
       "icon": "📊",
       "mode": "fullOutput",
       "lines": 158,
-      "size": 4747,
+      "size": 4850,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_from_csv.py",
       "imports": [
         "pathlib",
         "typing",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "openpyxl",
         "sys",
         "csv",
         "argparse"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "typing",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "openpyxl",
         "sys",
         "csv",
@@ -1464,21 +1400,26 @@
       "icon": "📊",
       "mode": "fullOutput",
       "lines": 151,
-      "size": 4646,
+      "size": 4749,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_from_txt.py",
       "imports": [
         "pathlib",
         "typing",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "argparse"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "typing",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "argparse"
       ],
@@ -1500,7 +1441,7 @@
       "icon": "📊",
       "mode": "fullOutput",
       "lines": 264,
-      "size": 8573,
+      "size": 8562,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_lowercase.py",
       "imports": [
         "pathlib",
@@ -1570,27 +1511,30 @@
       "icon": "📊",
       "mode": "fullOutput",
       "lines": 353,
-      "size": 11784,
+      "size": 11871,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_splitsheets.py",
       "imports": [
         "pathlib",
         "copy",
         "openpyxl",
         "concurrent.futures",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
         "sys",
         "argparse",
         "multiprocessing",
         "time"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "copy",
         "openpyxl",
         "concurrent",
+        "display",
+        "file_ops",
+        "finder",
         "sys",
         "argparse",
         "multiprocessing",
@@ -1614,23 +1558,28 @@
       "icon": "📊",
       "mode": "fullOutput",
       "lines": 178,
-      "size": 5937,
+      "size": 6040,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_to_csv.py",
       "imports": [
         "pathlib",
         "typing",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "openpyxl",
         "sys",
         "csv",
         "argparse"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "typing",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "openpyxl",
         "sys",
         "csv",
@@ -1654,21 +1603,26 @@
       "icon": "📊",
       "mode": "fullOutput",
       "lines": 161,
-      "size": 5010,
+      "size": 5113,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/xlsx_to_txt.py",
       "imports": [
         "pathlib",
         "typing",
-        "common_utils",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "argparse"
       ],
-      "localImports": [
-        "common_utils"
-      ],
+      "localImports": [],
       "externalImports": [
         "pathlib",
         "typing",
+        "display",
+        "file_ops",
+        "finder",
+        "progress",
         "sys",
         "argparse"
       ],
@@ -1692,33 +1646,6 @@
       "lines": 8,
       "size": 205,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_float.py",
-      "imports": [
-        "subprocess"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "subprocess"
-      ],
-      "tags": [
-        "yabai",
-        "automation",
-        "raycast"
-      ],
-      "linkedBy": []
-    },
-    {
-      "id": "yabai_focus_follow.py",
-      "name": "yabai_focus_follow.py",
-      "title": "yabai-focus-follow",
-      "description": "",
-      "type": "yabai",
-      "function": "automation",
-      "platform": "raycast",
-      "icon": "🎯",
-      "mode": "compact",
-      "lines": 27,
-      "size": 732,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_focus_follow.py",
       "imports": [
         "subprocess"
       ],
@@ -1761,60 +1688,6 @@
       "linkedBy": []
     },
     {
-      "id": "yabai_move.py",
-      "name": "yabai_move.py",
-      "title": "yabai-move",
-      "description": "",
-      "type": "yabai",
-      "function": "automation",
-      "platform": "raycast",
-      "icon": "🪟",
-      "mode": "silent",
-      "lines": 10,
-      "size": 326,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_move.py",
-      "imports": [
-        "sys"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "sys"
-      ],
-      "tags": [
-        "yabai",
-        "automation",
-        "raycast"
-      ],
-      "linkedBy": []
-    },
-    {
-      "id": "yabai_next.py",
-      "name": "yabai_next.py",
-      "title": "yabai-next",
-      "description": "",
-      "type": "yabai",
-      "function": "automation",
-      "platform": "raycast",
-      "icon": "🪟",
-      "mode": "silent",
-      "lines": 8,
-      "size": 267,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_next.py",
-      "imports": [
-        "subprocess"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "subprocess"
-      ],
-      "tags": [
-        "yabai",
-        "automation",
-        "raycast"
-      ],
-      "linkedBy": []
-    },
-    {
       "id": "yabai_org.py",
       "name": "yabai_org.py",
       "title": "yabai-org",
@@ -1824,10 +1697,11 @@
       "platform": "raycast",
       "icon": "🪟",
       "mode": "silent",
-      "lines": 38,
-      "size": 920,
+      "lines": 39,
+      "size": 939,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_org.py",
       "imports": [
+        "pathlib",
         "common",
         "subprocess",
         "json",
@@ -1836,65 +1710,12 @@
       ],
       "localImports": [],
       "externalImports": [
+        "pathlib",
         "common",
         "subprocess",
         "json",
         "sys",
         "os"
-      ],
-      "tags": [
-        "yabai",
-        "automation",
-        "raycast"
-      ],
-      "linkedBy": []
-    },
-    {
-      "id": "yabai_prev.py",
-      "name": "yabai_prev.py",
-      "title": "yabai-prev",
-      "description": "",
-      "type": "yabai",
-      "function": "automation",
-      "platform": "raycast",
-      "icon": "🪟",
-      "mode": "silent",
-      "lines": 8,
-      "size": 266,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_prev.py",
-      "imports": [
-        "subprocess"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "subprocess"
-      ],
-      "tags": [
-        "yabai",
-        "automation",
-        "raycast"
-      ],
-      "linkedBy": []
-    },
-    {
-      "id": "yabai_space.py",
-      "name": "yabai_space.py",
-      "title": "yabai-space",
-      "description": "",
-      "type": "yabai",
-      "function": "automation",
-      "platform": "raycast",
-      "icon": "🪟",
-      "mode": "silent",
-      "lines": 10,
-      "size": 326,
-      "path": "/Users/tianli/useful_scripts/.assets/scripts/yabai_space.py",
-      "imports": [
-        "sys"
-      ],
-      "localImports": [],
-      "externalImports": [
-        "sys"
       ],
       "tags": [
         "yabai",
@@ -1929,6 +1750,270 @@
         "raycast"
       ],
       "linkedBy": []
+    },
+    {
+      "id": "hy_cad",
+      "name": "hy_cad",
+      "title": "CAD脚本",
+      "description": "AutoCAD 自动化处理脚本集，基于 AutoLISP 编写",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "cli",
+      "icon": "📐",
+      "mode": "",
+      "lines": 0,
+      "size": 0,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/cad",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "cli",
+        "active"
+      ]
+    },
+    {
+      "id": "hy_capacity",
+      "name": "hy_capacity",
+      "title": "纳污能力计算",
+      "description": "基于水功能区的纳污能力计算工具，支持 Streamlit 界面和命令行两种模式",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "streamlit",
+      "icon": "🌊",
+      "mode": "silent",
+      "lines": 1343,
+      "size": 49968,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/capacity/web_app.py",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "streamlit",
+        "active"
+      ]
+    },
+    {
+      "id": "hy_company_query",
+      "name": "hy_company_query",
+      "title": "company_query",
+      "description": "",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "cli",
+      "icon": "🌊",
+      "mode": "",
+      "lines": 446,
+      "size": 15759,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/company_query",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "cli",
+        "进行中"
+      ]
+    },
+    {
+      "id": "hy_district_scheduler",
+      "name": "hy_district_scheduler",
+      "title": "区域调度模型",
+      "description": "区域水资源调度模型，支持 Streamlit 界面进行调度方案配置与分析",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "streamlit",
+      "icon": "🗺️",
+      "mode": "silent",
+      "lines": 2197,
+      "size": 97821,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/district_scheduler/webapp/app.py",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "streamlit",
+        "dev"
+      ]
+    },
+    {
+      "id": "hy_geocode",
+      "name": "hy_geocode",
+      "title": "地理编码/逆编码",
+      "description": "基于地址或坐标进行地理编码与逆编码转换的工具",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "streamlit",
+      "icon": "📍",
+      "mode": "silent",
+      "lines": 1768,
+      "size": 58688,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/geocode/app.py",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "streamlit",
+        "active"
+      ]
+    },
+    {
+      "id": "hy_irrigation",
+      "name": "hy_irrigation",
+      "title": "灌溉需水计算",
+      "description": "农业灌溉需水量计算工具，支持 Streamlit 界面交互",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "streamlit",
+      "icon": "🌾",
+      "mode": "silent",
+      "lines": 13708,
+      "size": 486086,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/irrigation/webapp/app.py",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "streamlit",
+        "dev"
+      ]
+    },
+    {
+      "id": "hy_qgis",
+      "name": "hy_qgis",
+      "title": "QGIS空间处理",
+      "description": "基于 QGIS 的空间数据处理 Shell Pipeline 工具",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "cli",
+      "icon": "🌐",
+      "mode": "",
+      "lines": 11983,
+      "size": 433197,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/qgis/scripts/run_pipeline.sh",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "cli",
+        "active"
+      ]
+    },
+    {
+      "id": "hy_rainfall",
+      "name": "hy_rainfall",
+      "title": "降雨数据",
+      "description": "降雨观测与统计数据集，供其他模块引用",
+      "type": "hydraulic",
+      "function": "analyze",
+      "platform": "cli",
+      "icon": "🌧️",
+      "mode": "",
+      "lines": 396,
+      "size": 19893,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/rainfall",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "analyze",
+        "cli",
+        "data"
+      ]
+    },
+    {
+      "id": "hy_reservoir_schedule",
+      "name": "hy_reservoir_schedule",
+      "title": "水库发电调度",
+      "description": "水库发电调度计算与优化工具，支持 Streamlit 可视化界面",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "streamlit",
+      "icon": "🏗️",
+      "mode": "silent",
+      "lines": 5202,
+      "size": 241199,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/reservoir_schedule/app.py",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "streamlit",
+        "active"
+      ]
+    },
+    {
+      "id": "hy_risk_data",
+      "name": "hy_risk_data",
+      "title": "风险分析表填充",
+      "description": "风险分析相关数据表的自动填充与处理 CLI 工具集",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "cli",
+      "icon": "⚠️",
+      "mode": "",
+      "lines": 5594,
+      "size": 197560,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/risk_data",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "cli",
+        "active"
+      ]
+    },
+    {
+      "id": "hy_water_annual",
+      "name": "hy_water_annual",
+      "title": "年度水资源数据",
+      "description": "年度水资源统计数据集，供其他模块引用",
+      "type": "hydraulic",
+      "function": "analyze",
+      "platform": "cli",
+      "icon": "📊",
+      "mode": "",
+      "lines": 985,
+      "size": 27702,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/water_annual",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "analyze",
+        "cli",
+        "data"
+      ]
     }
   ]
 }

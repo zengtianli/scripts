@@ -1,5 +1,5 @@
-# useful_scripts 第三方依赖
-# 生成日期: 2026-02-06
+# useful_scripts 第三方依赖（统一版）
+# 合并 .assets/scripts 和 .assets/projects 的依赖
 
 # Office 文档处理
 python-docx>=0.8.11
@@ -12,9 +12,21 @@ xlrd>=2.0.0
 pandas>=2.0.0
 numpy>=1.24.0
 
-# 可视化（gantt_timeline.py）
+# 可视化
 matplotlib>=3.7.0
 seaborn>=0.12.0
+plotly>=5.0.0
 
 # 配置解析
 PyYAML>=6.0
+
+# Web 框架（projects）
+streamlit>=1.28.0
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-multipart>=0.0.6
+
+# 科学计算（projects）
+scipy>=1.9.0
+pydantic>=2.6.0
+requests>=2.26.0

@@ -5,8 +5,10 @@
 
 import os
 import sys
+import json
 import shutil
 from pathlib import Path
+from datetime import datetime
 from typing import List, Optional, Union
 
 from display import show_error, show_warning, show_info
@@ -226,3 +228,75 @@ def create_folder(name: str, target_dir: Union[str, Path]) -> Optional[Path]:
         return folder
     except Exception:
         return None
+
+
+# ===== 数据文件操作（合并自 hydraulic/_lib） =====
+
+def read_geojson(geojson_path: str) -> dict:
+    """
+    读取 GeoJSON 文件
+
+    Args:
+        geojson_path: GeoJSON 文件路径
+
+    Returns:
+        dict: GeoJSON 数据字典
+
+    Raises:
+        SystemExit: 文件不存在或 JSON 解析失败时退出
+    """
+    try:
+        with open(geojson_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        show_info(f"成功读取 GeoJSON 文件: {geojson_path}")
+        show_info(f"  包含 {len(data.get('features', []))} 条记录")
+        return data
+    except FileNotFoundError:
+        show_error(f"找不到文件 {geojson_path}")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        show_error(f"JSON 解析失败 - {e}")
+        sys.exit(1)
+
+
+def create_backup(file_path: str, suffix: str = "backup") -> str:
+    """
+    创建文件备份（带时间戳）
+
+    Args:
+        file_path: 要备份的文件路径
+        suffix: 备份后缀名
+
+    Returns:
+        str: 备份文件路径
+
+    Raises:
+        SystemExit: 文件不存在时退出
+    """
+    if not os.path.exists(file_path):
+        show_error(f"文件不存在 {file_path}")
+        sys.exit(1)
+
+    base_dir = os.path.dirname(file_path)
+    base_name = os.path.splitext(os.path.basename(file_path))[0]
+    ext = os.path.splitext(file_path)[1]
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = os.path.join(base_dir, f"{base_name}_{suffix}_{timestamp}{ext}")
+
+    shutil.copy2(file_path, backup_path)
+    show_info(f"已创建备份文件: {backup_path}")
+
+    return backup_path
+
+
+def save_report(content: str, report_path: str):
+    """
+    保存文本报告到文件
+
+    Args:
+        content: 报告内容
+        report_path: 报告保存路径
+    """
+    with open(report_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    show_info(f"报告已保存至: {report_path}")

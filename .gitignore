@@ -1,1 +1,4 @@
 .DS_Store
+.oa/.next/
+__pycache__/
+*.pyc

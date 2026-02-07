@@ -1,0 +1,8 @@
+name: rainfall
+title: 降雨数据
+description: 降雨观测与统计数据集，供其他模块引用
+type: hydraulic
+icon: "\U0001F327\uFE0F"
+status: data
+entry: {}
+tags: [降雨, 气象数据, 水文]

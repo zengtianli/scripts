@@ -15,13 +15,17 @@ readonly PROJECT_ROOT="$(cd "$_COMMON_SH_DIR/../.." && pwd)"
 readonly SCRIPTS_DIR="$_COMMON_SH_DIR/../scripts"
 
 # ===== 环境变量设置 =====
-# 动态检测 Python 路径
+# 确保 miniforge bin 在 PATH 中（Raycast 非交互式 shell 不继承 alias/profile）
+readonly MINIFORGE_BIN="$HOME/miniforge3/bin"
+if [ -d "$MINIFORGE_BIN" ]; then
+    export PATH="$MINIFORGE_BIN:$PATH"
+fi
+# 检测 Python 路径
 if command -v python3 &>/dev/null; then
     readonly PYTHON_PATH="$(command -v python3)"
 else
     readonly PYTHON_PATH="/usr/bin/env python3"
 fi
-export PATH="$(dirname "$PYTHON_PATH"):$PATH"
 
 # ===== 使用统计 =====
 readonly USAGE_LOG="$HOME/.useful_scripts_usage.log"

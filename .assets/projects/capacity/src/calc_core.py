@@ -25,7 +25,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple, Dict
 import math
 
 # ============================================================
@@ -37,6 +37,28 @@ UNIT_FACTOR = 31.536  # 单位换算系数（秒→年，mg→t）
 # ============================================================
 # 数据结构
 # ============================================================
+@dataclass
+class Branch:
+    """支流信息"""
+    name: str              # 支流名称（如 钱塘156-1）
+    length: float          # 支流长度 L (m)
+    join_position: float   # 汇入干流的位置 (m)
+    C0: float              # 支流入口浓度 (mg/L)
+
+
+@dataclass
+class SegmentResult:
+    """分段计算结果"""
+    name: str        # 段名称
+    seg_type: str    # "干流段", "支流", "混合", "汇总"
+    length: float    # 长度 (m)
+    Q: float         # 流量 (m³/s)
+    C0: float        # 入口浓度 (mg/L)
+    C_out: float     # 出口浓度 (mg/L)
+    W: float         # 纳污能力 (t/a)
+    remark: str      # 备注
+
+
 @dataclass
 class Zone:
     """河道功能区参数"""
@@ -50,6 +72,8 @@ class Zone:
     beta: float         # 流速指数 β
     Cs: float           # 目标浓度 (mg/L)
     C0: float           # 初始浓度 (mg/L)
+    main_name: str = "" # 干流名称（如 钱塘156-0）
+    branches: Optional[List[Branch]] = None  # 支流列表
 
 
 @dataclass
@@ -136,12 +160,13 @@ def read_reservoir_volume(csv_path: Path) -> pd.DataFrame:
 # ============================================================
 # 计算函数
 # ============================================================
-def calc_monthly_flow(daily_flow: pd.DataFrame, zone_ids: List[str]) -> pd.DataFrame:
-    """计算逐月流量（月平均）"""
+def calc_monthly_flow(daily_flow: pd.DataFrame, flow_columns: List[str]) -> pd.DataFrame:
+    """计算逐月流量（月平均），flow_columns 为所有需要聚合的列名"""
     df = daily_flow.copy()
     df['年'] = df['日期'].dt.year
     df['月'] = df['日期'].dt.month
-    monthly = df.groupby(['年', '月'])[zone_ids].mean().reset_index()
+    existing_cols = [c for c in flow_columns if c in df.columns]
+    monthly = df.groupby(['年', '月'])[existing_cols].mean().reset_index()
     return monthly
 
 
@@ -211,48 +236,333 @@ def calc_outflow_concentration(C0: float, K: float, L: float, u: float) -> float
     计算出流浓度（用于链式传递）
     C = C0 × exp(-K × L / u)
     """
-    if u <= 0:
+    if u <= 0 or L <= 0:
         return C0
     return C0 * math.exp(-K * L / u)
 
 
-def calc_monthly_capacity(monthly_flow: pd.DataFrame, monthly_velocity: pd.DataFrame,
-                          zones: List[Zone]) -> pd.DataFrame:
+def calc_zone_segments(zone: Zone, main_Q: float,
+                       branch_flows: Optional[dict] = None) -> Tuple[List[SegmentResult], float, float]:
     """
-    计算逐月纳污能力（链式计算）
-    
-    每个功能区使用自己的 C0（如有），否则使用上游出流浓度
+    分段计算功能区纳污能力（含支流汇入）
+
+    按 VBA CalcZoneSegments 逻辑：
+    1. 按汇入位置排序支流
+    2. 干流被支流汇入点切分为多段
+    3. 每个混合点按流量加权混合浓度
+    4. 只汇总干流段的 W
+
+    Args:
+        zone: 功能区参数
+        main_Q: 干流流量 (m³/s)
+        branch_flows: {支流名: 流量} 字典，None 则无支流
+
+    Returns:
+        (segments, total_W, final_C_out)
+    """
+    segments = []
+    branches = zone.branches or []
+
+    # 无支流或无流量 → 整段计算
+    if not branches or main_Q <= 0:
+        u = calc_velocity(main_Q, zone.a, zone.beta)
+        W = calc_capacity_value(zone.Cs, zone.C0, main_Q, u, zone.K, zone.length, zone.b)
+        C_out = calc_outflow_concentration(zone.C0, zone.K, zone.length, u)
+        seg = SegmentResult(
+            name=zone.main_name or zone.name,
+            seg_type="干流段", length=zone.length,
+            Q=main_Q, C0=zone.C0, C_out=C_out, W=W, remark="整段"
+        )
+        segments.append(seg)
+        # 汇总
+        segments.append(SegmentResult(
+            name=f"【{zone.name} 小计】", seg_type="汇总",
+            length=zone.length, Q=0, C0=zone.C0, C_out=C_out, W=W,
+            remark="仅汇总干流段"
+        ))
+        return segments, W, C_out
+
+    # 按汇入位置排序
+    sorted_branches = sorted(branches, key=lambda br: br.join_position)
+
+    current_pos = 0.0
+    current_Q = main_Q
+    current_C = zone.C0
+    main_total_W = 0.0
+    total_length = 0.0
+    seg_num = 0
+
+    for j, br in enumerate(sorted_branches):
+        br_Q = 0.0
+        if branch_flows and br.name in branch_flows:
+            br_Q = branch_flows[br.name]
+
+        # 干流段：current_pos → 汇入点
+        seg_length = br.join_position - current_pos
+        if seg_length > 0 and current_Q > 0:
+            seg_num += 1
+            u = calc_velocity(current_Q, zone.a, zone.beta)
+            seg_C_out = calc_outflow_concentration(current_C, zone.K, seg_length, u)
+            seg_W = calc_capacity_value(zone.Cs, current_C, current_Q, u, zone.K, seg_length, zone.b)
+
+            remark = "起点→" + br.name + "汇入点" if j == 0 else "上一汇入点→" + br.name + "汇入点"
+            segments.append(SegmentResult(
+                name=f"{zone.main_name or zone.name}-段{seg_num}",
+                seg_type="干流段", length=seg_length,
+                Q=current_Q, C0=current_C, C_out=seg_C_out, W=seg_W,
+                remark=remark
+            ))
+            main_total_W += seg_W
+            total_length += seg_length
+            current_C = seg_C_out
+
+        # 支流自身
+        br_C = br.C0
+        if br_Q > 0 and br.length > 0:
+            br_u = calc_velocity(br_Q, zone.a, zone.beta)
+            br_C_out = calc_outflow_concentration(br_C, zone.K, br.length, br_u)
+            br_W = calc_capacity_value(zone.Cs, br_C, br_Q, br_u, zone.K, br.length, zone.b)
+            segments.append(SegmentResult(
+                name=br.name, seg_type="支流", length=br.length,
+                Q=br_Q, C0=br_C, C_out=br_C_out, W=br_W,
+                remark="(不计入汇总)"
+            ))
+            br_C_out_final = br_C_out
+        else:
+            br_C_out_final = br_C
+
+        # 混合点
+        if br_Q > 0:
+            mixed_Q = current_Q + br_Q
+            mixed_C = (current_Q * current_C + br_Q * br_C_out_final) / mixed_Q if mixed_Q > 0 else current_C
+            segments.append(SegmentResult(
+                name=f"(混合点{j+1})", seg_type="混合", length=0,
+                Q=mixed_Q, C0=mixed_C, C_out=0, W=0,
+                remark=f"Q={current_Q:.2f}×C={current_C:.4f} + Q={br_Q:.2f}×C={br_C_out_final:.4f}"
+            ))
+            current_Q = mixed_Q
+            current_C = mixed_C
+
+        current_pos = br.join_position
+
+    # 最后一段干流（最后汇入点 → 终点）
+    seg_length = zone.length - current_pos
+    if seg_length > 0 and current_Q > 0:
+        seg_num += 1
+        u = calc_velocity(current_Q, zone.a, zone.beta)
+        seg_C_out = calc_outflow_concentration(current_C, zone.K, seg_length, u)
+        seg_W = calc_capacity_value(zone.Cs, current_C, current_Q, u, zone.K, seg_length, zone.b)
+        segments.append(SegmentResult(
+            name=f"{zone.main_name or zone.name}-段{seg_num}",
+            seg_type="干流段", length=seg_length,
+            Q=current_Q, C0=current_C, C_out=seg_C_out, W=seg_W,
+            remark="最后汇入点→终点"
+        ))
+        main_total_W += seg_W
+        total_length += seg_length
+        final_C_out = seg_C_out
+    else:
+        final_C_out = current_C
+
+    # 汇总行
+    segments.append(SegmentResult(
+        name=f"【{zone.name} 小计】", seg_type="汇总",
+        length=total_length, Q=0, C0=zone.C0, C_out=final_C_out, W=main_total_W,
+        remark="仅汇总干流段"
+    ))
+
+    return segments, main_total_W, final_C_out
+
+
+def calc_monthly_capacity(monthly_flow: pd.DataFrame, monthly_velocity: pd.DataFrame,
+                          zones: List[Zone], flow_col_map: Optional[Dict] = None) -> pd.DataFrame:
+    """
+    计算逐月纳污能力（支持支流分段计算）
+
+    Args:
+        monthly_flow: 逐月流量 DataFrame
+        monthly_velocity: 逐月流速 DataFrame（仅无支流时使用）
+        zones: 功能区列表
+        flow_col_map: {zone_id: {"main": col, "branches": [col, ...]}}
+                      如果为 None，使用旧的单链模式
     """
     result = monthly_flow[['年', '月']].copy()
-    
-    for zone in zones:
-        result[zone.zone_id] = 0.0
-    
-    # 逐行（逐月）计算
-    for idx, row in monthly_flow.iterrows():
-        C_current = 0.0  # 当前浓度（从上游传递）
-        
-        for i, zone in enumerate(zones):
-            Q = row[zone.zone_id]
-            u = monthly_velocity.loc[idx, zone.zone_id]
-            
-            # 使用该功能区的 C0（如有），否则使用上游传递的浓度
-            if zone.C0 > 0:
-                C0_use = zone.C0
-            elif i == 0:
-                # 首个功能区必须有 C0
-                C0_use = zone.C0 if zone.C0 > 0 else 0.0
-            else:
-                C0_use = C_current
-            
-            # 计算纳污能力
-            W = calc_capacity_value(zone.Cs, C0_use, Q, u, zone.K, zone.length, zone.b)
-            result.loc[idx, zone.zone_id] = W
-            
-            # 计算出流浓度，传递给下游
-            C_current = calc_outflow_concentration(C0_use, zone.K, zone.length, u)
-    
+    zone_ids = [z.zone_id for z in zones]
+    for zid in zone_ids:
+        result[zid] = 0.0
+
+    has_branches = flow_col_map is not None and any(
+        z.branches for z in zones
+    )
+
+    if has_branches:
+        # 新模式：逐行逐功能区调用 calc_zone_segments
+        for idx, row in monthly_flow.iterrows():
+            C_current = 0.0
+            for i, zone in enumerate(zones):
+                col_info = flow_col_map.get(zone.zone_id, {})
+                main_col = col_info.get("main", zone.zone_id)
+                main_Q = row.get(main_col, 0.0)
+                if pd.isna(main_Q):
+                    main_Q = 0.0
+
+                # 收集支流流量
+                branch_flows = {}
+                for br_col in col_info.get("branches", []):
+                    bq = row.get(br_col, 0.0)
+                    if pd.notna(bq):
+                        branch_flows[br_col] = bq
+
+                # 使用上游传递的 C0（如果当前功能区没有自定义 C0）
+                if zone.C0 > 0:
+                    pass  # 使用自身 C0
+                elif i > 0:
+                    zone_copy = Zone(
+                        zone_id=zone.zone_id, name=zone.name,
+                        water_class=zone.water_class, length=zone.length,
+                        K=zone.K, b=zone.b, a=zone.a, beta=zone.beta,
+                        Cs=zone.Cs, C0=C_current,
+                        main_name=zone.main_name, branches=zone.branches,
+                    )
+                    _, W, C_current = calc_zone_segments(zone_copy, main_Q, branch_flows)
+                    result.loc[idx, zone.zone_id] = W
+                    continue
+
+                _, W, C_current = calc_zone_segments(zone, main_Q, branch_flows)
+                result.loc[idx, zone.zone_id] = W
+    else:
+        # 旧模式：单链计算（无支流）
+        for idx, row in monthly_flow.iterrows():
+            C_current = 0.0
+            for i, zone in enumerate(zones):
+                Q = row[zone.zone_id]
+                u = monthly_velocity.loc[idx, zone.zone_id]
+                if zone.C0 > 0:
+                    C0_use = zone.C0
+                elif i == 0:
+                    C0_use = zone.C0 if zone.C0 > 0 else 0.0
+                else:
+                    C0_use = C_current
+                W = calc_capacity_value(zone.Cs, C0_use, Q, u, zone.K, zone.length, zone.b)
+                result.loc[idx, zone.zone_id] = W
+                C_current = calc_outflow_concentration(C0_use, zone.K, zone.length, u)
+
     return result
+
+
+def calc_daily_capacity_with_segments(daily_flow: pd.DataFrame, zones: List[Zone],
+                                       flow_col_map: Dict) -> Tuple[pd.DataFrame, Dict]:
+    """
+    逐日逐功能区分段计算纳污能力
+
+    Returns:
+        (daily_capacity_df, segment_accum)
+        - daily_capacity_df: 日期 | zone1 | zone2 | ... （每日功能区总W）
+        - segment_accum: {zone_id: {seg_name: {"W_sum": float, "count": int, ...}}}
+          用于计算年平均分段结果
+    """
+    result = daily_flow[['日期']].copy()
+    zone_ids = [z.zone_id for z in zones]
+    for zid in zone_ids:
+        result[zid] = 0.0
+
+    # 分段累计器（用于纳污能力过程/结果表）
+    seg_accum = {z.zone_id: {} for z in zones}
+
+    for idx, row in daily_flow.iterrows():
+        C_current = 0.0
+        for i, zone in enumerate(zones):
+            col_info = flow_col_map.get(zone.zone_id, {})
+            main_col = col_info.get("main", zone.zone_id)
+            main_Q = row.get(main_col, 0.0)
+            if pd.isna(main_Q):
+                main_Q = 0.0
+
+            branch_flows = {}
+            for br_col in col_info.get("branches", []):
+                bq = row.get(br_col, 0.0)
+                if pd.notna(bq):
+                    branch_flows[br_col] = bq
+
+            # 上游浓度传递
+            zone_for_calc = zone
+            if zone.C0 <= 0 and i > 0:
+                zone_for_calc = Zone(
+                    zone_id=zone.zone_id, name=zone.name,
+                    water_class=zone.water_class, length=zone.length,
+                    K=zone.K, b=zone.b, a=zone.a, beta=zone.beta,
+                    Cs=zone.Cs, C0=C_current,
+                    main_name=zone.main_name, branches=zone.branches,
+                )
+
+            segments, total_W, C_current = calc_zone_segments(zone_for_calc, main_Q, branch_flows)
+            result.loc[idx, zone.zone_id] = total_W
+
+            # 累计分段数据
+            for seg in segments:
+                key = seg.name
+                if key not in seg_accum[zone.zone_id]:
+                    seg_accum[zone.zone_id][key] = {
+                        "seg_type": seg.seg_type, "length": seg.length,
+                        "W_sum": 0.0, "Q_sum": 0.0, "C0_sum": 0.0,
+                        "C_out_sum": 0.0, "count": 0, "remark": seg.remark,
+                    }
+                acc = seg_accum[zone.zone_id][key]
+                acc["W_sum"] += seg.W
+                acc["Q_sum"] += seg.Q
+                acc["C0_sum"] += seg.C0
+                acc["C_out_sum"] += seg.C_out
+                acc["count"] += 1
+
+    return result, seg_accum
+
+
+def build_process_table(seg_accum: Dict, zones: List[Zone]) -> pd.DataFrame:
+    """
+    构建纳污能力过程表（展示全部段：干流段、支流、混合点、汇总）
+    """
+    rows = []
+    for zone in zones:
+        zone_segs = seg_accum.get(zone.zone_id, {})
+        for seg_name, acc in zone_segs.items():
+            cnt = acc["count"] if acc["count"] > 0 else 1
+            rows.append({
+                "功能区": zone.zone_id,
+                "段名称": seg_name,
+                "类型": acc["seg_type"],
+                "长度(m)": acc["length"],
+                "平均流量Q(m³/s)": round(acc["Q_sum"] / cnt, 4),
+                "平均入口浓度C0(mg/L)": round(acc["C0_sum"] / cnt, 6),
+                "平均出口浓度(mg/L)": round(acc["C_out_sum"] / cnt, 6),
+                "年平均纳污能力W(t/a)": round(acc["W_sum"] / cnt, 4),
+                "备注": acc["remark"],
+            })
+    return pd.DataFrame(rows)
+
+
+def build_result_table(seg_accum: Dict, zones: List[Zone]) -> pd.DataFrame:
+    """
+    构建纳污能力结果表（只展示干流段和汇总）
+    """
+    rows = []
+    for zone in zones:
+        zone_segs = seg_accum.get(zone.zone_id, {})
+        for seg_name, acc in zone_segs.items():
+            if acc["seg_type"] not in ("干流段", "汇总"):
+                continue
+            cnt = acc["count"] if acc["count"] > 0 else 1
+            rows.append({
+                "功能区": zone.zone_id,
+                "段名称": seg_name,
+                "类型": acc["seg_type"],
+                "长度(m)": acc["length"],
+                "平均流量Q(m³/s)": round(acc["Q_sum"] / cnt, 4),
+                "平均入口浓度C0(mg/L)": round(acc["C0_sum"] / cnt, 6),
+                "平均出口浓度(mg/L)": round(acc["C_out_sum"] / cnt, 6),
+                "年平均纳污能力W(t/a)": round(acc["W_sum"] / cnt, 4),
+                "备注": acc["remark"],
+            })
+    return pd.DataFrame(rows)
 
 
 def calc_zone_monthly_avg(df: pd.DataFrame, zone_ids: List[str], is_capacity: bool = False) -> pd.DataFrame:

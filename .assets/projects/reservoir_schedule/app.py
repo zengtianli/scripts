@@ -34,7 +34,7 @@ from src.hydro_core import HydroElectricity, read_info_txt, read_paras
 # 页面配置
 # ============================================================
 st.set_page_config(
-    page_title="浙水设计-梯级水库群多目标联合调度模型",
+    page_title="浙水设计-水库群多目标联合调度系统",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -237,7 +237,7 @@ def run_calculation_from_xlsx(uploaded_file, calc_step: str = "旬") -> bytes:
 # ============================================================
 # 标题
 # ============================================================
-st.title("⚡ 浙水设计-梯级水库群多目标联合调度模型")
+st.title("⚡ 浙水设计-水库群多目标联合调度系统")
 st.caption("上传输入文件 → 预览参数 → 运行计算 → 下载结果")
 
 # ============================================================
@@ -309,7 +309,7 @@ with st.sidebar:
 if st.session_state.input_data is None:
     # 未上传文件时显示说明
     st.markdown("""
-    ### 👋 欢迎使用浙水设计-梯级水库群多目标联合调度模型
+    ### 👋 欢迎使用浙水设计-水库群多目标联合调度系统
     
     **使用步骤：**
     1. 在左侧上传 **输入.xlsx** 文件
@@ -669,7 +669,7 @@ else:
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: gray; font-size: 14px;'>"
-    "⚡ 浙水设计-梯级水库群多目标联合调度模型 V1.0 | 浙江省水利水电勘测设计院"
+    "⚡ 浙水设计-水库群多目标联合调度系统 V1.0 | 浙江省水利水电勘测设计院"
     "</div>",
     unsafe_allow_html=True
 )

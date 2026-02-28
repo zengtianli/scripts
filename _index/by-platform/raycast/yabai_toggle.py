@@ -1,1 +1,1 @@
-../../../.assets/scripts/yabai_toggle.py
+../../../scripts/window/yabai_toggle.py

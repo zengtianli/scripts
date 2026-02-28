@@ -1,1 +1,1 @@
-../../../../.assets/scripts/docx_to_md.sh
+../../../../scripts/document/docx_to_md.sh

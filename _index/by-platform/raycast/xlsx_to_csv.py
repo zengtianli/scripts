@@ -1,1 +1,1 @@
-../../../.assets/scripts/xlsx_to_csv.py
+../../../scripts/data/xlsx_to_csv.py

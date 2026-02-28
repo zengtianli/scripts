@@ -1,1 +1,1 @@
-../../../.assets/scripts/xlsx_lowercase.py
+../../../scripts/data/xlsx_lowercase.py

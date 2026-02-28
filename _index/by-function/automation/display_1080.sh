@@ -1,1 +1,0 @@
-/Users/tianli/useful_scripts/.assets/scripts/display_1080.sh

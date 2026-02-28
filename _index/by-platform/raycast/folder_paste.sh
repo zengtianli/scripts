@@ -1,1 +1,1 @@
-../../../.assets/scripts/folder_paste.sh
+../../../scripts/file/folder_paste.sh

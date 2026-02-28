@@ -1,1 +1,0 @@
-/Users/tianli/useful_scripts/.assets/scripts/sys_app_launcher.py

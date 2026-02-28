@@ -1,1 +1,1 @@
-../../../.assets/scripts/clashx_status.sh
+../../../scripts/network/clashx_status.sh

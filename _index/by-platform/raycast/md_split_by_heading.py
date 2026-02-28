@@ -1,1 +1,1 @@
-../../../.assets/scripts/md_split_by_heading.py
+../../../scripts/document/md_split_by_heading.py

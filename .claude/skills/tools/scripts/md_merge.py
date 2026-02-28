@@ -1,1 +1,1 @@
-../../../../.assets/scripts/md_merge.py
+../../../../scripts/document/md_merge.py

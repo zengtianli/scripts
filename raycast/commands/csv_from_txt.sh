@@ -4,4 +4,4 @@
 # @raycast.mode fullOutput
 # @raycast.icon 📊
 # @raycast.packageName Scripts
-source "$(dirname "$0")/../lib/run_python.sh" && run_python "csv_from_txt.py" "$@"
+source "$(dirname "$0")/../lib/run_python.sh" && run_python "data/csv_from_txt.py" "$@"

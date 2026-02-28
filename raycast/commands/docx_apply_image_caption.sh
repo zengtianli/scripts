@@ -4,4 +4,4 @@
 # @raycast.mode fullOutput
 # @raycast.icon 📄
 # @raycast.packageName Scripts
-source "$(dirname "$0")/../lib/run_python.sh" && run_python "docx_apply_image_caption.py" "$@"
+source "$(dirname "$0")/../lib/run_python.sh" && run_python "document/docx_apply_image_caption.py" "$@"

@@ -1,1 +1,1 @@
-../../../.assets/scripts/pptx_text_formatter.py
+../../../scripts/document/pptx_text_formatter.py

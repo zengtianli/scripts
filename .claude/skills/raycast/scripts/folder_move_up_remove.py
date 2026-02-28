@@ -1,1 +1,1 @@
-../../../../.assets/scripts/folder_move_up_remove.py
+../../../../scripts/file/folder_move_up_remove.py

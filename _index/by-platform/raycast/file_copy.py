@@ -1,1 +1,1 @@
-../../../.assets/scripts/file_copy.py
+../../../scripts/file/file_copy.py

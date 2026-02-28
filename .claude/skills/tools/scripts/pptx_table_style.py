@@ -1,1 +1,1 @@
-../../../../.assets/scripts/pptx_table_style.py
+../../../../scripts/document/pptx_table_style.py

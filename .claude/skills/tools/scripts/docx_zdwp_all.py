@@ -1,1 +1,1 @@
-../../../../.assets/scripts/docx_zdwp_all.py
+../../../../scripts/document/docx_zdwp_all.py

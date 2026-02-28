@@ -1,1 +1,0 @@
-/Users/tianli/useful_scripts/.assets/scripts/folder_move_up_remove.py

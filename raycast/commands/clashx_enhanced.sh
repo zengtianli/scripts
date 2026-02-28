@@ -4,4 +4,4 @@
 # @raycast.mode fullOutput
 # @raycast.icon ⚙️
 # @raycast.packageName Network
-source "$(dirname "$0")/../lib/run_python.sh" && run_shell "clashx_enhanced.sh" "$@"
+source "$(dirname "$0")/../lib/run_python.sh" && run_shell "network/clashx_enhanced.sh" "$@"

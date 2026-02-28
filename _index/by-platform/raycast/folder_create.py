@@ -1,1 +1,1 @@
-../../../.assets/scripts/folder_create.py
+../../../scripts/file/folder_create.py

@@ -1,1 +1,1 @@
-../../../.assets/scripts/file_run.py
+../../../scripts/file/file_run.py

@@ -1,1 +1,0 @@
-../../../.assets/scripts/gantt_timeline.py

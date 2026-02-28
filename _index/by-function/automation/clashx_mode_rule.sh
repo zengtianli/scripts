@@ -1,1 +1,0 @@
-../../../.assets/scripts/clashx_mode_rule.sh

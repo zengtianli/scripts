@@ -1,1 +1,1 @@
-../../../../.assets/scripts/pptx_apply_all.py
+../../../../scripts/document/pptx_apply_all.py

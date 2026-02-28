@@ -1,1 +1,0 @@
-../../../.assets/scripts/pptx_apply_all.py

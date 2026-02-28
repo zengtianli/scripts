@@ -1,1 +1,1 @@
-../../../../.assets/scripts/yabai_mouse_follow.py
+../../../../scripts/window/yabai_mouse_follow.py

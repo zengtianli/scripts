@@ -4,4 +4,4 @@
 # @raycast.mode fullOutput
 # @raycast.icon 🚀
 # @raycast.packageName System
-source "$(dirname "$0")/../lib/run_python.sh" && run_python "sys_app_launcher.py" "$@"
+source "$(dirname "$0")/../lib/run_python.sh" && run_python "system/sys_app_launcher.py" "$@"

@@ -4,4 +4,4 @@
 # @raycast.mode fullOutput
 # @raycast.icon 📝
 # @raycast.packageName Scripts
-source "$(dirname "$0")/../lib/run_python.sh" && run_python "md_formatter.py" "$@"
+source "$(dirname "$0")/../lib/run_python.sh" && run_python "document/md_formatter.py" "$@"

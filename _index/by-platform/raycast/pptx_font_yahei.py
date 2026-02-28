@@ -1,1 +1,1 @@
-../../../.assets/scripts/pptx_font_yahei.py
+../../../scripts/document/pptx_font_yahei.py

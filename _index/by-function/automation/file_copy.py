@@ -1,1 +1,0 @@
-/Users/tianli/useful_scripts/.assets/scripts/file_copy.py

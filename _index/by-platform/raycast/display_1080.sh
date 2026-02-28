@@ -1,1 +1,1 @@
-../../../.assets/scripts/display_1080.sh
+../../../scripts/system/display_1080.sh

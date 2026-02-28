@@ -1,1 +1,1 @@
-../../../.assets/scripts/xlsx_splitsheets.py
+../../../scripts/data/xlsx_splitsheets.py

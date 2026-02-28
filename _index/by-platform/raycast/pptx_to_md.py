@@ -1,1 +1,1 @@
-../../../.assets/scripts/pptx_to_md.py
+../../../scripts/document/pptx_to_md.py

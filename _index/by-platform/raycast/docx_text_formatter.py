@@ -1,1 +1,1 @@
-../../../.assets/scripts/docx_text_formatter.py
+../../../scripts/document/docx_text_formatter.py

@@ -1,1 +1,1 @@
-../../../.assets/scripts/sys_app_launcher.py
+../../../scripts/system/sys_app_launcher.py

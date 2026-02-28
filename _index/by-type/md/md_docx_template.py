@@ -1,1 +1,0 @@
-../../../.assets/scripts/md_docx_template.py

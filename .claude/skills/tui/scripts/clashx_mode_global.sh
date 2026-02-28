@@ -1,1 +1,1 @@
-../../../../.assets/scripts/clashx_mode_global.sh
+../../../../scripts/network/clashx_mode_global.sh

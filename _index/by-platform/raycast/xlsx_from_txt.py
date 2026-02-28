@@ -1,1 +1,1 @@
-../../../.assets/scripts/xlsx_from_txt.py
+../../../scripts/data/xlsx_from_txt.py

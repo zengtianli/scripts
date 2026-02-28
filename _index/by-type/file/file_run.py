@@ -1,1 +1,0 @@
-../../../.assets/scripts/file_run.py

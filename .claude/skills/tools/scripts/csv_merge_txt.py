@@ -1,1 +1,1 @@
-../../../../.assets/scripts/csv_merge_txt.py
+../../../../scripts/data/csv_merge_txt.py

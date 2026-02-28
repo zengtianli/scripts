@@ -1,1 +1,1 @@
-../../../../.assets/scripts/md_formatter.py
+../../../../scripts/document/md_formatter.py

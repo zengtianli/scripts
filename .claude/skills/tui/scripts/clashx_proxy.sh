@@ -1,1 +1,1 @@
-../../../../.assets/scripts/clashx_proxy.sh
+../../../../scripts/network/clashx_proxy.sh

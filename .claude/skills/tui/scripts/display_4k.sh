@@ -1,1 +1,1 @@
-../../../../.assets/scripts/display_4k.sh
+../../../../scripts/system/display_4k.sh

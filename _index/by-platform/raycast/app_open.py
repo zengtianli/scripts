@@ -1,1 +1,1 @@
-../../../.assets/scripts/app_open.py
+../../../scripts/tools/app_open.py

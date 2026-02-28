@@ -1,1 +1,1 @@
-../../../../.assets/scripts/yabai_float.py
+../../../../scripts/window/yabai_float.py

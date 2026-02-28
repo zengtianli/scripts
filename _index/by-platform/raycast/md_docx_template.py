@@ -1,1 +1,1 @@
-../../../.assets/scripts/md_docx_template.py
+../../../scripts/document/md_docx_template.py

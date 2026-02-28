@@ -1,1 +1,1 @@
-../../../.assets/scripts/csv_from_txt.py
+../../../scripts/data/csv_from_txt.py

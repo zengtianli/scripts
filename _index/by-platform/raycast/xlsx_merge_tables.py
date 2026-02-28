@@ -1,1 +1,1 @@
-../../../.assets/scripts/xlsx_merge_tables.py
+../../../scripts/data/xlsx_merge_tables.py

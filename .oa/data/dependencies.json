@@ -94,6 +94,14 @@
       "os",
       "sys"
     ],
+    "file_print.py": [
+      "pathlib",
+      "finder",
+      "display",
+      "subprocess",
+      "sys",
+      "time"
+    ],
     "file_run.py": [
       "concurrent.futures",
       "subprocess",
@@ -172,6 +180,13 @@
       "re",
       "sys"
     ],
+    "md_to_docx.py": [
+      "pathlib",
+      "os",
+      "sys",
+      "subprocess",
+      "argparse"
+    ],
     "pptx_apply_all.py": [
       "pathlib",
       "finder",
@@ -231,6 +246,21 @@
       "subprocess",
       "os",
       "re"
+    ],
+    "sys_oa_dev.sh": [],
+    "sys_oa_zdwp.sh": [],
+    "tts_volcano.py": [
+      "pathlib",
+      "display",
+      "file_ops",
+      "os",
+      "sys",
+      "json",
+      "uuid",
+      "gzip",
+      "struct",
+      "argparse",
+      "subprocess"
     ],
     "xlsx_from_csv.py": [
       "pathlib",

@@ -22,3 +22,21 @@ PYTHON_PATH = shutil.which("python3") or "/usr/bin/env python3"
 
 # 日志文件
 USAGE_LOG = os.path.expanduser("~/.useful_scripts_usage.log")
+
+# ── Raycast 环境变量加载 ──────────────────────────────
+ENV_ZSH = Path.home() / "Documents/sync/zsh/config/env.zsh"
+
+
+def load_env():
+    """
+    加载 env.zsh 中的环境变量。
+    Raycast 不继承 shell 环境，需要主动加载。
+    终端下环境变量已存在，setdefault 不会覆盖。
+    """
+    if not ENV_ZSH.exists():
+        return
+    import re
+    for line in ENV_ZSH.read_text().splitlines():
+        m = re.match(r'export (\w+)="([^"]*)"', line)
+        if m:
+            os.environ.setdefault(m.group(1), m.group(2))

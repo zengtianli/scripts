@@ -1,35 +1,36 @@
 {
-  "generated_at": "2026-02-06T17:04:33.993497",
+  "generated_at": "2026-02-28T15:20:17.000238",
   "stats": {
-    "total": 56,
+    "total": 62,
     "by_type": {
       "app": 1,
       "clashx": 6,
       "csv": 3,
       "display": 2,
       "docx": 4,
-      "file": 2,
+      "file": 3,
       "folder": 4,
       "gantt": 1,
-      "md": 4,
+      "md": 5,
       "pptx": 5,
       "quarto": 1,
-      "sys": 1,
+      "sys": 3,
+      "other": 1,
       "xlsx": 7,
       "yabai": 4,
-      "hydraulic": 11
+      "hydraulic": 12
     },
     "by_function": {
-      "automation": 12,
-      "convert": 8,
+      "automation": 14,
+      "convert": 9,
       "analyze": 7,
-      "other": 13,
+      "other": 15,
       "format": 7,
-      "project": 9
+      "project": 10
     },
     "by_platform": {
-      "raycast": 43,
-      "cli": 8,
+      "raycast": 48,
+      "cli": 9,
       "streamlit": 5
     }
   },
@@ -630,8 +631,8 @@
       "platform": "raycast",
       "icon": "📄",
       "mode": "fullOutput",
-      "lines": 114,
-      "size": 2989,
+      "lines": 131,
+      "size": 3484,
       "path": "/Users/tianli/useful_scripts/.assets/scripts/docx_to_md.sh",
       "imports": [
         "$(dirname"
@@ -703,6 +704,43 @@
         "subprocess",
         "os",
         "sys"
+      ],
+      "tags": [
+        "file",
+        "other",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "file_print.py",
+      "name": "file_print.py",
+      "title": "file-print",
+      "description": "Print selected files from Finder using default printer",
+      "type": "file",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "🖨️",
+      "mode": "fullOutput",
+      "lines": 77,
+      "size": 2264,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/file_print.py",
+      "imports": [
+        "pathlib",
+        "finder",
+        "display",
+        "subprocess",
+        "sys",
+        "time"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "finder",
+        "display",
+        "subprocess",
+        "sys",
+        "time"
       ],
       "tags": [
         "file",
@@ -1078,6 +1116,41 @@
       "linkedBy": []
     },
     {
+      "id": "md_to_docx.py",
+      "name": "md_to_docx.py",
+      "title": "md-to-docx",
+      "description": "Markdown 转 Docx（Pandoc 简化版）",
+      "type": "md",
+      "function": "convert",
+      "platform": "raycast",
+      "icon": "📄",
+      "mode": "fullOutput",
+      "lines": 111,
+      "size": 3046,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/md_to_docx.py",
+      "imports": [
+        "pathlib",
+        "os",
+        "sys",
+        "subprocess",
+        "argparse"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "os",
+        "sys",
+        "subprocess",
+        "argparse"
+      ],
+      "tags": [
+        "md",
+        "convert",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
       "id": "pptx_apply_all.py",
       "name": "pptx_apply_all.py",
       "title": "pptx-all",
@@ -1340,6 +1413,99 @@
       "tags": [
         "sys",
         "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "sys_oa_dev.sh",
+      "name": "sys_oa_dev.sh",
+      "title": "开发部 OA",
+      "description": "启动开发部 OA 管理面板",
+      "type": "sys",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🛠",
+      "mode": "silent",
+      "lines": 25,
+      "size": 534,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/sys_oa_dev.sh",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "tags": [
+        "sys",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "sys_oa_zdwp.sh",
+      "name": "sys_oa_zdwp.sh",
+      "title": "水利公司 OA",
+      "description": "启动水利公司 OA 管理面板",
+      "type": "sys",
+      "function": "automation",
+      "platform": "raycast",
+      "icon": "🌊",
+      "mode": "silent",
+      "lines": 25,
+      "size": 540,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/sys_oa_zdwp.sh",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "tags": [
+        "sys",
+        "automation",
+        "raycast"
+      ],
+      "linkedBy": []
+    },
+    {
+      "id": "tts_volcano.py",
+      "name": "tts_volcano.py",
+      "title": "tts-volcano",
+      "description": "火山引擎语音合成（文本转语音）",
+      "type": "other",
+      "function": "other",
+      "platform": "raycast",
+      "icon": "🔊",
+      "mode": "fullOutput",
+      "lines": 175,
+      "size": 5883,
+      "path": "/Users/tianli/useful_scripts/.assets/scripts/tts_volcano.py",
+      "imports": [
+        "pathlib",
+        "display",
+        "file_ops",
+        "os",
+        "sys",
+        "json",
+        "uuid",
+        "gzip",
+        "struct",
+        "argparse",
+        "subprocess"
+      ],
+      "localImports": [],
+      "externalImports": [
+        "pathlib",
+        "display",
+        "file_ops",
+        "os",
+        "sys",
+        "json",
+        "uuid",
+        "gzip",
+        "struct",
+        "argparse",
+        "subprocess"
+      ],
+      "tags": [
+        "other",
+        "other",
         "raycast"
       ],
       "linkedBy": []
@@ -1785,8 +1951,8 @@
       "platform": "streamlit",
       "icon": "🌊",
       "mode": "silent",
-      "lines": 1343,
-      "size": 49968,
+      "lines": 1843,
+      "size": 67538,
       "path": "/Users/tianli/useful_scripts/.assets/projects/capacity/web_app.py",
       "imports": [],
       "localImports": [],
@@ -1954,7 +2120,7 @@
       "icon": "🏗️",
       "mode": "silent",
       "lines": 5202,
-      "size": 241199,
+      "size": 241175,
       "path": "/Users/tianli/useful_scripts/.assets/projects/reservoir_schedule/app.py",
       "imports": [],
       "localImports": [],
@@ -2013,6 +2179,30 @@
         "analyze",
         "cli",
         "data"
+      ]
+    },
+    {
+      "id": "hy_water_efficiency",
+      "name": "hy_water_efficiency",
+      "title": "浙水设计-水效评估分析系统",
+      "description": "工业集聚区水效评估分析系统，基于AHP+CRITIC+TOPSIS方法",
+      "type": "hydraulic",
+      "function": "project",
+      "platform": "cli",
+      "icon": "🌊",
+      "mode": "",
+      "lines": 1071,
+      "size": 38815,
+      "path": "/Users/tianli/useful_scripts/.assets/projects/water_efficiency",
+      "imports": [],
+      "localImports": [],
+      "externalImports": [],
+      "linkedBy": [],
+      "tags": [
+        "hydraulic",
+        "project",
+        "cli",
+        "active"
       ]
     }
   ]

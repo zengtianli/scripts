@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title md-to-docx-template
-# @raycast.mode fullOutput
-# @raycast.icon 📄
-# @raycast.packageName DOCX
-# @raycast.description Markdown 转 Docx（样式复刻版）
 # -*- coding: utf-8 -*-
 """
 md_docx_heading_template.py - Markdown 转 Docx（样式复刻版）

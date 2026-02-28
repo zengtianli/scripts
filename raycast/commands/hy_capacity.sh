@@ -1,0 +1,8 @@
+#!/bin/bash
+# @raycast.schemaVersion 1
+# @raycast.title 纳污能力计算
+# @raycast.mode silent
+# @raycast.icon 🌊
+# @raycast.packageName Hydraulic
+# @raycast.description 启动纳污能力计算 Streamlit 应用
+source "$(dirname "$0")/../lib/run_python.sh" && run_streamlit "capacity" "web_app.py"

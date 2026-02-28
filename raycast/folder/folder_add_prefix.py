@@ -1,1 +1,0 @@
-../../.assets/scripts/folder_add_prefix.py

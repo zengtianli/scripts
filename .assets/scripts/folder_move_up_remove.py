@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title folder-move-up-remove
-# @raycast.mode fullOutput
-# @raycast.icon 🗂️
-# @raycast.packageName Folders
-# @raycast.description 将选中文件夹内容移到上一级并删除空文件夹
 
 import subprocess
 import os

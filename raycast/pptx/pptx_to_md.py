@@ -1,1 +1,0 @@
-../../.assets/scripts/pptx_to_md.py

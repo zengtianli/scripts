@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
 
-# @raycast.schemaVersion 1
-# @raycast.title yabai-org
-# @raycast.mode silent
-# @raycast.icon 🪟
-# @raycast.packageName YABAI
 
 # @tags: yabai, organize, layout
 

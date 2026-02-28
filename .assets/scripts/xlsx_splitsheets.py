@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title xlsx-split
-# @raycast.mode fullOutput
-# @raycast.icon 📊
-# @raycast.packageName Scripts
-# @raycast.description Split Excel sheets
 """
 Excel工作表分离工具 - 将单个Excel文件按工作表拆分为多个文件
 版本: 3.0.0

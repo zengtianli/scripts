@@ -1,0 +1,7 @@
+#!/bin/bash
+# @raycast.schemaVersion 1
+# @raycast.title 水效评估分析系统
+# @raycast.mode compact
+# @raycast.icon 💧
+# @raycast.packageName Hydraulic
+source "$(dirname "$0")/../lib/run_python.sh" && run_streamlit "water_efficiency" "app.py" --server.port 8502

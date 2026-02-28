@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title sys-app-launcher
-# @raycast.mode fullOutput
-# @raycast.icon 🚀
-# @raycast.packageName System
-# @raycast.description 根据桌面上的essential_apps.txt列表启动必要的应用程序
 
 import subprocess
 import os

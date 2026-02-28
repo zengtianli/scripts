@@ -1,1 +1,0 @@
-../../.assets/scripts/file_print.py

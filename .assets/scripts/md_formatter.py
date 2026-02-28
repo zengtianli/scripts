@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title md-format
-# @raycast.mode fullOutput
-# @raycast.icon 📝
-# @raycast.packageName Scripts
-# @raycast.description Format markdown
 # -*- coding: utf-8 -*-
 """
 文本格式自动修复工具

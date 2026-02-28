@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title pptx-table
-# @raycast.mode fullOutput
-# @raycast.icon 📽️
-# @raycast.packageName Scripts
-# @raycast.description Apply PPT table style
 # -*- coding: utf-8 -*-
 """
 PPT表格样式工具

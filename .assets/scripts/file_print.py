@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title file-print
-# @raycast.mode fullOutput
-# @raycast.icon 🖨️
-# @raycast.packageName Files
-# @raycast.description Print selected files from Finder using default printer
-# @raycast.argument1 { "type": "text", "placeholder": "Copies (default: 1)", "optional": true }
 
 import subprocess
 import sys

@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title csv-to-txt
-# @raycast.mode fullOutput
-# @raycast.icon 📊
-# @raycast.packageName Scripts
-# @raycast.description Convert CSV to TXT
 """
 CSV转TXT转换工具 - 将CSV文件转换为制表符分隔的TXT文件
 版本: 2.0.0

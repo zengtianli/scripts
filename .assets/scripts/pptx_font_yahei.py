@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title pptx-font
-# @raycast.mode fullOutput
-# @raycast.icon 📽️
-# @raycast.packageName Scripts
-# @raycast.description Set PPT font to YaHei
 # -*- coding: utf-8 -*-
 """
 PPT文档字体统一工具 - 微软雅黑

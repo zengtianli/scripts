@@ -1,1 +1,0 @@
-../../.assets/scripts/folder_move_up_remove.py

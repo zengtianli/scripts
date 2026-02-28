@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title file-run
-# @raycast.mode fullOutput
-# @raycast.icon 🚀
-# @raycast.packageName Files
-# @raycast.description Run selected shell or python scripts
-# @raycast.argument1 { "type": "dropdown", "placeholder": "Mode", "data": [{"title": "Single", "value": "single"}, {"title": "Parallel", "value": "parallel"}] }
 
 import subprocess
 import os

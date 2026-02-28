@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title pptx-all
-# @raycast.mode fullOutput
-# @raycast.icon 📽️
-# @raycast.packageName Scripts
-# @raycast.description Apply all PPT styles
 """
 PPT文档标准化一键处理工具
 按正确顺序执行所有PPTX格式化操作

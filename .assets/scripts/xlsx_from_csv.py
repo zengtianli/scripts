@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title xlsx-from-csv
-# @raycast.mode fullOutput
-# @raycast.icon 📊
-# @raycast.packageName Scripts
-# @raycast.description Convert CSV to Excel
 """
 CSV转XLSX转换工具 - 将CSV文件转换为Excel XLSX格式
 版本: 2.0.0

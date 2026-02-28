@@ -1,1 +1,0 @@
-../../.assets/scripts/yabai_toggle.py

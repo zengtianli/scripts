@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# @raycast.schemaVersion 1
-# @raycast.title yabai-mouse-follow
-# @raycast.mode compact
-# @raycast.icon 🖱️
 
 """
 切换 mouse_follows_focus（键盘切窗口时鼠标跟过去）

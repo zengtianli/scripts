@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title csv-merge-txt
-# @raycast.mode fullOutput
-# @raycast.icon 📊
-# @raycast.packageName Scripts
-# @raycast.description Merge TXT files
 """
 将目录中的所有 .txt 文件按列合并到一个 CSV 文件中。
 文件名中的数字用于排序。

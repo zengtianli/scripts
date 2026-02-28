@@ -6,6 +6,10 @@
 # 使用说明: source "$(dirname "$0")/../lib/common.sh"
 # ============================================================
 
+# 防止重复 source
+[[ -n "$_COMMON_SH_LOADED" ]] && return 0
+_COMMON_SH_LOADED=1
+
 # ===== 动态路径检测 =====
 # LIB_DIR: 本文件所在目录
 readonly _COMMON_SH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,6 +23,11 @@ readonly SCRIPTS_DIR="$_COMMON_SH_DIR/../scripts"
 readonly MINIFORGE_BIN="$HOME/miniforge3/bin"
 if [ -d "$MINIFORGE_BIN" ]; then
     export PATH="$MINIFORGE_BIN:$PATH"
+fi
+# 加载用户环境变量（API keys 等）
+_ENV_ZSH="$HOME/Documents/sync/zsh/config/env.zsh"
+if [ -f "$_ENV_ZSH" ]; then
+    source "$_ENV_ZSH"
 fi
 # 检测 Python 路径
 if command -v python3 &>/dev/null; then

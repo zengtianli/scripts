@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title docx-image-caption
-# @raycast.mode fullOutput
-# @raycast.icon 📄
-# @raycast.packageName Scripts
-# @raycast.description Apply image captions
 """
 应用图片和图名样式工具
 将文档中的图片段落和图名（题注）统一应用"ZDWP图名"样式

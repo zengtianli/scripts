@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title xlsx-lowercase
-# @raycast.mode fullOutput
-# @raycast.icon 📊
-# @raycast.packageName Scripts
-# @raycast.description Lowercase Excel data
 # -*- coding: utf-8 -*-
 """
 Office文档文本小写化工具

@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title md-merge
-# @raycast.mode fullOutput
-# @raycast.icon 📝
-# @raycast.packageName Scripts
-# @raycast.description Merge markdown files
 """
 合并多个 Markdown 文件为一个文件
 """

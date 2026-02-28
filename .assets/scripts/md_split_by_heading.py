@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title md-split
-# @raycast.mode fullOutput
-# @raycast.icon ✂️
-# @raycast.packageName Scripts
-# @raycast.description Split markdown by heading level 1
 """
 按一级标题拆分 Markdown 文件
 """

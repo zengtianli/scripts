@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title pptx-to-md
-# @raycast.mode fullOutput
-# @raycast.icon 📽️
-# @raycast.packageName Scripts
-# @raycast.description Convert PPT to Markdown
 """
 PPTX转Markdown转换工具 - 将PPTX演示文稿转换为Markdown格式
 版本: 2.0.0

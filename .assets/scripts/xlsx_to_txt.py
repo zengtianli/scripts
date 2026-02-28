@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title xlsx-to-txt
-# @raycast.mode fullOutput
-# @raycast.icon 📊
-# @raycast.packageName Scripts
-# @raycast.description Convert Excel to TXT
 """
 XLSX转TXT转换工具 - 将Excel XLSX文件转换为制表符分隔的TXT格式
 版本: 2.0.0

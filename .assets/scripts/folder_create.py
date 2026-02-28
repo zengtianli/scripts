@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title folder-create
-# @raycast.mode fullOutput
-# @raycast.icon 📁
-# @raycast.packageName Folders
-# @raycast.description Create a new folder inside selected folder in Finder
 
 import subprocess
 import os

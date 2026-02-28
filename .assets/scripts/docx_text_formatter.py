@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title docx-text-format
-# @raycast.mode fullOutput
-# @raycast.icon 📄
-# @raycast.packageName Scripts
-# @raycast.description Format text in Word
-# @raycast.argument1 { "type": "text", "placeholder": "文件路径", "optional": true }
 # -*- coding: utf-8 -*-
 """
 文本格式自动修复工具 - DOCX版本

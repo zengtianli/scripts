@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title folder-add-prefix
-# @raycast.mode fullOutput
-# @raycast.icon 📝
-# @raycast.packageName Folders
-# @raycast.description 将文件夹名称作为前缀添加到文件名
 
 import subprocess
 import os

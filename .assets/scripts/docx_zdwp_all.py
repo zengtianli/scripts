@@ -1,10 +1,4 @@
 #!/usr/bin/env python3
-# @raycast.schemaVersion 1
-# @raycast.title docx-zdwp-all
-# @raycast.mode fullOutput
-# @raycast.icon ✨
-# @raycast.packageName Scripts
-# @raycast.description Apply all ZDWP styles
 """
 ZDWP Word文档标准化一键处理工具
 按正确顺序执行所有ZDWP格式化操作

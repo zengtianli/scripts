@@ -1,7 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title app-open
-# @raycast.mode silent
+# @raycast.mode fullOutput
 # @raycast.icon 🚀
 # @raycast.packageName Apps
 # @raycast.description Open selected folder in specified app

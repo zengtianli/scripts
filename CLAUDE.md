@@ -59,7 +59,8 @@ _index/               # 脚本索引（by-function, by-platform, by-type）
 - 脚本保留功能前缀：`docx_`、`xlsx_`、`csv_`、`md_`、`pptx_`、`yabai_`、`clashx_`
 - 文件/文件夹操作：`file_`、`folder_`
 - 系统工具：`sys_`、`display_`
-- 水利 Raycast 脚本：`hy_`
+- 秘书系统：`sec_`（secretary）
+- 水利领域：`hy_`（hydraulic）
 
 ### Raycast 脚本
 - `raycast/commands/` 下是 Shell wrapper（含 @raycast 元数据）
@@ -75,3 +76,40 @@ _index/               # 脚本索引（by-function, by-platform, by-type）
 - 恢复或删除文件时，必须处理所有关联文件（主文件、wrapper、raycast 引用）
 - 修改完成后，运行 `python3 lib/tools/health_check.py` 验证
 - 公共库只有一套（`lib/`），不要在项目内创建独立的 _lib 目录
+
+## 路径规范
+
+**当前目录结构**（2026-03-04 清理后）：
+- ✅ `scripts/{data,document,file,network,secretary,system,tools,window}/` - 功能脚本（按类别分组）
+- ✅ `raycast/commands/` - Raycast 入口脚本（51 个命令）
+- ❌ `execute/` - 已废弃，不再使用
+- ❌ `.assets/scripts/` - 已废弃，不再使用
+
+**OA 系统**：
+- OA 项目：`~/Dev/oa-project/`
+- 启动命令：`cd ~/Dev/oa-project && pnpm dev`（端口 3000）
+- 秘书系统：已整合到 OA 总控的 `/secretary` 页面
+- Raycast 命令：`sec_oa.sh` 打开 OA 总控
+
+**已删除的冗余命令**（2026-03-04）：
+- ❌ `sec_report.sh` - 功能已整合到 OA
+- ❌ `sec_review.sh` - 功能已整合到 OA
+- ❌ `sys_oa_dev.sh` - 不再需要
+- ❌ `sys_oa_zdwp.sh` - 不再需要
+
+**跨仓库路径引用**：
+- 水利公司：`~/Work/zdwp/`
+- 论文部：`~/Personal/essays/`
+- 个人网站：`~/Personal/website/`
+- 求职管理：`~/Personal/resume/`
+- 工作报告：`~/Work/reports/`
+- 学习笔记：`~/Learn/`
+
+**禁止的路径模式**：
+- ❌ `/Users/tianli/useful_scripts/execute/xxx`
+- ❌ `/Users/tianli/useful_scripts/.assets/scripts/xxx`
+- ❌ `~/Downloads/zdwp/`（已迁移至 `~/Work/zdwp/`）
+- ❌ `~/Downloads/essay/`（已迁移至 `~/Personal/essays/`）
+- ❌ `~/Downloads/personal_site/`（已迁移至 `~/Personal/website/`）
+- ✅ `/Users/tianli/useful_scripts/scripts/{category}/xxx`
+- ✅ `/Users/tianli/useful_scripts/raycast/commands/xxx`

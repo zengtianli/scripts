@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title xlsx-merge
+# @raycast.description Merge multiple Excel tables into one
 # @raycast.mode fullOutput
 # @raycast.icon 📊
 # @raycast.packageName Scripts

@@ -42,6 +42,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from finder import get_input_files
+from progress import ProgressTracker
 
 try:
     from pptx import Presentation
@@ -299,28 +300,32 @@ def process_pptx(input_file):
 
 if __name__ == "__main__":
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='pptx', allow_multiple=False)
-    
+    files = get_input_files(sys.argv[1:], expected_ext='pptx')
+
     if not files:
         print("❌ 错误：缺少文件名参数")
         print("\n使用方法：")
         print("    python3 text_formatter.py 文件名.pptx")
+        print("    python3 text_formatter.py file1.pptx file2.pptx")
         print("    或在 Finder 中选择 .pptx 文件后运行")
         print("\n示例：")
         print("    python3 text_formatter.py presentation.pptx")
         sys.exit(1)
-    
-    input_file = files[0]
-    
+
     print("=" * 50)
     print("文本格式自动修复工具 - PPTX版本")
     print("=" * 50)
-    
-    success = process_pptx(input_file)
-    
-    if success:
-        print("\n🎉 全部完成！")
-    else:
-        print("\n❌ 处理失败，请检查错误信息")
-        sys.exit(1)
+
+    tracker = ProgressTracker()
+
+    for file_path in files:
+        print(f"\n处理文件: {Path(file_path).name}")
+        success = process_pptx(str(file_path))
+        if success:
+            tracker.add_success()
+        else:
+            tracker.add_error()
+
+    print("\n" + "=" * 50)
+    tracker.show_summary("文件处理")
 

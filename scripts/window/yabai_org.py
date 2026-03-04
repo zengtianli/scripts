@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from common import log_usage
 
 def main():
-    log_usage("yabai_org", "yabai")
+    log_usage("yb_org", "yabai")
     
     # 1. 切换到 bsp 布局（平铺模式）
     subprocess.run(['yabai', '-m', 'space', '--layout', 'bsp'], capture_output=True)

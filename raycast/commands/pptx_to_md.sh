@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title pptx-to-md
+# @raycast.description Convert PowerPoint presentation to Markdown
 # @raycast.mode fullOutput
 # @raycast.icon 📽️
 # @raycast.packageName Scripts

@@ -24,6 +24,7 @@ from docx.oxml.ns import qn
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from finder import get_input_files
+from progress import ProgressTracker
 
 def find_style_fuzzy(doc, style_name):
     """
@@ -281,19 +282,37 @@ def apply_image_caption_style(input_file, style_name="ZDWP图名"):
 
 def main():
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='docx', allow_multiple=False)
-    
+    files = get_input_files(sys.argv[1:], expected_ext='docx')
+
     if not files:
         print("用法: python3 apply_image_caption_style.py <input.docx> [样式名称]")
         print("      或在 Finder 中选择 .docx 文件后运行")
         print("示例: python3 apply_image_caption_style.py document.docx")
         print("      python3 apply_image_caption_style.py document.docx \"ZDWP图名\"")
         sys.exit(1)
-    
-    input_file = files[0]
-    style_name = sys.argv[2] if len(sys.argv) > 2 else "ZDWP图名"
-    
-    apply_image_caption_style(input_file, style_name)
+
+    # 样式名称从第一个非文件参数获取
+    style_name = "ZDWP图名"
+    for arg in sys.argv[1:]:
+        if not Path(arg).exists() and not arg.startswith('-'):
+            style_name = arg
+            break
+
+    tracker = ProgressTracker()
+
+    for file_path in files:
+        print(f"\n{'='*50}")
+        print(f"处理文件: {Path(file_path).name}")
+        print('='*50)
+        try:
+            apply_image_caption_style(str(file_path), style_name)
+            tracker.add_success()
+        except Exception as e:
+            print(f"❌ 处理失败: {e}")
+            tracker.add_error()
+
+    print(f"\n{'='*50}")
+    tracker.show_summary("文件处理")
 
 if __name__ == "__main__":
     main()

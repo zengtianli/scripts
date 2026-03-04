@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title csv-merge-txt
+# @raycast.description Merge multiple text files into a single CSV
 # @raycast.mode fullOutput
 # @raycast.icon 📊
 # @raycast.packageName Scripts

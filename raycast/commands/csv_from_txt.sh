@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title csv-from-txt
+# @raycast.description Convert text file to CSV format
 # @raycast.mode fullOutput
 # @raycast.icon 📊
 # @raycast.packageName Scripts

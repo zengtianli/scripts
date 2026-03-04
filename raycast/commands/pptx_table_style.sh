@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title pptx-table
+# @raycast.description Apply table styling to PowerPoint presentation
 # @raycast.mode fullOutput
 # @raycast.icon 📽️
 # @raycast.packageName Scripts

@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title md-to-docx-template
+# @raycast.description Convert Markdown to Word document with template
 # @raycast.mode fullOutput
 # @raycast.icon 📄
 # @raycast.packageName DOCX

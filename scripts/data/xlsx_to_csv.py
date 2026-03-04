@@ -120,47 +120,46 @@ def show_help() -> None:
     """)
 
 def main():
-    # 无参数时从 Finder 获取选中的文件
-    if len(sys.argv) == 1:
-        files = get_input_files([], expected_ext='xlsx')
-        if files:
-            sys.argv.extend(files)
-    
     parser = argparse.ArgumentParser(description='XLSX转CSV转换工具', add_help=False)
-    parser.add_argument('input', nargs='?', help='输入XLSX文件或目录')
-    parser.add_argument('output', nargs='?', help='输出CSV文件')
     parser.add_argument('-r', '--recursive', action='store_true', help='递归处理子目录')
     parser.add_argument('-s', '--sheet', help='指定要转换的工作表名称')
     parser.add_argument('-d', '--default', action='store_true', help='仅转换默认工作表')
     parser.add_argument('-h', '--help', action='store_true', help='显示帮助信息')
     parser.add_argument('--version', action='store_true', help='显示版本信息')
-    args = parser.parse_args()
-    
+    args, unknown = parser.parse_known_args()
+
     if args.help:
         show_help()
         return
-    
+
     if args.version:
         show_version()
         return
-    
+
     if not check_dependencies():
         sys.exit(1)
-    
+
     all_sheets = not (args.sheet or args.default)
-    
-    if not args.input:
-        batch_process(Path.cwd(), all_sheets=all_sheets)
-    else:
-        input_path = Path(args.input)
-        if input_path.is_file():
-            output_path = Path(args.output) if args.output else None
-            if not convert_xlsx_to_csv_single(input_path, output_path, args.sheet, all_sheets):
-                sys.exit(1)
-        elif input_path.is_dir():
-            batch_process(input_path, args.recursive, all_sheets=all_sheets)
+
+    # 获取输入文件列表
+    input_files = [Path(f) for f in get_input_files(unknown, expected_ext='xlsx')]
+
+    if not input_files:
+        show_warning("未找到XLSX文件")
+        sys.exit(1)
+
+    show_info(f"找到 {len(input_files)} 个XLSX文件")
+    tracker = ProgressTracker()
+
+    # 批量处理文件
+    for i, file_path in enumerate(input_files, 1):
+        show_processing(f"进度 ({i}/{len(input_files)}): {file_path.name}")
+        if convert_xlsx_to_csv_single(file_path, sheet_name=args.sheet, all_sheets=all_sheets):
+            tracker.add_success()
         else:
-            fatal_error(f"输入路径不存在: {input_path}")
+            tracker.add_failure()
+
+    tracker.show_summary("文件转换")
 
 if __name__ == "__main__":
     try:

@@ -40,6 +40,10 @@ import sys
 from pathlib import Path
 from docx import Document
 
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
+from finder import get_input_files
+from progress import ProgressTracker
+
 # ===== 配置选项 =====
 # 注释掉下面这行可以启用页脚处理
 SKIP_FOOTER = True
@@ -296,58 +300,34 @@ def process_docx(input_file):
         return False
 
 
-def get_finder_selection():
-    """获取 Finder 中选中的文件"""
-    import subprocess
-    script = '''
-    tell application "Finder"
-        set theSelection to selection
-        if (count of theSelection) > 0 then
-            return POSIX path of (item 1 of theSelection as alias)
-        else
-            return ""
-        end if
-    end tell
-    '''
-    try:
-        result = subprocess.run(['osascript', '-e', script], 
-                              capture_output=True, text=True, timeout=5)
-        return result.stdout.strip()
-    except:
-        return ""
-
-
 if __name__ == "__main__":
-    input_file = None
-    
-    # 优先使用命令行参数
-    if len(sys.argv) >= 2 and sys.argv[1].strip():
-        input_file = sys.argv[1].strip()
-    else:
-        # 尝试从 Finder 获取选中的文件
-        finder_file = get_finder_selection()
-        if finder_file and finder_file.lower().endswith('.docx'):
-            input_file = finder_file
-            print(f"📂 从 Finder 获取文件: {Path(finder_file).name}")
-    
-    if not input_file:
+    # 获取输入文件（优先命令行参数，否则从 Finder 获取）
+    files = get_input_files(sys.argv[1:], expected_ext='docx')
+
+    if not files:
         print("❌ 错误：缺少文件名参数")
         print("\n使用方法：")
         print("  1. 在 Finder 中选中 .docx 文件，然后运行此脚本")
-        print("  2. 或在 Raycast 中输入文件路径")
+        print("  2. 或在命令行中提供文件路径")
         print("\n示例：")
         print("    python3 docx_text_formatter.py 文件名.docx")
+        print("    python3 docx_text_formatter.py file1.docx file2.docx")
         sys.exit(1)
-    
+
     print("=" * 50)
     print("文本格式自动修复工具 - DOCX版本")
     print("=" * 50)
-    
-    success = process_docx(input_file)
-    
-    if success:
-        print("\n🎉 全部完成！")
-    else:
-        print("\n❌ 处理失败，请检查错误信息")
-        sys.exit(1)
+
+    tracker = ProgressTracker()
+
+    for file_path in files:
+        print(f"\n处理文件: {Path(file_path).name}")
+        success = process_docx(str(file_path))
+        if success:
+            tracker.add_success()
+        else:
+            tracker.add_error()
+
+    print("\n" + "=" * 50)
+    tracker.show_summary("文件处理")
 

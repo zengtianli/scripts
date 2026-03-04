@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title xlsx-split
+# @raycast.description Split Excel workbook into separate sheets
 # @raycast.mode fullOutput
 # @raycast.icon 📊
 # @raycast.packageName Scripts

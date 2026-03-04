@@ -20,6 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from finder import get_input_files
+from progress import ProgressTracker
 
 try:
     from pptx import Presentation
@@ -174,13 +175,14 @@ def process_presentation(input_path, output_path=None):
 def main():
     """主函数"""
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='pptx', allow_multiple=False)
-    
+    files = get_input_files(sys.argv[1:], expected_ext='pptx')
+
     if not files:
         print("PPT表格样式工具")
         print()
         print("用法:")
         print(f"  python {os.path.basename(__file__)} <输入文件.pptx>")
+        print(f"  python {os.path.basename(__file__)} file1.pptx file2.pptx")
         print("  或在 Finder 中选择 .pptx 文件后运行")
         print()
         print("功能:")
@@ -192,12 +194,21 @@ def main():
         print("示例:")
         print(f"  python {os.path.basename(__file__)} presentation.pptx")
         sys.exit(1)
-    
-    input_path = files[0]
-    output_path = sys.argv[2] if len(sys.argv) > 2 else None
-    
-    success = process_presentation(input_path, output_path)
-    sys.exit(0 if success else 1)
+
+    tracker = ProgressTracker()
+
+    for file_path in files:
+        print(f"\n{'='*50}")
+        print(f"处理文件: {os.path.basename(file_path)}")
+        print('='*50)
+        success = process_presentation(str(file_path))
+        if success:
+            tracker.add_success()
+        else:
+            tracker.add_error()
+
+    print(f"\n{'='*50}")
+    tracker.show_summary("文件处理")
 
 
 if __name__ == "__main__":

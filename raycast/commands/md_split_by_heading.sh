@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title md-split
+# @raycast.description Split Markdown file by headings
 # @raycast.mode fullOutput
 # @raycast.icon ✂️
 # @raycast.packageName Scripts

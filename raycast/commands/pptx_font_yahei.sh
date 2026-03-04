@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title pptx-font
+# @raycast.description Change PowerPoint fonts to Microsoft YaHei
 # @raycast.mode fullOutput
 # @raycast.icon 📽️
 # @raycast.packageName Scripts

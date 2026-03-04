@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title md-merge
+# @raycast.description Merge multiple Markdown files into one
 # @raycast.mode fullOutput
 # @raycast.icon 📝
 # @raycast.packageName Scripts

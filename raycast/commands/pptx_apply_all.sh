@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title pptx-all
+# @raycast.description Apply all formatting to PowerPoint presentation
 # @raycast.mode fullOutput
 # @raycast.icon 📽️
 # @raycast.packageName Scripts

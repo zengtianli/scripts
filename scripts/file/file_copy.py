@@ -3,23 +3,12 @@
 import subprocess
 import os
 import sys
+from pathlib import Path
 
-def get_finder_selection_multiple():
-    """获取 Finder 选中的多个文件"""
-    script = '''
-    tell application "Finder"
-        set sel to selection
-        set paths to {}
-        repeat with f in sel
-            set end of paths to POSIX path of (f as alias)
-        end repeat
-        set AppleScript's text item delimiters to ","
-        return paths as text
-    end tell
-    '''
-    result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
-    paths = result.stdout.strip()
-    return [p.strip() for p in paths.split(',') if p.strip()] if paths else []
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
+
+from finder import get_input_files
+from display import show_success, show_error, show_info
 
 def copy_to_clipboard(text):
     """复制文本到剪贴板"""
@@ -27,10 +16,9 @@ def copy_to_clipboard(text):
 
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "name"
-    files = get_finder_selection_multiple()
+    files = get_input_files([], allow_multiple=True)
 
     if not files:
-        print("❌ 在 Finder 中未选择文件")
         return
 
     if mode == "content":
@@ -39,7 +27,7 @@ def main():
         for file_path in files:
             filename = os.path.basename(file_path)
             if not os.path.isfile(file_path):
-                print(f"⚠️ 跳过非文件: {filename}")
+                show_info(f"跳过非文件: {filename}")
                 continue
             try:
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -47,17 +35,17 @@ def main():
                 content_parts.append(f"文件名：{filename}\n\n{content}\n\n-----------------------------------\n")
                 count += 1
             except Exception as e:
-                print(f"⚠️ 无法读取文件: {filename} ({e})")
+                show_info(f"无法读取文件: {filename} ({e})")
 
         if content_parts:
             copy_to_clipboard('\n'.join(content_parts))
-            print(f"✅ 已复制 {count} 个文件的名称和内容到剪贴板")
+            show_success(f"已复制 {count} 个文件的名称和内容到剪贴板")
         else:
-            print("❌ 没有可复制的内容")
+            show_error("没有可复制的内容")
     else:
         filenames = [os.path.basename(f) for f in files]
         copy_to_clipboard('\n'.join(filenames))
-        print(f"✅ 已复制 {len(filenames)} 个文件的名称到剪贴板")
+        show_success(f"已复制 {len(filenames)} 个文件的名称到剪贴板")
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title md-format
+# @raycast.description Format and standardize Markdown files
 # @raycast.mode fullOutput
 # @raycast.icon 📝
 # @raycast.packageName Scripts

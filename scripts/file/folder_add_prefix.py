@@ -1,82 +1,68 @@
 #!/usr/bin/env python3
 
-import subprocess
 import os
+import sys
+from pathlib import Path
 
-def get_finder_selection_multiple():
-    """获取 Finder 选中的多个文件"""
-    script = '''
-    tell application "Finder"
-        set sel to selection
-        set paths to {}
-        repeat with f in sel
-            set end of paths to POSIX path of (f as alias)
-        end repeat
-        set AppleScript's text item delimiters to ","
-        return paths as text
-    end tell
-    '''
-    result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
-    paths = result.stdout.strip()
-    if paths:
-        return [p.strip().rstrip('/') for p in paths.split(',') if p.strip()]
-    return []
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
+
+from finder import get_input_files
+from display import show_success, show_error, show_info
 
 def main():
-    folders = get_finder_selection_multiple()
-    
+    folders = get_input_files([], allow_multiple=True)
+
     if not folders:
-        print("❌ 没有选中文件夹")
         return
     
     success_count = 0
     skipped_count = 0
-    
+
     for folder in folders:
+        folder = folder.rstrip('/')
         if not os.path.isdir(folder):
-            print(f"⚠️ 跳过 {os.path.basename(folder)} - 不是文件夹")
+            show_info(f"跳过 {os.path.basename(folder)} - 不是文件夹")
             skipped_count += 1
             continue
-        
+
         folder_name = os.path.basename(folder)
-        print(f"📂 处理文件夹: {folder_name}")
-        
+        show_info(f"处理文件夹: {folder_name}")
+
         # 获取文件夹中的所有文件
         files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
-        
+
         if not files:
-            print("  ⚠️ 文件夹为空，跳过")
+            show_info("  文件夹为空，跳过")
             skipped_count += 1
             continue
-        
+
         files_count = 0
         for filename in files:
             # 检查是否已有前缀
             if filename.startswith(folder_name):
-                print(f"  ⚠️ 跳过 {filename} - 已有前缀")
+                show_info(f"  跳过 {filename} - 已有前缀")
                 continue
-            
+
             old_path = os.path.join(folder, filename)
             new_filename = f"{folder_name}_{filename}"
             new_path = os.path.join(folder, new_filename)
-            
+
             try:
                 os.rename(old_path, new_path)
-                print(f"  ✓ 已重命名: {filename} → {new_filename}")
+                show_info(f"  已重命名: {filename} → {new_filename}")
                 files_count += 1
             except Exception as e:
-                print(f"  ❌ 重命名失败: {filename} ({e})")
-        
+                show_error(f"  重命名失败: {filename} ({e})")
+
         if files_count > 0:
-            print(f"✅ 共重命名了 {files_count} 个文件")
+            show_info(f"共重命名了 {files_count} 个文件")
             success_count += 1
         else:
             skipped_count += 1
-    
-    print("")
-    print(f"✅ 成功处理了 {success_count} 个文件夹")
+
+    show_success(f"成功处理了 {success_count} 个文件夹")
     if skipped_count > 0:
-        print(f"⚠️ 跳过了 {skipped_count} 个文件夹或空文件夹")
+        show_info(f"跳过了 {skipped_count} 个文件夹或空文件夹")
 
 if __name__ == '__main__':
     main()

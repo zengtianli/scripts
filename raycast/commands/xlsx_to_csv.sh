@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title xlsx-to-csv
+# @raycast.description Convert Excel spreadsheet to CSV format
 # @raycast.mode fullOutput
 # @raycast.icon 📊
 # @raycast.packageName Scripts

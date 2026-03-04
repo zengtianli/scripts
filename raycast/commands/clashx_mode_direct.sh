@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title clashx_mode_direct
+# @raycast.description Switch ClashX to direct connection mode
 # @raycast.mode fullOutput
 # @raycast.icon ⚡
 # @raycast.packageName Network

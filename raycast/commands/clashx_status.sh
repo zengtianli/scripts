@@ -1,6 +1,7 @@
 #!/bin/bash
 # @raycast.schemaVersion 1
 # @raycast.title clashx_status
+# @raycast.description Display current ClashX proxy status and configuration
 # @raycast.mode fullOutput
 # @raycast.icon 🌐
 # @raycast.packageName Network

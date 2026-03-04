@@ -1,1 +1,0 @@
-../../../../scripts/system/sys_oa_dev.sh

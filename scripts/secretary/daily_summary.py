@@ -1,4 +1,4 @@
-#!/Users/tianli/miniforge3/bin/python3
+#!/usr/bin/env python3
 """
 总秘书每日汇总脚本
 整合应用追踪数据和三个秘书的日志，生成每日总结

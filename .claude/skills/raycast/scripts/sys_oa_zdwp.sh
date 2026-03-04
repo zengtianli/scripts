@@ -1,1 +1,0 @@
-../../../../scripts/system/sys_oa_zdwp.sh

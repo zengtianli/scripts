@@ -9,3 +9,4 @@ docs/raycast
 # 文档符号链接（源文件在 ~/docs/useful_scripts/）
 projects/*_docs
 research/*.md
+node_modules/

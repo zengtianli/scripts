@@ -1,0 +1,455 @@
+#!/usr/bin/env python3
+"""
+AI 敏感词扫描器 (scan_sensitive_words.py)
+
+调用 Claude API 扫描标书 .md 文件，智能识别敏感词并维护敏感词列表。
+
+识别类型：
+  - 组织名称/公司名称（竞争对手或错误引用）
+  - 不符合乙方立场的措辞（过于强硬/绝对的用词）
+  - 项目名称交叉污染（A项目文档中出现B项目专有名词）
+
+用法：
+  python3 scan_sensitive_words.py <目录路径>
+  python3 scan_sensitive_words.py <目录路径> --config path/to/sensitive_words.json
+  python3 scan_sensitive_words.py <目录路径> --json
+  python3 scan_sensitive_words.py <目录路径> --update
+"""
+
+import argparse
+import json
+import os
+import sys
+from pathlib import Path
+from typing import Optional
+
+# === 路径设置 ===
+SCRIPTS_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(SCRIPTS_ROOT / "lib"))
+
+from display import show_error, show_info, show_processing, show_success, show_warning
+from file_ops import find_files_by_extension
+
+# === 常量 ===
+DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+DEFAULT_BASE_URL = "https://code.mmkg.cloud"
+DEFAULT_AUTH_TOKEN = "sk-314b13f94f1aeba82a992b54e0100734827647a7a14a9a4956ca1947842ac6cf"
+CHUNK_SIZE = 8000  # 按字符数分块
+
+
+# === API 调用 ===
+
+def create_client():
+    """创建 Anthropic 客户端，优先使用环境变量"""
+    try:
+        import anthropic
+    except ImportError:
+        show_error("缺少 anthropic 包，请运行: pip install anthropic")
+        sys.exit(1)
+
+    base_url = os.environ.get("ANTHROPIC_BASE_URL", DEFAULT_BASE_URL)
+    auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN", DEFAULT_AUTH_TOKEN)
+
+    return anthropic.Anthropic(base_url=base_url, api_key=auth_token)
+
+
+def build_prompt(content: str, existing_words: list[str], filename: str) -> str:
+    """构建发送给 AI 的分析 prompt"""
+    existing_list = "、".join(existing_words[:50]) if existing_words else "（暂无）"
+
+    return f"""你是一个标书文档审阅专家。请分析以下标书文档内容，识别其中的敏感词。
+
+## 需要识别的敏感词类型
+
+1. **组织名称/公司名称**：可能是竞争对手名称、错误引用的单位名称、不应出现在本标书中的第三方名称。注意区分：招标方/甲方名称是正常的，但其他公司名称可能是错误引用。
+
+2. **不符合乙方立场的措辞**：标书是乙方（投标方）撰写的，以下措辞不恰当：
+   - 对甲方提要求或命令的词（如"必须"、"应当"、"要求甲方"）
+   - 过于绝对的承诺（如"确保"、"保证"、"杜绝"、"绝对"）
+   - 语气过于强硬或紧迫的词（如"亟需"、"迫在眉睫"）
+   - 非正式用语（如"我们"、"我司"、"我方"）
+   - 甲方口吻的词（如"验收合格后"用在不恰当的语境中）
+
+3. **项目名称交叉污染**：文档中出现的可能属于其他项目的专有名词（地名、项目名、河流名、水库名等），这些词可能是从其他标书复制时遗漏的。
+
+## 已有敏感词列表（无需重复报告）
+{existing_list}
+
+## 当前文件名
+{filename}
+
+## 文档内容
+{content}
+
+## 输出要求
+
+请以 JSON 数组格式输出发现的可疑敏感词，每个元素包含：
+- word: 敏感词原文
+- category: 类型（"organization" | "wording" | "cross_project"）
+- reason: 为什么认为这是敏感词
+- suggest: 建议替换为什么（如果适用，否则为空字符串）
+- severity: 严重程度（"high" | "medium" | "low"）
+- context: 该词出现的上下文片段（前后各约 10 个字）
+
+如果没有发现任何敏感词，返回空数组 []。
+
+只输出 JSON 数组，不要包含其他文字、代码块标记或解释。"""
+
+
+def call_api(client, prompt: str) -> Optional[list[dict]]:
+    """调用 Claude API 分析内容"""
+    try:
+        response = client.messages.create(
+            model=DEFAULT_MODEL,
+            max_tokens=4096,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = response.content[0].text.strip()
+
+        # 清理可能的 markdown 代码块包裹
+        if text.startswith("```"):
+            lines = text.split("\n")
+            # 去掉首尾的 ``` 行
+            lines = [l for l in lines if not l.strip().startswith("```")]
+            text = "\n".join(lines)
+
+        return json.loads(text)
+    except json.JSONDecodeError as e:
+        show_warning(f"API 返回解析失败: {e}")
+        show_warning(f"原始返回: {text[:200]}")
+        return None
+    except Exception as e:
+        show_error(f"API 调用失败: {e}")
+        return None
+
+
+# === 配置文件操作 ===
+
+def find_config(scan_dir: str) -> Optional[str]:
+    """从扫描目录向上查找 sensitive_words.json"""
+    current = Path(scan_dir).resolve()
+    while current != current.parent:
+        config = current / "sensitive_words.json"
+        if config.is_file():
+            return str(config)
+        current = current.parent
+    return None
+
+
+def load_config(config_path: str) -> dict:
+    """加载 sensitive_words.json"""
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        show_error(f"无法读取配置文件 {config_path}: {e}")
+        sys.exit(1)
+
+
+def get_existing_words(config: dict) -> list[str]:
+    """从配置中提取所有已有敏感词"""
+    words = []
+    for item in config.get("forbidden_words", []):
+        words.append(item["word"])
+    for item in config.get("project_isolation", []):
+        words.append(item["word"])
+    return words
+
+
+def save_config(config: dict, config_path: str):
+    """保存 sensitive_words.json"""
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
+# === 文件处理 ===
+
+def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
+    """按字符数分块，尽量在段落边界切割"""
+    if len(text) <= chunk_size:
+        return [text]
+
+    chunks = []
+    while text:
+        if len(text) <= chunk_size:
+            chunks.append(text)
+            break
+
+        # 在 chunk_size 附近找段落边界
+        cut = text.rfind("\n\n", 0, chunk_size)
+        if cut == -1 or cut < chunk_size // 2:
+            cut = text.rfind("\n", 0, chunk_size)
+        if cut == -1 or cut < chunk_size // 2:
+            cut = chunk_size
+
+        chunks.append(text[:cut])
+        text = text[cut:].lstrip("\n")
+
+    return chunks
+
+
+def verify_findings(findings: list[dict], content: str) -> list[dict]:
+    """验证 AI 返回的词是否真的出现在文件内容中，过滤幻觉"""
+    verified = []
+    for f in findings:
+        word = f.get("word", "")
+        if word and word in content:
+            verified.append(f)
+    return verified
+
+
+def scan_file(client, filepath: Path, existing_words: list[str]) -> list[dict]:
+    """扫描单个文件"""
+    try:
+        content = filepath.read_text(encoding="utf-8")
+    except Exception as e:
+        show_warning(f"无法读取 {filepath}: {e}")
+        return []
+
+    if not content.strip():
+        return []
+
+    chunks = chunk_text(content)
+    all_findings = []
+
+    for i, chunk in enumerate(chunks):
+        if len(chunks) > 1:
+            show_processing(f"  分块 {i+1}/{len(chunks)}")
+
+        prompt = build_prompt(chunk, existing_words, filepath.name)
+        findings = call_api(client, prompt)
+
+        if findings:
+            for f in findings:
+                f["file"] = str(filepath)
+            all_findings.extend(findings)
+
+    # 过滤 AI 幻觉：验证词是否真的出现在文件中
+    verified = verify_findings(all_findings, content)
+    if len(verified) < len(all_findings):
+        diff = len(all_findings) - len(verified)
+        show_warning(f"  过滤 {diff} 个幻觉词条（文件中不存在）")
+
+    return verified
+
+
+# === 去重与过滤 ===
+
+def deduplicate_findings(findings: list[dict], existing_words: list[str]) -> list[dict]:
+    """去重并过滤已有的敏感词"""
+    seen = set()
+    existing_set = set(existing_words)
+    result = []
+
+    for f in findings:
+        word = f.get("word", "")
+        if not word or word in existing_set:
+            continue
+        key = (word, f.get("category", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(f)
+
+    return result
+
+
+# === 输出格式 ===
+
+CATEGORY_LABELS = {
+    "organization": "组织名称",
+    "wording": "措辞问题",
+    "cross_project": "项目串名",
+}
+
+SEVERITY_LABELS = {
+    "high": "高",
+    "medium": "中",
+    "low": "低",
+}
+
+
+def print_table(findings: list[dict]):
+    """人类可读的表格输出"""
+    if not findings:
+        show_success("未发现新的可疑敏感词。")
+        return
+
+    print(f"\n{'='*80}")
+    print(f"  发现 {len(findings)} 个可疑敏感词")
+    print(f"{'='*80}\n")
+
+    for i, f in enumerate(findings, 1):
+        cat = CATEGORY_LABELS.get(f.get("category", ""), f.get("category", "未知"))
+        sev = SEVERITY_LABELS.get(f.get("severity", ""), f.get("severity", ""))
+        word = f.get("word", "")
+        reason = f.get("reason", "")
+        suggest = f.get("suggest", "")
+        context = f.get("context", "")
+        filepath = f.get("file", "")
+
+        print(f"  [{i:2d}] {word}")
+        print(f"       类型: {cat}  |  严重程度: {sev}")
+        print(f"       原因: {reason}")
+        if suggest:
+            print(f"       建议: -> {suggest}")
+        if context:
+            print(f"       上下文: ...{context}...")
+        if filepath:
+            print(f"       文件: {Path(filepath).name}")
+        print()
+
+    print(f"{'='*80}")
+
+
+def print_json(findings: list[dict]):
+    """结构化 JSON 输出"""
+    print(json.dumps(findings, ensure_ascii=False, indent=2))
+
+
+# === 更新模式 ===
+
+def interactive_update(findings: list[dict], config: dict, config_path: str):
+    """交互式确认并更新 sensitive_words.json"""
+    if not findings:
+        show_info("没有新词需要添加。")
+        return
+
+    added_count = 0
+    print(f"\n逐条确认是否加入敏感词表（y=加入 / n=跳过 / q=退出）：\n")
+
+    for f in findings:
+        word = f.get("word", "")
+        cat = CATEGORY_LABELS.get(f.get("category", ""), f.get("category", ""))
+        reason = f.get("reason", "")
+        suggest = f.get("suggest", "")
+
+        print(f"  [{cat}] {word}")
+        print(f"    原因: {reason}")
+        if suggest:
+            print(f"    建议替换: {suggest}")
+
+        try:
+            choice = input("    加入词表? (y/n/q): ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print()
+            break
+
+        if choice == "q":
+            break
+        elif choice == "y":
+            category = f.get("category", "")
+            if category == "cross_project":
+                config.setdefault("project_isolation", []).append({
+                    "word": word,
+                    "reason": reason,
+                })
+            else:
+                entry = {"word": word, "reason": reason}
+                if suggest:
+                    entry["suggest"] = suggest
+                config.setdefault("forbidden_words", []).append(entry)
+            added_count += 1
+            show_success(f"已添加: {word}")
+        print()
+
+    if added_count > 0:
+        save_config(config, config_path)
+        show_success(f"已更新 {config_path}，新增 {added_count} 个敏感词。")
+    else:
+        show_info("未添加任何新词。")
+
+
+# === 主流程 ===
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="AI 敏感词扫描器 - 调用 Claude API 扫描标书文档识别敏感词",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+示例：
+  %(prog)s ~/Work/zdwp/docs/                    # 扫描目录，输出表格
+  %(prog)s ~/Work/zdwp/docs/ --json              # 输出 JSON
+  %(prog)s ~/Work/zdwp/docs/ --update            # 扫描后交互式更新词表
+  %(prog)s ~/Work/zdwp/docs/ --config words.json # 指定配置文件
+        """,
+    )
+    parser.add_argument("directory", help="要扫描的目录路径")
+    parser.add_argument(
+        "--config", help="sensitive_words.json 路径（默认自动向上查找）"
+    )
+    parser.add_argument(
+        "--update", action="store_true", help="交互式确认后更新敏感词表"
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="以 JSON 格式输出（面向 CC）"
+    )
+
+    args = parser.parse_args()
+
+    # 验证目录
+    scan_dir = Path(args.directory).resolve()
+    if not scan_dir.is_dir():
+        show_error(f"目录不存在: {scan_dir}")
+        sys.exit(1)
+
+    # 查找配置文件
+    config_path = args.config
+    if not config_path:
+        config_path = find_config(str(scan_dir))
+
+    config = {}
+    existing_words = []
+    if config_path:
+        config = load_config(config_path)
+        existing_words = get_existing_words(config)
+        if not args.json:
+            show_info(f"配置文件: {config_path}")
+            show_info(f"已有敏感词: {len(existing_words)} 个")
+    else:
+        if not args.json:
+            show_warning("未找到 sensitive_words.json，将从零开始扫描。")
+        if args.update:
+            show_error("--update 模式需要配置文件，请用 --config 指定。")
+            sys.exit(1)
+
+    # 收集 .md 文件
+    md_files = find_files_by_extension(scan_dir, "md", recursive=True)
+    if not md_files:
+        show_warning(f"目录中没有 .md 文件: {scan_dir}")
+        sys.exit(0)
+
+    if not args.json:
+        show_info(f"找到 {len(md_files)} 个 .md 文件")
+
+    # 创建 API 客户端
+    client = create_client()
+
+    # 逐文件扫描
+    all_findings = []
+    for i, filepath in enumerate(md_files, 1):
+        if not args.json:
+            show_processing(f"扫描 ({i}/{len(md_files)}): {filepath.name}")
+        findings = scan_file(client, filepath, existing_words)
+        all_findings.extend(findings)
+
+    # 去重
+    unique_findings = deduplicate_findings(all_findings, existing_words)
+
+    if not args.json:
+        show_info(f"AI 共返回 {len(all_findings)} 个词条，去重后 {len(unique_findings)} 个新词")
+
+    # 输出
+    if args.json:
+        print_json(unique_findings)
+    else:
+        print_table(unique_findings)
+
+    # 更新模式
+    if args.update:
+        interactive_update(unique_findings, config, config_path)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,26 @@
+============================================================
+样式提取自: template.docx
+============================================================
+
+提取的样式:
+  - a: Normal
+  - 10: heading 1
+  - 2: heading 2
+  - 3: heading 3
+  - 4: heading 4
+  - ZDWP: ZDWP正文
+  - ZDWP1: ZDWP 表名
+  - ZDWP3: ZDWP表格内容
+  - ZDWP4: ZDWP图名
+
+正文样式: ZDWP
+
+Markdown 映射:
+  # 标题    → Heading 1
+  ## 标题   → Heading 2
+  ### 标题  → Heading 3
+  #### 标题 → Heading 4
+  普通段落  → ZDWP正文
+  表x ...   → ZDWP 表名
+  表格内容  → ZDWP表格内容
+  图x ...   → ZDWP图名

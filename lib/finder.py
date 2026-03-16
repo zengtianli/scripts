@@ -115,9 +115,10 @@ def get_input_files(
     """
     files = []
     
-    # 优先使用命令行参数
-    if args:
-        files = [a for a in args if not a.startswith('-')]
+    # 优先使用命令行参数（过滤空白参数，如 Raycast optional 参数未填时传入的空字符串）
+    clean_args = [a for a in args if a.strip() and not a.startswith('-')]
+    if clean_args:
+        files = clean_args
     else:
         # 从 Finder 获取
         files = get_finder_selection()

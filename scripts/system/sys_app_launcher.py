@@ -5,8 +5,8 @@ import os
 import re
 from pathlib import Path
 
-ESSENTIAL_APPS_FILE = os.path.expanduser("~/Desktop/essential_apps.txt")
-RUNNING_APPS_FILE = os.path.expanduser("~/Desktop/running_apps.txt")
+ESSENTIAL_APPS_FILE = os.path.realpath(os.path.expanduser("~/Desktop/essential_apps.txt"))
+RUNNING_APPS_FILE = os.path.realpath(os.path.expanduser("~/Desktop/running_apps.txt"))
 
 def get_running_apps():
     """获取当前运行的应用程序列表"""

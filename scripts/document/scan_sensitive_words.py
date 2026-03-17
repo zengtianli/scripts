@@ -19,6 +19,7 @@ AI 敏感词扫描器 (scan_sensitive_words.py)
 import argparse
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Optional
@@ -72,6 +73,12 @@ def build_prompt(content: str, existing_words: list[str], filename: str) -> str:
 
 3. **项目名称交叉污染**：文档中出现的可能属于其他项目的专有名词（地名、项目名、河流名、水库名等），这些词可能是从其他标书复制时遗漏的。
 
+## 重要：以下不算敏感词，请勿报告
+
+- **标书规范用语**：如"采购人""投标人""本项目""本项目团队""本单位""投标方""招标方""中标人""评标委员会"等，这些是标书行业标准术语，不是敏感词。
+- **正式行文措辞**：如"根据""按照""依据""鉴于""为此"等连接词，属于公文规范用语。
+- **本项目自身名称**：本文件所属项目的名称、地名、河流名等，属于本项目内容，不是交叉污染。
+
 ## 已有敏感词列表（无需重复报告）
 {existing_list}
 
@@ -83,7 +90,8 @@ def build_prompt(content: str, existing_words: list[str], filename: str) -> str:
 
 ## 输出要求
 
-请以 JSON 数组格式输出发现的可疑敏感词，每个元素包含：
+请直接输出纯 JSON 数组（不要用 markdown 代码块包裹，不要加任何解释文字）。
+每个元素包含：
 - word: 敏感词原文
 - category: 类型（"organization" | "wording" | "cross_project"）
 - reason: 为什么认为这是敏感词
@@ -91,36 +99,72 @@ def build_prompt(content: str, existing_words: list[str], filename: str) -> str:
 - severity: 严重程度（"high" | "medium" | "low"）
 - context: 该词出现的上下文片段（前后各约 10 个字）
 
-如果没有发现任何敏感词，返回空数组 []。
+如果没有发现任何敏感词，直接返回 []
 
-只输出 JSON 数组，不要包含其他文字、代码块标记或解释。"""
+注意：JSON 中的字符串值如果包含引号，请用反斜杠转义。直接输出 JSON，不要包裹在 ```json ``` 中。"""
 
 
-def call_api(client, prompt: str) -> Optional[list[dict]]:
-    """调用 Claude API 分析内容"""
+def _parse_json_response(text: str) -> Optional[list[dict]]:
+    """尝试从 AI 返回的文本中解析 JSON 数组，带多层容错"""
+    # 第 1 步：strip markdown 代码块
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        # 去掉 ```json 或 ``` 开头行和结尾 ```
+        cleaned = re.sub(r"^```(?:json)?\s*\n?", "", cleaned)
+        cleaned = re.sub(r"\n?```\s*$", "", cleaned)
+        cleaned = cleaned.strip()
+
+    # 第 2 步：直接尝试 json.loads
     try:
-        response = client.messages.create(
-            model=DEFAULT_MODEL,
-            max_tokens=4096,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text = response.content[0].text.strip()
+        result = json.loads(cleaned)
+        if isinstance(result, list):
+            return result
+    except json.JSONDecodeError:
+        pass
 
-        # 清理可能的 markdown 代码块包裹
-        if text.startswith("```"):
-            lines = text.split("\n")
-            # 去掉首尾的 ``` 行
-            lines = [l for l in lines if not l.strip().startswith("```")]
-            text = "\n".join(lines)
+    # 第 3 步：用 regex 提取最外层 JSON 数组
+    match = re.search(r"\[[\s\S]*\]", cleaned)
+    if match:
+        try:
+            result = json.loads(match.group())
+            if isinstance(result, list):
+                return result
+        except json.JSONDecodeError:
+            pass
 
-        return json.loads(text)
-    except json.JSONDecodeError as e:
-        show_warning(f"API 返回解析失败: {e}")
-        show_warning(f"原始返回: {text[:200]}")
-        return None
-    except Exception as e:
-        show_error(f"API 调用失败: {e}")
-        return None
+    return None
+
+
+def call_api(client, prompt: str, max_retries: int = 2) -> Optional[list[dict]]:
+    """调用 Claude API 分析内容，带 retry 和容错解析"""
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = client.messages.create(
+                model=DEFAULT_MODEL,
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = response.content[0].text.strip()
+
+            result = _parse_json_response(text)
+            if result is not None:
+                return result
+
+            # 解析失败，决定是否 retry
+            if attempt < max_retries:
+                show_warning(f"  JSON 解析失败（第 {attempt} 次），重试中...")
+                continue
+            else:
+                show_warning(f"  JSON 解析失败（已重试 {max_retries} 次），跳过此块")
+                show_warning(f"  原始返回: {text[:200]}")
+                return None
+
+        except Exception as e:
+            show_error(f"API 调用失败: {e}")
+            if attempt < max_retries:
+                show_warning(f"  第 {attempt} 次失败，重试中...")
+                continue
+            return None
 
 
 # === 配置文件操作 ===
@@ -156,6 +200,11 @@ def get_existing_words(config: dict) -> list[str]:
     return words
 
 
+def get_whitelist(config: dict) -> set[str]:
+    """从配置中提取白名单词汇"""
+    return set(config.get("whitelist", []))
+
+
 def save_config(config: dict, config_path: str):
     """保存 sensitive_words.json"""
     with open(config_path, "w", encoding="utf-8") as f:
@@ -189,17 +238,42 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
     return chunks
 
 
-def verify_findings(findings: list[dict], content: str) -> list[dict]:
-    """验证 AI 返回的词是否真的出现在文件内容中，过滤幻觉"""
+# 标书正式术语白名单：这些词不应被报告为敏感词
+FORMAL_TERMS_WHITELIST = {
+    "采购人", "投标人", "招标人", "中标人", "投标方", "招标方",
+    "本项目", "本项目团队", "本单位", "本公司",
+    "评标委员会", "采购代理机构", "监理单位", "建设单位",
+    "项目负责人", "项目经理", "技术负责人",
+    "根据", "按照", "依据", "鉴于", "为此",
+}
+
+
+def verify_findings(
+    findings: list[dict], content: str, whitelist: set[str] | None = None
+) -> list[dict]:
+    """验证 AI 返回的词是否真的出现在文件内容中，过滤幻觉和白名单/正式术语"""
+    # 合并内置正式术语白名单和配置白名单
+    combined_whitelist = FORMAL_TERMS_WHITELIST.copy()
+    if whitelist:
+        combined_whitelist.update(whitelist)
+
     verified = []
     for f in findings:
         word = f.get("word", "")
-        if word and word in content:
+        if not word:
+            continue
+        # 过滤白名单词汇
+        if word in combined_whitelist:
+            continue
+        # 验证词是否真的在文件内容中
+        if word in content:
             verified.append(f)
     return verified
 
 
-def scan_file(client, filepath: Path, existing_words: list[str]) -> list[dict]:
+def scan_file(
+    client, filepath: Path, existing_words: list[str], whitelist: set[str] | None = None
+) -> list[dict]:
     """扫描单个文件"""
     try:
         content = filepath.read_text(encoding="utf-8")
@@ -225,8 +299,8 @@ def scan_file(client, filepath: Path, existing_words: list[str]) -> list[dict]:
                 f["file"] = str(filepath)
             all_findings.extend(findings)
 
-    # 过滤 AI 幻觉：验证词是否真的出现在文件中
-    verified = verify_findings(all_findings, content)
+    # 过滤 AI 幻觉：验证词是否真的出现在文件中，同时过滤白名单
+    verified = verify_findings(all_findings, content, whitelist)
     if len(verified) < len(all_findings):
         diff = len(all_findings) - len(verified)
         show_warning(f"  过滤 {diff} 个幻觉词条（文件中不存在）")
@@ -236,15 +310,22 @@ def scan_file(client, filepath: Path, existing_words: list[str]) -> list[dict]:
 
 # === 去重与过滤 ===
 
-def deduplicate_findings(findings: list[dict], existing_words: list[str]) -> list[dict]:
-    """去重并过滤已有的敏感词"""
+def deduplicate_findings(
+    findings: list[dict], existing_words: list[str], whitelist: set[str] | None = None
+) -> list[dict]:
+    """去重并过滤已有的敏感词和白名单词汇"""
     seen = set()
     existing_set = set(existing_words)
+    # 合并内置正式术语白名单和配置白名单
+    combined_whitelist = FORMAL_TERMS_WHITELIST.copy()
+    if whitelist:
+        combined_whitelist.update(whitelist)
+
     result = []
 
     for f in findings:
         word = f.get("word", "")
-        if not word or word in existing_set:
+        if not word or word in existing_set or word in combined_whitelist:
             continue
         key = (word, f.get("category", ""))
         if key in seen:
@@ -401,12 +482,16 @@ def main():
 
     config = {}
     existing_words = []
+    whitelist = set()
     if config_path:
         config = load_config(config_path)
         existing_words = get_existing_words(config)
+        whitelist = get_whitelist(config)
         if not args.json:
             show_info(f"配置文件: {config_path}")
             show_info(f"已有敏感词: {len(existing_words)} 个")
+            if whitelist:
+                show_info(f"白名单词汇: {len(whitelist)} 个")
     else:
         if not args.json:
             show_warning("未找到 sensitive_words.json，将从零开始扫描。")
@@ -431,11 +516,11 @@ def main():
     for i, filepath in enumerate(md_files, 1):
         if not args.json:
             show_processing(f"扫描 ({i}/{len(md_files)}): {filepath.name}")
-        findings = scan_file(client, filepath, existing_words)
+        findings = scan_file(client, filepath, existing_words, whitelist)
         all_findings.extend(findings)
 
     # 去重
-    unique_findings = deduplicate_findings(all_findings, existing_words)
+    unique_findings = deduplicate_findings(all_findings, existing_words, whitelist)
 
     if not args.json:
         show_info(f"AI 共返回 {len(all_findings)} 个词条，去重后 {len(unique_findings)} 个新词")

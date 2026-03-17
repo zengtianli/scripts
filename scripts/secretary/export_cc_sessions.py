@@ -22,6 +22,7 @@ from pathlib import Path
 PROJECTS_DIR = Path.home() / ".claude" / "projects"
 OUTPUT_DIR = Path.home() / "docs" / "sessions" / "exports"
 DEFAULT_DAYS = 7
+LOCAL_TZ = timezone(timedelta(hours=8))  # 中国标准时间 UTC+8
 
 
 # ── 工具函数 ───────────────────────────────────────────────────────────────
@@ -220,7 +221,7 @@ def generate_markdown(
         try:
             dt = datetime.fromisoformat(
                 messages[0]["timestamp"].replace("Z", "+00:00")
-            )
+            ).astimezone(LOCAL_TZ)
             first_ts = dt.strftime("%Y-%m-%d %H:%M")
         except (ValueError, AttributeError):
             first_ts = ""
@@ -248,7 +249,7 @@ def generate_markdown(
             try:
                 dt = datetime.fromisoformat(
                     msg["timestamp"].replace("Z", "+00:00")
-                )
+                ).astimezone(LOCAL_TZ)
                 ts = dt.strftime("%H:%M:%S")
             except (ValueError, AttributeError):
                 ts = ""

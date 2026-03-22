@@ -35,10 +35,13 @@
     python3 text_formatter_docx.py 文件名.docx
 """
 
+import copy
 import re
 import sys
 from pathlib import Path
 from docx import Document
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from finder import get_input_files
@@ -50,28 +53,29 @@ SKIP_FOOTER = True
 # SKIP_FOOTER = False  # 取消注释这行可以处理页脚
 
 
-def fix_quotes(content):
+def fix_quotes(content, counter=0):
     """
     替换所有双引号为中文标准引号
-    奇数位置 → " (左引号)
-    偶数位置 → " (右引号)
+    奇数位置 → U+201C (左引号)
+    偶数位置 → U+201D (右引号)
+
+    counter: 外部传入的计数器，用于跨run保持引号配对
+    返回: (结果文本, 本次替换数, 更新后的counter)
     """
     # 匹配所有可能的双引号类型
-    # ", ", ", ", 「, 」以及英文双引号"
-    quote_pattern = r'["""''「」]'
-    
-    # 计数器，用于判断奇偶
-    counter = 0
-    
+    quote_pattern = '[\u0022\u201c\u201d\u2018\u2019\u300c\u300d]'
+
+    count = len(re.findall(quote_pattern, content))
+
     def replace_quote(match):
         nonlocal counter
         counter += 1
-        # 奇数用中文左引号"，偶数用中文右引号"
-        return '“' if counter % 2 == 1 else '”'
+        # 奇数用中文左引号”，偶数用中文右引号”
+        return '\u201c' if counter % 2 == 1 else '\u201d'
     # 执行替换
     result = re.sub(quote_pattern, replace_quote, content)
-    
-    return result, counter
+
+    return result, count, counter
 
 
 def fix_punctuation(content):
@@ -172,36 +176,132 @@ def fix_units(content):
     return result, replacement_count
 
 
+QUOTE_CHARS = {'\u201c', '\u201d'}
+QUOTE_FONT = '\u5b8b\u4f53'  # 宋体
+
+
+def _set_run_font_songti(run_element):
+    """为 run 的 rPr 设置宋体字体（ascii + hAnsi + eastAsia）"""
+    rPr = run_element.find(qn('w:rPr'))
+    if rPr is None:
+        rPr = OxmlElement('w:rPr')
+        run_element.insert(0, rPr)
+    rFonts = rPr.find(qn('w:rFonts'))
+    if rFonts is None:
+        rFonts = OxmlElement('w:rFonts')
+        rPr.insert(0, rFonts)
+    rFonts.set(qn('w:ascii'), QUOTE_FONT)
+    rFonts.set(qn('w:hAnsi'), QUOTE_FONT)
+    rFonts.set(qn('w:eastAsia'), QUOTE_FONT)
+    rFonts.set(qn('w:hint'), 'eastAsia')
+
+
+def _split_run_at_quotes(run):
+    """
+    将 run 在引号位置拆分，返回 [(text, is_quote), ...] 片段列表。
+    如果没有引号，返回 None。
+    """
+    text = run.text
+    if not text or not any(c in QUOTE_CHARS for c in text):
+        return None
+
+    segments = []
+    buf = []
+    for c in text:
+        if c in QUOTE_CHARS:
+            if buf:
+                segments.append((''.join(buf), False))
+                buf = []
+            segments.append((c, True))
+        else:
+            buf.append(c)
+    if buf:
+        segments.append((''.join(buf), False))
+    return segments
+
+
+def _apply_quote_split(run, segments):
+    """
+    根据 segments 拆分 run：第一段复用原 run，后续段插入新 run。
+    引号段设置宋体。
+    """
+    parent = run._element.getparent()
+
+    # 第一段复用原 run
+    first_text, first_is_quote = segments[0]
+    run.text = first_text
+    if first_is_quote:
+        _set_run_font_songti(run._element)
+
+    # 后续段：复制原 run 的格式，插入到原 run 之后
+    insert_after = run._element
+    for seg_text, is_quote in segments[1:]:
+        new_r = copy.deepcopy(run._element)
+        # 设置文本（清除 deepcopy 带来的旧文本）
+        for t_elem in new_r.findall(qn('w:t')):
+            new_r.remove(t_elem)
+        t_elem = OxmlElement('w:t')
+        t_elem.text = seg_text
+        # 保留空格
+        t_elem.set(qn('xml:space'), 'preserve')
+        new_r.append(t_elem)
+
+        if is_quote:
+            _set_run_font_songti(new_r)
+        else:
+            # 非引号段恢复原 run 的字体（去掉宋体覆盖）
+            rPr = new_r.find(qn('w:rPr'))
+            if rPr is not None:
+                rFonts = rPr.find(qn('w:rFonts'))
+                orig_rPr = run._element.find(qn('w:rPr'))
+                orig_rFonts = orig_rPr.find(qn('w:rFonts')) if orig_rPr is not None else None
+                if rFonts is not None and orig_rFonts is not None:
+                    # 用原始字体信息覆盖
+                    rPr.replace(rFonts, copy.deepcopy(orig_rFonts))
+                elif rFonts is not None and orig_rFonts is None:
+                    rPr.remove(rFonts)
+
+        parent.insert(list(parent).index(insert_after) + 1, new_r)
+        insert_after = new_r
+
+
 def process_paragraph(paragraph, stats):
     """
-    处理段落中的文本，保持格式不变
+    处理段落中的文本，逐run处理以保持每个run的字体格式。
+    引号拆分为独立run并设置宋体。
     """
-    # 处理段落文本
-    if paragraph.text:
-        # 获取原始文本
-        original_text = paragraph.text
-        
+    if not paragraph.runs:
+        return
+
+    # 引号计数器跨run维护，保证配对正确
+    quote_counter = 0
+
+    # 先收集需要处理的 runs（遍历中会插入新 run，所以先快照）
+    original_runs = list(paragraph.runs)
+
+    for run in original_runs:
+        if not run.text:
+            continue
+
+        original_text = run.text
+
         # 应用所有转换
-        fixed_text, quote_count = fix_quotes(original_text)
+        fixed_text, quote_count, quote_counter = fix_quotes(original_text, quote_counter)
         fixed_text, punct_count = fix_punctuation(fixed_text)
         fixed_text, unit_count = fix_units(fixed_text)
-        
+
         # 更新统计
         stats['quotes'] += quote_count
         stats['punctuation'] += punct_count
         stats['units'] += unit_count
-        
-        # 如果文本有变化，更新段落
+
         if fixed_text != original_text:
-            # 保持格式的方式更新文本
-            # 遍历所有runs，只修改第一个非空run，清空其他runs
-            runs = paragraph.runs
-            if runs:
-                # 将所有文本放到第一个run中
-                runs[0].text = fixed_text
-                # 清空其他runs
-                for i in range(1, len(runs)):
-                    runs[i].text = ''
+            run.text = fixed_text
+
+        # 拆分引号为独立 run 并设置宋体
+        segments = _split_run_at_quotes(run)
+        if segments:
+            _apply_quote_split(run, segments)
 
 
 def process_table(table, stats):

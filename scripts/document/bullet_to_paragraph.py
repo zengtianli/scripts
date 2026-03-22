@@ -60,12 +60,12 @@ def get_client():
     """初始化 Anthropic 客户端，从环境变量读取配置"""
     import anthropic
 
-    auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+    auth_token = os.environ.get("MMKG_AUTH_TOKEN")
     if not auth_token:
-        show_error("环境变量 ANTHROPIC_AUTH_TOKEN 未设置，请先配置后重试")
+        show_error("环境变量 MMKG_AUTH_TOKEN 未设置，请先配置后重试")
         sys.exit(1)
 
-    base_url = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com")
+    base_url = os.environ.get("MMKG_BASE_URL", "https://api.anthropic.com")
     return anthropic.Anthropic(base_url=base_url, auth_token=auth_token)
 
 

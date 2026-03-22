@@ -48,8 +48,8 @@ def create_client():
         show_error("缺少 anthropic 包，请运行: pip install anthropic")
         sys.exit(1)
 
-    base_url = os.environ.get("ANTHROPIC_BASE_URL", DEFAULT_BASE_URL)
-    auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN", DEFAULT_AUTH_TOKEN)
+    base_url = os.environ.get("MMKG_BASE_URL", DEFAULT_BASE_URL)
+    auth_token = os.environ.get("MMKG_AUTH_TOKEN", DEFAULT_AUTH_TOKEN)
 
     return anthropic.Anthropic(base_url=base_url, api_key=auth_token)
 

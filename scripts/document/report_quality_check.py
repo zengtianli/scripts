@@ -523,8 +523,8 @@ def fix_forbidden_words(text: str) -> str:
 def _get_anthropic_client():
     """创建 Anthropic API 客户端（用于 bullet point 转换）"""
     import os
-    base_url = os.environ.get("ANTHROPIC_BASE_URL")
-    auth_token = os.environ.get("ANTHROPIC_AUTH_TOKEN")
+    base_url = os.environ.get("MMKG_BASE_URL")
+    auth_token = os.environ.get("MMKG_AUTH_TOKEN")
     if not base_url or not auth_token:
         return None
     try:
@@ -542,7 +542,7 @@ def fix_bullet_points(text: str) -> str:
 
     client = _get_anthropic_client()
     if client is None:
-        show_warning("API 不可用（需要 ANTHROPIC_BASE_URL 和 ANTHROPIC_AUTH_TOKEN），跳过 bullet point 修复")
+        show_warning("API 不可用（需要 MMKG_BASE_URL 和 MMKG_AUTH_TOKEN），跳过 bullet point 修复")
         return text
 
     blocks = extract_bullet_blocks(text)
@@ -604,7 +604,7 @@ def fix_numbered_lists(text: str) -> str:
 
     client = _get_anthropic_client()
     if client is None:
-        show_warning("API 不可用（需要 ANTHROPIC_BASE_URL 和 ANTHROPIC_AUTH_TOKEN），跳过有序列表修复")
+        show_warning("API 不可用（需要 MMKG_BASE_URL 和 MMKG_AUTH_TOKEN），跳过有序列表修复")
         return text
 
     blocks = extract_bullet_blocks(text)

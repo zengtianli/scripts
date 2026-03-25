@@ -149,9 +149,7 @@ def is_short_or_opaque_name(stem: str) -> bool:
     if len(stem) < 5:
         return True
     # 只有 ASCII 字母、数字、下划线、横杠
-    if re.fullmatch(r"[a-zA-Z0-9_\-]+", stem):
-        return True
-    return False
+    return bool(re.fullmatch(r"[a-zA-Z0-9_\-]+", stem))
 
 
 # ---------------------------------------------------------------------------

@@ -4,11 +4,11 @@ Word 文档核心功能模块
 提供所有 docx 相关的转换和格式化功能
 """
 
+import contextlib
 import re
 import shutil
 import subprocess
 from pathlib import Path
-import contextlib
 
 # 尝试导入 python-docx
 try:
@@ -231,10 +231,8 @@ def apply_table_style(input_file: Path, style_name: str = "Table Grid",
         doc = Document(input_file)
 
         for table in doc.tables:
-            try:
+            with contextlib.suppress(KeyError):
                 table.style = style_name
-            except KeyError:
-                pass  # 样式不存在
 
         doc.save(output_file)
         return True

@@ -1,1 +1,0 @@
-../../../../scripts/document/pptx_table_style.py

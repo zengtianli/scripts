@@ -48,8 +48,9 @@ except ImportError:
 
 
 # Word XML 命名空间
-from docx_xml import NSMAP
 import contextlib
+
+from docx_xml import NSMAP
 
 # 需要提取的样式 ID
 TARGET_STYLES = {

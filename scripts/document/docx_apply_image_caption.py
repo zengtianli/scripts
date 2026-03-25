@@ -68,7 +68,7 @@ def find_style_fuzzy(doc, style_name):
                 space_match = style.name
 
             # 3. 包含关键词的匹配（两个方向都检查）
-            if search_name_normalized in style_normalized or style_normalized in search_name_normalized:
+            if search_name_normalized in style_normalized or style_normalized in search_name_normalized:  # noqa: SIM102
                 # 只记录相关性高的（长度差距不要太大）
                 if abs(len(style_normalized) - len(search_name_normalized)) <= 5:
                     partial_matches.append(style.name)

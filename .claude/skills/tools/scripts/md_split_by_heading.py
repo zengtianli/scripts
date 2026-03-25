@@ -1,1 +1,0 @@
-../../../../scripts/document/md_split_by_heading.py

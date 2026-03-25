@@ -21,6 +21,7 @@ Test:
       -d '{"message":"hello"}'
 """
 
+import contextlib
 import glob
 import json
 import os
@@ -30,7 +31,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
-import contextlib
 
 # ---------------------------------------------------------------------------
 # Configuration

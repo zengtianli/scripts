@@ -1,1 +1,0 @@
-../../../../scripts/window/yabai_float.py

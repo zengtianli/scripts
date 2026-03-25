@@ -184,7 +184,7 @@ def extract_format_snapshot(docx_path: str) -> dict:
 
         section_idx = 0
         for sectPr in tree.iter(f"{{{W}}}sectPr"):
-            section_idx += 1
+            section_idx += 1  # noqa: SIM113
             sec = {"section": section_idx}
 
             pgSz = sectPr.find(f"{{{W}}}pgSz")

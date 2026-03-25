@@ -81,10 +81,7 @@ def classify(filename: str, ext_map: dict, fallback: str) -> str:
 
 def should_ignore(filename: str, ignore_prefixes: list[str]) -> bool:
     """判断是否应忽略该文件。"""
-    for prefix in ignore_prefixes:
-        if filename.startswith(prefix):
-            return True
-    return False
+    return any(filename.startswith(prefix) for prefix in ignore_prefixes)
 
 
 def safe_move(src: Path, dest_dir: Path, logger: logging.Logger, dry_run: bool) -> bool:

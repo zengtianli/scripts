@@ -1,1 +1,0 @@
-../../../../scripts/document/md_formatter.py

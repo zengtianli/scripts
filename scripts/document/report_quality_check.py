@@ -212,10 +212,7 @@ def _find_nearest_heading(lines: list[str], line_idx: int) -> str:
 
 def _has_nearby_table(lines: list[str], line_idx: int, radius: int = 5) -> bool:
     """检查附近是否有表格"""
-    for i in range(max(0, line_idx - radius), min(len(lines), line_idx + radius)):
-        if is_in_table(lines[i]):
-            return True
-    return False
+    return any(is_in_table(lines[i]) for i in range(max(0, line_idx - radius), min(len(lines), line_idx + radius)))
 
 
 def _classify_data_source(lines: list[str], line_idx: int) -> str:

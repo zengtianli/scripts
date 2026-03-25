@@ -1,1 +1,0 @@
-../../../scripts/document/pptx_font_yahei.py

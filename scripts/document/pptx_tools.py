@@ -540,9 +540,8 @@ def table_process_shape(shape, stats):
         stats: 统计字典
     """
     # 处理表格
-    if shape.has_table:
-        if table_set_style(shape.table):
-            stats["table_processed"] += 1
+    if shape.has_table and table_set_style(shape.table):
+        stats["table_processed"] += 1
 
     # 处理组合形状中的子形状
     if hasattr(shape, "shapes"):

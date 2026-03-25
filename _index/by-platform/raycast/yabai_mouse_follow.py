@@ -1,1 +1,0 @@
-../../../scripts/window/yabai_mouse_follow.py

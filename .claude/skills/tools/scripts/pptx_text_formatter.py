@@ -1,1 +1,0 @@
-../../../../scripts/document/pptx_text_formatter.py

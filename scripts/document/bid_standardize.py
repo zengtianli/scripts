@@ -18,9 +18,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
+import contextlib
+
 from display import show_error, show_info, show_success
 from file_ops import show_version_info
-import contextlib
 
 SCRIPT_NAME = "bid_standardize"
 SCRIPT_VERSION = "1.3.0"

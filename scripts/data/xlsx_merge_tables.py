@@ -74,10 +74,7 @@ def _fuzzy_match_local(name1, name2):
     norm2 = _normalize_name_local(_clean_name_local(name2))
     if norm1 == norm2:
         return True
-    if len(norm1) >= 2 and len(norm2) >= 2:
-        if norm1 in norm2 or norm2 in norm1:
-            return True
-    return False
+    return bool(len(norm1) >= 2 and len(norm2) >= 2 and (norm1 in norm2 or norm2 in norm1))
 
 
 # ==================== 匹配函数 ====================

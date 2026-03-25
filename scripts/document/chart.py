@@ -104,7 +104,7 @@ def draw_horizontal_bar(config: dict, output_path: str):
     bars = ax.barh(y_pos, values, height=0.55, color=colors, edgecolor="#333333", linewidth=0.8, alpha=0.9)
 
     max_val = max(values)
-    for i, (_bar, val) in enumerate(zip(bars, values)):
+    for i, (_bar, val) in enumerate(zip(bars, values, strict=False)):
         pct = percents[i]
         label_text = f"{val} {unit}（{pct}%）" if pct is not None else f"{val} {unit}"
         if val > max_val * 0.3:
@@ -155,7 +155,7 @@ def draw_vertical_bar(config: dict, output_path: str):
     x_pos = np.arange(len(items))
     bars = ax.bar(x_pos, values, width=0.55, color=colors, edgecolor="#333333", linewidth=0.8, alpha=0.9)
 
-    for bar, val in zip(bars, values):
+    for bar, val in zip(bars, values, strict=False):
         pct_item = next((it for it in items if it["value"] == val), None)
         pct = pct_item.get("percent") if pct_item else None
         text = f"{val}\n({pct}%)" if pct is not None else f"{val}"
@@ -198,7 +198,7 @@ def draw_grouped_bar(config: dict, output_path: str):
         color = s.get("color") or get_phase_color(i)
         bars = ax.bar(x + offset, s["values"], bar_width * 0.9, label=s["name"],
                       color=color, edgecolor="#333333", linewidth=0.6, alpha=0.9)
-        for bar, val in zip(bars, s["values"]):
+        for bar, val in zip(bars, s["values"], strict=False):
             ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f"{val}", ha="center", va="bottom", fontsize=8)
 
     ax.set_xticks(x)

@@ -400,7 +400,7 @@ def generate_plan_md(
     """Generate the rename plan as a Markdown file."""
     # Group by AI-assigned group, then by directory
     groups = defaultdict(list)
-    for i, (f, r) in enumerate(zip(files, ai_results)):
+    for i, (f, r) in enumerate(zip(files, ai_results, strict=False)):
         key = (f["dir"], r.get("group", "未分组"))
         groups[key].append((i, f, r))
 

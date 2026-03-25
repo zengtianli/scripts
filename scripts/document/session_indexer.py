@@ -424,7 +424,7 @@ def main():
         mtime_str = str(mtime)
 
         # Check if file is unchanged since last index
-        if filepath in cache and cache[filepath] == mtime_str:
+        if filepath in cache and cache[filepath] == mtime_str:  # noqa: SIM102
             # Use cached result if available
             if filepath in existing_index:
                 results.append(existing_index[filepath])

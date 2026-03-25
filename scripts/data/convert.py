@@ -196,7 +196,7 @@ def _csv_merge_txt(target_dir: Path, output_file: Path | None = None, **_kw) -> 
 
     txt_files.sort(key=extract_number)
     show_info(f"找到 {len(txt_files)} 个 TXT 文件")
-    max_lines = max(sum(1 for _ in open(f, encoding="utf-8")) for f in txt_files)
+    max_lines = max(sum(1 for _ in open(f, encoding="utf-8")) for f in txt_files)  # noqa: SIM115
     if max_lines == 0:
         output_file.touch()
         show_success("所有文件为空，生成空 CSV")
@@ -204,7 +204,7 @@ def _csv_merge_txt(target_dir: Path, output_file: Path | None = None, **_kw) -> 
     lines = [[] for _ in range(max_lines)]
     for f in txt_files:
         show_info(f"处理: {f.name}")
-        file_lines = [line.strip() for line in open(f, encoding="utf-8")]
+        file_lines = [line.strip() for line in open(f, encoding="utf-8")]  # noqa: SIM115
         for i in range(max_lines):
             lines[i].append(file_lines[i] if i < len(file_lines) else "")
     with open(output_file, "w", newline="", encoding="utf-8") as f:

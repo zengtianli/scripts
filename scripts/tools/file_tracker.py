@@ -53,10 +53,7 @@ class FileTracker:
     def should_ignore(self, path: str) -> bool:
         """检查路径是否应该被忽略"""
         parts = Path(path).parts
-        for part in parts:
-            if part in self.IGNORE_PATTERNS:
-                return True
-        return False
+        return any(part in self.IGNORE_PATTERNS for part in parts)
 
     def get_file_action(self, mtime: float) -> str:
         """

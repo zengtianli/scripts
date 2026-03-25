@@ -212,7 +212,7 @@ def get_first_heading_text(doc, style_prefix: str = "Heading") -> str | None:
         标题文本，未找到返回 None
     """
     for para in doc.paragraphs:
-        if para.style and para.style.name:
+        if para.style and para.style.name:  # noqa: SIM102
             if para.style.name.startswith(style_prefix) or para.style.name.startswith("标题"):
                 text = para.text.strip()
                 if text:

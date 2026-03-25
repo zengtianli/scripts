@@ -28,6 +28,9 @@ from copy import deepcopy
 
 try:
     from lxml import etree
+
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 except ImportError:
     print("❌ 需要安装 lxml: pip install lxml")
     sys.exit(1)
@@ -45,10 +48,7 @@ except ImportError:
 
 
 # Word XML 命名空间
-NSMAP = {
-    "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
-    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-}
+from docx_xml import NSMAP
 
 # 需要提取的样式 ID
 TARGET_STYLES = {

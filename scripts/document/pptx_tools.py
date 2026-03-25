@@ -34,6 +34,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from finder import get_input_files
 from progress import ProgressTracker
+from text_format_rules import fix_punctuation, fix_quotes, fix_units
 
 # ── 第三方依赖 ────────────────────────────────────────────────────────
 try:
@@ -365,110 +366,6 @@ def font_process_presentation(input_path, do_backup=True):
 #  子命令: format — 文本格式修复（引号、标点、单位）
 # =====================================================================
 
-def format_fix_quotes(content):
-    """
-    替换所有双引号为中文标准引号
-    奇数位置 -> \u201c (左引号)
-    偶数位置 -> \u201d (右引号)
-    """
-    quote_pattern = '["""\u300c\u300d]'
-    counter = 0
-
-    def replace_quote(match):
-        nonlocal counter
-        counter += 1
-        return '"' if counter % 2 == 1 else '"'
-
-    result = re.sub(quote_pattern, replace_quote, content)
-    return result, counter
-
-
-def format_fix_punctuation(content):
-    """
-    将英文标点符号转换为中文标点符号
-    """
-    punctuation_map = {
-        ",": "\uff0c",
-        ":": "\uff1a",
-        ";": "\uff1b",
-        "!": "\uff01",
-        "?": "\uff1f",
-        "(": "\uff08",
-        ")": "\uff09",
-    }
-
-    result = content
-    replacement_count = 0
-
-    for eng_punct, chn_punct in punctuation_map.items():
-        escaped_punct = re.escape(eng_punct)
-        count = len(re.findall(escaped_punct, result))
-        replacement_count += count
-        result = re.sub(escaped_punct, chn_punct, result)
-
-    return result, replacement_count
-
-
-def format_fix_units(content):
-    """
-    将中文单位转换为标准符号单位
-    """
-    units_map = {
-        # 面积单位
-        "平方公里": "km\u00b2",
-        "平方千米": "km\u00b2",
-        "平方米": "m\u00b2",
-        "平方厘米": "cm\u00b2",
-        "平方毫米": "mm\u00b2",
-        # 体积单位
-        "立方米": "m\u00b3",
-        "立方厘米": "cm\u00b3",
-        "立方毫米": "mm\u00b3",
-        "立方公里": "km\u00b3",
-        "立方千米": "km\u00b3",
-        # 长度单位
-        "公里": "km",
-        "千米": "km",
-        "厘米": "cm",
-        "毫米": "mm",
-        "微米": "\u03bcm",
-        "纳米": "nm",
-        # 质量单位
-        "公斤": "kg",
-        "千克": "kg",
-        "毫克": "mg",
-        "微克": "\u03bcg",
-        # 容量单位
-        "毫升": "mL",
-        "微升": "\u03bcL",
-        # 时间单位
-        "小时": "h",
-        "分钟": "min",
-        "秒钟": "s",
-        # 温度单位
-        "摄氏度": "\u2103",
-        "华氏度": "\u2109",
-        # m2/m3 转换
-        "km2": "km\u00b2",
-        "km3": "km\u00b3",
-        "m2": "m\u00b2",
-        "m3": "m\u00b3",
-    }
-
-    result = content
-    replacement_count = 0
-
-    sorted_units = sorted(units_map.items(), key=lambda x: len(x[0]), reverse=True)
-
-    for chn_unit, symbol in sorted_units:
-        count = result.count(chn_unit)
-        if count > 0:
-            replacement_count += count
-            result = result.replace(chn_unit, symbol)
-
-    return result, replacement_count
-
-
 def format_process_text(text, stats):
     """
     处理文本，应用所有文本转换
@@ -476,7 +373,7 @@ def format_process_text(text, stats):
     if not text:
         return text
 
-    result, quote_count = format_fix_quotes(text)
+    result, quote_count = fix_quotes(text)
     result, punct_count = format_fix_punctuation(result)
     result, unit_count = format_fix_units(result)
 

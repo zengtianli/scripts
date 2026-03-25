@@ -35,7 +35,6 @@
 """
 
 import copy
-import re
 import sys
 from pathlib import Path
 
@@ -43,131 +42,13 @@ from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / “lib”))
 from finder import get_input_files
 from progress import ProgressTracker
+from text_format_rules import fix_punctuation, fix_quotes, fix_units
 
 # ===== 配置选项 =====
-# 注释掉下面这行可以启用页脚处理
 SKIP_FOOTER = True
-# SKIP_FOOTER = False  # 取消注释这行可以处理页脚
-
-
-def fix_quotes(content, counter=0):
-    """
-    替换所有双引号为中文标准引号
-    奇数位置 → U+201C (左引号)
-    偶数位置 → U+201D (右引号)
-
-    counter: 外部传入的计数器，用于跨run保持引号配对
-    返回: (结果文本, 本次替换数, 更新后的counter)
-    """
-    # 匹配所有可能的双引号类型
-    quote_pattern = "[\u0022\u201c\u201d\u2018\u2019\u300c\u300d]"
-
-    count = len(re.findall(quote_pattern, content))
-
-    def replace_quote(match):
-        nonlocal counter
-        counter += 1
-        # 奇数用中文左引号”，偶数用中文右引号”
-        return "\u201c" if counter % 2 == 1 else "\u201d"
-
-    # 执行替换
-    result = re.sub(quote_pattern, replace_quote, content)
-
-    return result, count, counter
-
-
-def fix_punctuation(content):
-    """
-    将英文标点符号转换为中文标点符号
-    """
-    # 英文标点到中文标点的映射
-    punctuation_map = {
-        ",": "，",  # 逗号
-        ":": "：",  # 冒号
-        ";": "；",  # 分号
-        "!": "！",  # 感叹号
-        "?": "？",  # 问号
-        "(": "（",  # 左括号
-        ")": "）",  # 右括号
-    }
-
-    result = content
-    replacement_count = 0
-
-    # 逐个替换标点符号
-    for eng_punct, chn_punct in punctuation_map.items():
-        # 转义特殊字符
-        escaped_punct = re.escape(eng_punct)
-        count = len(re.findall(escaped_punct, result))
-        replacement_count += count
-        result = re.sub(escaped_punct, chn_punct, result)
-
-    return result, replacement_count
-
-
-def fix_units(content):
-    """
-    将中文单位转换为标准符号单位
-    """
-    # 中文单位到符号的映射（按长度排序，优先匹配长的）
-    units_map = {
-        # 面积单位
-        "平方公里": "km²",
-        "平方千米": "km²",
-        "平方米": "m²",
-        "平方厘米": "cm²",
-        "平方毫米": "mm²",
-        # 体积单位
-        "立方米": "m³",
-        "立方厘米": "cm³",
-        "立方毫米": "mm³",
-        "立方公里": "km³",
-        "立方千米": "km³",
-        # 长度单位
-        "公里": "km",
-        "千米": "km",
-        "厘米": "cm",
-        "毫米": "mm",
-        "微米": "μm",
-        "纳米": "nm",
-        # 质量单位
-        "公斤": "kg",
-        "千克": "kg",
-        "毫克": "mg",
-        "微克": "μg",
-        # 容量单位
-        "毫升": "mL",
-        "微升": "μL",
-        # 时间单位
-        "小时": "h",
-        "分钟": "min",
-        "秒钟": "s",
-        # 温度单位
-        "摄氏度": "℃",
-        "华氏度": "℉",
-        # 直接替换 m2/m3 和 km2/km3
-        "km2": "km²",
-        "km3": "km³",
-        "m2": "m²",
-        "m3": "m³",
-    }
-
-    result = content
-    replacement_count = 0
-
-    # 按长度从长到短排序，避免误匹配（如"平方米"要在"米"之前）
-    sorted_units = sorted(units_map.items(), key=lambda x: len(x[0]), reverse=True)
-
-    for chn_unit, symbol in sorted_units:
-        count = result.count(chn_unit)
-        if count > 0:
-            replacement_count += count
-            result = result.replace(chn_unit, symbol)
-
-    return result, replacement_count
 
 
 QUOTE_CHARS = {"\u201c", "\u201d"}

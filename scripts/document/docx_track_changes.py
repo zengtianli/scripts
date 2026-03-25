@@ -25,22 +25,12 @@ import tempfile
 import zipfile
 from datetime import UTC, datetime
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from lxml import etree
 
-# ── Word XML 命名空间 ──────────────────────────────────────────────
-NSMAP = {
-    "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
-    "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
-}
-W = NSMAP["w"]
-R_NS = NSMAP["r"]
-REL_COMMENTS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments"
-
-
-def qn(tag: str) -> str:
-    """将 'w:t' 转换为 '{namespace}t' 格式"""
-    prefix, local = tag.split(":")
-    return f"{{{NSMAP[prefix]}}}{local}"
+from docx_xml import NSMAP, W, R_NS, REL_COMMENTS, qn
 
 
 # ═══════════════════════════════════════════════════════════════════

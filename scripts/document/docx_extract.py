@@ -20,22 +20,19 @@ Word 文档文本提取工具 (docx_extract.py)
 """
 
 import argparse
+import sys
 import json
 import os
 import re
 import zipfile
 
+from pathlib import Path
+
 from lxml import etree
 
-NSMAP = {
-    "w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main",
-}
-W = NSMAP["w"]
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 
-
-def qn(tag: str) -> str:
-    prefix, local = tag.split(":")
-    return f"{{{NSMAP[prefix]}}}{local}"
+from docx_xml import NSMAP, W, qn
 
 
 def extract_paragraphs(docx_path: str) -> list[dict]:

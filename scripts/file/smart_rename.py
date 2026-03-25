@@ -289,8 +289,13 @@ def analyze_with_ai(
     files: list[dict],
     config: dict,
     logger: logging.Logger,
+    prev_results: list[dict] | None = None,
 ) -> list[dict]:
-    """Send files in batches to AI for analysis. Returns merged results."""
+    """Send files in batches to AI for analysis. Returns merged results.
+
+    If prev_results is provided, only re-analyze files that previously failed
+    (action == "skip" and reason contains "AI 调用失败").
+    """
     ai_cfg = config["ai"]
     batch_size = ai_cfg["batch_size"]
 
@@ -300,8 +305,25 @@ def analyze_with_ai(
     for indices in dups.values():
         dup_indices.update(indices)
 
-    all_indices = list(range(len(files)))
     results = [None] * len(files)
+
+    # Determine which indices need (re)analysis
+    if prev_results and len(prev_results) == len(files):
+        # Retry mode: keep successful results, only redo failures
+        failed_indices = []
+        for i, r in enumerate(prev_results):
+            if r and "AI 调用失败" in r.get("reason", ""):
+                failed_indices.append(i)
+            else:
+                results[i] = r  # Keep previous success
+        all_indices = failed_indices
+        logger.info("重试模式: %d 个成功保留, %d 个失败待重试", len(files) - len(failed_indices), len(failed_indices))
+    else:
+        all_indices = list(range(len(files)))
+
+    if not all_indices:
+        logger.info("没有需要分析的文件")
+        return results
 
     # Process in batches
     for batch_start in range(0, len(all_indices), batch_size):
@@ -595,17 +617,28 @@ def cmd_analyze(args, config, logger):
     if similar:
         logger.info("发现 %d 组文件名相似的文件", len(similar))
 
-    # AI analysis
-    ai_results = analyze_with_ai(files, config, logger)
+    plan_path = Path(config["plan_file"]).expanduser()
+    raw_path = plan_path.with_suffix(".json")
+    prev_results_path = plan_path.with_name("_rename_results.json")
+
+    # Load previous results for retry mode
+    prev_results = None
+    if getattr(args, "retry_failed", False) and prev_results_path.exists():
+        prev_results = json.loads(prev_results_path.read_text(encoding="utf-8"))
+        logger.info("加载上次结果，仅重试失败的文件")
+
+    # AI analysis (with retry support)
+    ai_results = analyze_with_ai(files, config, logger, prev_results=prev_results)
 
     # Generate plan
-    plan_path = Path(config["plan_file"]).expanduser()
     generate_plan_md(files, ai_results, plan_path, logger)
 
-    # Also save raw file list for execute phase
-    raw_path = plan_path.with_suffix(".json")
+    # Save raw file list + AI results for retry/execute
     raw_path.write_text(
         json.dumps(files, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    prev_results_path.write_text(
+        json.dumps(ai_results, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     logger.info("文件元信息已保存: %s", raw_path)
     logger.info("请审核 %s 后运行: python3 smart_rename.py execute", plan_path)
@@ -652,6 +685,7 @@ def main():
     p_analyze.add_argument("--all", action="store_true", help="扫描所有分类目录")
     p_analyze.add_argument("--dir", help="扫描指定目录")
     p_analyze.add_argument("--dry-run", action="store_true", help="只分析前5个文件（测试）")
+    p_analyze.add_argument("--retry-failed", action="store_true", help="仅重试上次失败的文件")
 
     # execute
     p_execute = sub.add_parser("execute", help="执行审核后的重命名计划")

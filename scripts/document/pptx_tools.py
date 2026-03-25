@@ -371,13 +371,13 @@ def format_fix_quotes(content):
     奇数位置 -> \u201c (左引号)
     偶数位置 -> \u201d (右引号)
     """
-    quote_pattern = r'["""\u2018\u2019\u300c\u300d]'
+    quote_pattern = '["""\u300c\u300d]'
     counter = 0
 
     def replace_quote(match):
         nonlocal counter
         counter += 1
-        return '\u201c' if counter % 2 == 1 else '\u201d'
+        return '"' if counter % 2 == 1 else '"'
 
     result = re.sub(quote_pattern, replace_quote, content)
     return result, counter

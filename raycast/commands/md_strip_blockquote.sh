@@ -19,4 +19,4 @@ if [ -z "$input" ]; then
     exit 1
 fi
 
-source "$(dirname "$0")/../lib/run_python.sh" && run_python "document/md_strip_blockquote.py" "$input" --fix
+source "$(dirname "$0")/../lib/run_python.sh" && run_python "document/md_tools.py" strip "$input" --fix

@@ -18,8 +18,8 @@ ZDWP Word文档标准化一键处理工具
     python3 apply_zdwp_all.py document.docx
 """
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
@@ -31,13 +31,14 @@ PYTHON = sys.executable
 
 # 各个处理脚本的路径
 SCRIPTS = {
-    'text_formatter': SCRIPT_DIR / 'docx_text_formatter.py',
-    'heading_styles': SCRIPT_DIR / 'docx_apply_heading_styles.py',
-    'paragraph_style': SCRIPT_DIR / 'docx_apply_paragraph_style.py',
-    'table_style': SCRIPT_DIR / 'docx_apply_table_style.py',
-    'image_caption': SCRIPT_DIR / 'docx_apply_image_caption.py',
-    'numbers_font': SCRIPT_DIR / 'docx_format_numbers_font.py',
+    "text_formatter": SCRIPT_DIR / "docx_text_formatter.py",
+    "heading_styles": SCRIPT_DIR / "docx_apply_heading_styles.py",
+    "paragraph_style": SCRIPT_DIR / "docx_apply_paragraph_style.py",
+    "table_style": SCRIPT_DIR / "docx_apply_table_style.py",
+    "image_caption": SCRIPT_DIR / "docx_apply_image_caption.py",
+    "numbers_font": SCRIPT_DIR / "docx_format_numbers_font.py",
 }
+
 
 def run_script(script_path, input_file, args=None):
     """
@@ -56,12 +57,7 @@ def run_script(script_path, input_file, args=None):
         cmd.extend(args)
 
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         # 打印输出
         if result.stdout:
@@ -78,6 +74,7 @@ def run_script(script_path, input_file, args=None):
         print(f"❌ 执行失败: {e}")
         return False
 
+
 def apply_zdwp_all(input_file):
     """
     应用所有ZDWP标准化处理
@@ -92,8 +89,8 @@ def apply_zdwp_all(input_file):
         print(f"❌ 错误: 文件不存在: {input_file}")
         sys.exit(1)
 
-    if input_path.suffix.lower() != '.docx':
-        print(f"❌ 错误: 只支持 .docx 文件")
+    if input_path.suffix.lower() != ".docx":
+        print("❌ 错误: 只支持 .docx 文件")
         sys.exit(1)
 
     print("=" * 70)
@@ -105,34 +102,34 @@ def apply_zdwp_all(input_file):
     # 执行顺序
     steps = [
         {
-            'name': '步骤 1/6: 文本格式修复',
-            'script': SCRIPTS['text_formatter'],
-            'args': None,
+            "name": "步骤 1/6: 文本格式修复",
+            "script": SCRIPTS["text_formatter"],
+            "args": None,
         },
         {
-            'name': '步骤 2/6: 自动识别标题',
-            'script': SCRIPTS['heading_styles'],
-            'args': None,
+            "name": "步骤 2/6: 自动识别标题",
+            "script": SCRIPTS["heading_styles"],
+            "args": None,
         },
         {
-            'name': '步骤 3/6: 应用正文样式',
-            'script': SCRIPTS['paragraph_style'],
-            'args': ['ZDWP正文'],
+            "name": "步骤 3/6: 应用正文样式",
+            "script": SCRIPTS["paragraph_style"],
+            "args": ["ZDWP正文"],
         },
         {
-            'name': '步骤 4/6: 应用表格样式',
-            'script': SCRIPTS['table_style'],
-            'args': ['ZDWP表格内容'],
+            "name": "步骤 4/6: 应用表格样式",
+            "script": SCRIPTS["table_style"],
+            "args": ["ZDWP表格内容"],
         },
         {
-            'name': '步骤 5/6: 应用图片和图名样式',
-            'script': SCRIPTS['image_caption'],
-            'args': ['ZDWP图名'],
+            "name": "步骤 5/6: 应用图片和图名样式",
+            "script": SCRIPTS["image_caption"],
+            "args": ["ZDWP图名"],
         },
         {
-            'name': '步骤 6/6: 字体格式化',
-            'script': SCRIPTS['numbers_font'],
-            'args': None,
+            "name": "步骤 6/6: 字体格式化",
+            "script": SCRIPTS["numbers_font"],
+            "args": None,
         },
     ]
 
@@ -144,11 +141,11 @@ def apply_zdwp_all(input_file):
         print(f"▶️  {step['name']}")
         print("=" * 70)
 
-        if run_script(step['script'], input_path, step['args']):
+        if run_script(step["script"], input_path, step["args"]):
             success_count += 1
             print(f"✅ {step['name']} 完成")
         else:
-            failed_steps.append(step['name'])
+            failed_steps.append(step["name"])
             print(f"⚠️ {step['name']} 失败（继续执行后续步骤）")
 
     # 总结
@@ -167,10 +164,11 @@ def apply_zdwp_all(input_file):
     print(f"\n📄 处理完成: {input_path.name}")
     print("=" * 70)
 
+
 def main():
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='docx', allow_multiple=False)
-    
+    files = get_input_files(sys.argv[1:], expected_ext="docx", allow_multiple=False)
+
     if not files:
         print("ZDWP Word文档标准化一键处理工具")
         print("\n用法: python3 apply_zdwp_all.py <input.docx>")
@@ -188,6 +186,6 @@ def main():
     input_file = files[0]
     apply_zdwp_all(input_file)
 
+
 if __name__ == "__main__":
     main()
-

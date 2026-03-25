@@ -3,9 +3,9 @@
 
 import json
 import sys
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import defaultdict
 
 LOG_FILE = Path.home() / "Library" / "Logs" / "secretary" / "personal_log.jsonl"
 
@@ -16,7 +16,7 @@ def load_logs():
         return []
 
     logs = []
-    with open(LOG_FILE, "r", encoding="utf-8") as f:
+    with open(LOG_FILE, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if line:

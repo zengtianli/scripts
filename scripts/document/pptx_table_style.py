@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 PPT表格样式工具
 
@@ -13,9 +12,9 @@ PPT表格样式工具
     python3 table_style.py <input.pptx>
 """
 
-import sys
 import os
 import shutil
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
@@ -33,14 +32,8 @@ except ImportError:
 
 def show_message(msg_type, message):
     """显示格式化消息"""
-    icons = {
-        'success': '✅',
-        'error': '❌',
-        'warning': '⚠️',
-        'info': 'ℹ️',
-        'processing': '🔄'
-    }
-    icon = icons.get(msg_type, 'ℹ️')
+    icons = {"success": "✅", "error": "❌", "warning": "⚠️", "info": "ℹ️", "processing": "🔄"}
+    icon = icons.get(msg_type, "ℹ️")
     print(f"{icon} {message}")
 
 
@@ -49,48 +42,48 @@ def backup_file(file_path):
     backup_path = f"{file_path}.backup"
     try:
         shutil.copy2(file_path, backup_path)
-        show_message('info', f"已备份原文件: {os.path.basename(backup_path)}")
+        show_message("info", f"已备份原文件: {os.path.basename(backup_path)}")
         return backup_path
     except Exception as e:
-        show_message('warning', f"备份文件失败: {e}")
+        show_message("warning", f"备份文件失败: {e}")
         return None
 
 
 def set_table_style(table):
     """
     设置表格样式选项
-    
+
     Args:
         table: pptx table对象
-    
+
     Returns:
         bool: 是否成功设置
     """
     try:
         # Header Row - 标题行
         table.first_row = True
-        
+
         # Banded Rows - 镶边行（交替行颜色）
         table.horz_banding = True
-        
+
         # First Column - 首列
         table.first_col = True
-        
+
         # 其他可选设置（默认关闭）
         # table.last_row = False      # Total Row - 汇总行
         # table.last_col = False      # Last Column - 末列
         # table.vert_banding = False  # Banded Columns - 镶边列
-        
+
         return True
     except Exception as e:
-        show_message('warning', f"设置表格样式失败: {e}")
+        show_message("warning", f"设置表格样式失败: {e}")
         return False
 
 
 def process_shape(shape, stats):
     """
     处理形状，查找表格
-    
+
     Args:
         shape: pptx shape对象
         stats: 统计字典
@@ -98,10 +91,10 @@ def process_shape(shape, stats):
     # 处理表格
     if shape.has_table:
         if set_table_style(shape.table):
-            stats['processed_tables'] += 1
-    
+            stats["processed_tables"] += 1
+
     # 处理组合形状中的子形状
-    if hasattr(shape, 'shapes'):
+    if hasattr(shape, "shapes"):
         for sub_shape in shape.shapes:
             process_shape(sub_shape, stats)
 
@@ -109,65 +102,66 @@ def process_shape(shape, stats):
 def process_presentation(input_path, output_path=None):
     """
     处理PPT文档中所有表格的样式
-    
+
     Args:
         input_path: 输入文件路径
         output_path: 输出文件路径，如果为None则覆盖原文件
-    
+
     Returns:
         bool: 是否成功
     """
     try:
         # 验证输入文件
         if not os.path.exists(input_path):
-            show_message('error', f"文件不存在: {input_path}")
+            show_message("error", f"文件不存在: {input_path}")
             return False
-        
-        if not input_path.lower().endswith('.pptx'):
-            show_message('error', "只支持.pptx格式的文件")
+
+        if not input_path.lower().endswith(".pptx"):
+            show_message("error", "只支持.pptx格式的文件")
             return False
-        
-        show_message('processing', f"正在处理文件: {os.path.basename(input_path)}")
-        
+
+        show_message("processing", f"正在处理文件: {os.path.basename(input_path)}")
+
         # 备份原文件
         backup_file(input_path)
-        
+
         # 打开PPT
         prs = Presentation(input_path)
-        
+
         # 统计信息
         total_slides = len(prs.slides)
-        stats = {'processed_tables': 0}
-        
-        show_message('info', f"文档包含 {total_slides} 张幻灯片")
-        
+        stats = {"processed_tables": 0}
+
+        show_message("info", f"文档包含 {total_slides} 张幻灯片")
+
         # 处理所有幻灯片
-        show_message('processing', "正在处理表格样式...")
+        show_message("processing", "正在处理表格样式...")
         for i, slide in enumerate(prs.slides, 1):
             try:
                 for shape in slide.shapes:
                     process_shape(shape, stats)
             except Exception as e:
-                show_message('warning', f"处理第{i}张幻灯片时出错: {e}")
+                show_message("warning", f"处理第{i}张幻灯片时出错: {e}")
                 continue
-        
-        if stats['processed_tables'] > 0:
-            show_message('info', f"已处理 {stats['processed_tables']} 个表格")
+
+        if stats["processed_tables"] > 0:
+            show_message("info", f"已处理 {stats['processed_tables']} 个表格")
         else:
-            show_message('warning', "未找到任何表格")
-        
+            show_message("warning", "未找到任何表格")
+
         # 保存文档
         output_file = output_path if output_path else input_path
         prs.save(output_file)
-        
-        show_message('success', f"表格样式设置完成: {os.path.basename(output_file)}")
-        show_message('info', "已启用: Header Row, Banded Rows, First Column")
-        
+
+        show_message("success", f"表格样式设置完成: {os.path.basename(output_file)}")
+        show_message("info", "已启用: Header Row, Banded Rows, First Column")
+
         return True
-        
+
     except Exception as e:
-        show_message('error', f"处理文件时出错: {e}")
+        show_message("error", f"处理文件时出错: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -175,7 +169,7 @@ def process_presentation(input_path, output_path=None):
 def main():
     """主函数"""
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='pptx')
+    files = get_input_files(sys.argv[1:], expected_ext="pptx")
 
     if not files:
         print("PPT表格样式工具")
@@ -198,19 +192,18 @@ def main():
     tracker = ProgressTracker()
 
     for file_path in files:
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print(f"处理文件: {os.path.basename(file_path)}")
-        print('='*50)
+        print("=" * 50)
         success = process_presentation(str(file_path))
         if success:
             tracker.add_success()
         else:
             tracker.add_error()
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     tracker.show_summary("文件处理")
 
 
 if __name__ == "__main__":
     main()
-

@@ -7,10 +7,9 @@ Claude Code 对话记录分析器
 import json
 import os
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any
-from collections import defaultdict
+from typing import Any
 
 
 class ConversationAnalyzer:
@@ -21,19 +20,19 @@ class ConversationAnalyzer:
 
         # 关键词模式
         self.task_keywords = [
-            r'创建|实现|开发|编写|修改|修复|添加|删除|重构|优化',
-            r'完成|处理|解决|分析|设计|测试|部署',
+            r"创建|实现|开发|编写|修改|修复|添加|删除|重构|优化",
+            r"完成|处理|解决|分析|设计|测试|部署",
         ]
         self.decision_keywords = [
-            r'决定|选择|采用|使用|改为|切换到',
-            r'方案|策略|架构|技术栈',
+            r"决定|选择|采用|使用|改为|切换到",
+            r"方案|策略|架构|技术栈",
         ]
         self.project_patterns = [
-            r'cursor-shared|useful_scripts|zdwp|essay|sync',
-            r'~/[a-zA-Z_-]+',
+            r"cursor-shared|useful_scripts|zdwp|essay|sync",
+            r"~/[a-zA-Z_-]+",
         ]
 
-    def find_today_conversations(self) -> List[Path]:
+    def find_today_conversations(self) -> list[Path]:
         """查找今天的对话记录文件"""
         today = datetime.now().date()
         conversations = []
@@ -50,11 +49,11 @@ class ConversationAnalyzer:
 
         return conversations
 
-    def parse_jsonl(self, file_path: Path) -> List[Dict]:
+    def parse_jsonl(self, file_path: Path) -> list[dict]:
         """解析 JSONL 文件"""
         messages = []
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 for line in f:
                     try:
                         data = json.loads(line.strip())
@@ -73,47 +72,47 @@ class ConversationAnalyzer:
             texts = []
             for item in content:
                 if isinstance(item, dict):
-                    if item.get('type') == 'text':
-                        texts.append(item.get('text', ''))
-                    elif item.get('type') == 'thinking':
-                        texts.append(item.get('thinking', ''))
+                    if item.get("type") == "text":
+                        texts.append(item.get("text", ""))
+                    elif item.get("type") == "thinking":
+                        texts.append(item.get("thinking", ""))
                 elif isinstance(item, str):
                     texts.append(item)
-            return ' '.join(texts)
-        return ''
+            return " ".join(texts)
+        return ""
 
-    def extract_projects(self, messages: List[Dict]) -> List[str]:
+    def extract_projects(self, messages: list[dict]) -> list[str]:
         """提取项目名称"""
         projects = set()
 
         for msg in messages:
             # 从 cwd 提取
-            cwd = msg.get('cwd', '')
+            cwd = msg.get("cwd", "")
             if cwd:
                 # 提取目录名
-                parts = cwd.split('/')
+                parts = cwd.split("/")
                 if len(parts) > 0:
                     projects.add(parts[-1])
 
             # 从消息内容提取
-            if 'message' in msg and 'content' in msg['message']:
-                text = self.extract_text_from_content(msg['message']['content'])
+            if "message" in msg and "content" in msg["message"]:
+                text = self.extract_text_from_content(msg["message"]["content"])
                 for pattern in self.project_patterns:
                     matches = re.findall(pattern, text, re.IGNORECASE)
                     projects.update(matches)
 
         return sorted(list(projects))
 
-    def extract_tasks(self, messages: List[Dict]) -> List[str]:
+    def extract_tasks(self, messages: list[dict]) -> list[str]:
         """提取任务"""
         tasks = []
 
         for msg in messages:
-            if msg.get('type') != 'user':
+            if msg.get("type") != "user":
                 continue
 
-            if 'message' in msg and 'content' in msg['message']:
-                text = self.extract_text_from_content(msg['message']['content'])
+            if "message" in msg and "content" in msg["message"]:
+                text = self.extract_text_from_content(msg["message"]["content"])
 
                 # 查找任务关键词
                 for pattern in self.task_keywords:
@@ -124,22 +123,22 @@ class ConversationAnalyzer:
                         end = min(len(text), match.end() + 80)
                         context = text[start:end].strip()
                         # 清理换行和多余空格
-                        context = re.sub(r'\s+', ' ', context)
+                        context = re.sub(r"\s+", " ", context)
                         if len(context) > 10:
                             tasks.append(context)
 
         return tasks[:10]  # 限制数量
 
-    def extract_decisions(self, messages: List[Dict]) -> List[str]:
+    def extract_decisions(self, messages: list[dict]) -> list[str]:
         """提取决策"""
         decisions = []
 
         for msg in messages:
-            if msg.get('type') != 'assistant':
+            if msg.get("type") != "assistant":
                 continue
 
-            if 'message' in msg and 'content' in msg['message']:
-                text = self.extract_text_from_content(msg['message']['content'])
+            if "message" in msg and "content" in msg["message"]:
+                text = self.extract_text_from_content(msg["message"]["content"])
 
                 # 查找决策关键词
                 for pattern in self.decision_keywords:
@@ -148,48 +147,37 @@ class ConversationAnalyzer:
                         start = max(0, match.start() - 20)
                         end = min(len(text), match.end() + 80)
                         context = text[start:end].strip()
-                        context = re.sub(r'\s+', ' ', context)
+                        context = re.sub(r"\s+", " ", context)
                         if len(context) > 10:
                             decisions.append(context)
 
         return decisions[:10]
 
-    def generate_suggestions(self, projects: List[str], tasks: List[str],
-                           decisions: List[str]) -> List[Dict]:
+    def generate_suggestions(self, projects: list[str], tasks: list[str], decisions: list[str]) -> list[dict]:
         """生成回顾建议"""
         suggestions = []
 
         # 项目进展建议
         for project in projects:
             if project and len(project) > 2:
-                suggestions.append({
-                    "type": "project_progress",
-                    "content": f"完成 {project} 项目相关工作",
-                    "confidence": 0.7
-                })
+                suggestions.append(
+                    {"type": "project_progress", "content": f"完成 {project} 项目相关工作", "confidence": 0.7}
+                )
 
         # 任务建议
         for task in tasks[:5]:
-            suggestions.append({
-                "type": "work_record",
-                "content": task,
-                "confidence": 0.6
-            })
+            suggestions.append({"type": "work_record", "content": task, "confidence": 0.6})
 
         # 决策建议
         for decision in decisions[:3]:
-            suggestions.append({
-                "type": "decision",
-                "content": decision,
-                "confidence": 0.5
-            })
+            suggestions.append({"type": "decision", "content": decision, "confidence": 0.5})
 
         # 按置信度排序
-        suggestions.sort(key=lambda x: x['confidence'], reverse=True)
+        suggestions.sort(key=lambda x: x["confidence"], reverse=True)
 
         return suggestions[:15]
 
-    def analyze(self, compact: bool = False) -> Dict[str, Any]:
+    def analyze(self, compact: bool = False) -> dict[str, Any]:
         """分析今天的对话记录"""
         conversations = self.find_today_conversations()
 
@@ -211,15 +199,12 @@ class ConversationAnalyzer:
             "projects": projects,
             "tasks": tasks,
             "decisions": decisions,
-            "suggestions": suggestions
+            "suggestions": suggestions,
         }
 
         if compact:
             # 压缩格式：只保留建议
-            result = {
-                "date": result["date"],
-                "suggestions": suggestions
-            }
+            result = {"date": result["date"], "suggestions": suggestions}
 
         return result
 
@@ -227,10 +212,10 @@ class ConversationAnalyzer:
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='分析 Claude Code 对话记录')
-    parser.add_argument('--compact', action='store_true', help='压缩输出格式')
-    parser.add_argument('--output', '-o', help='输出文件路径')
-    parser.add_argument('--projects-dir', help='对话记录目录')
+    parser = argparse.ArgumentParser(description="分析 Claude Code 对话记录")
+    parser.add_argument("--compact", action="store_true", help="压缩输出格式")
+    parser.add_argument("--output", "-o", help="输出文件路径")
+    parser.add_argument("--projects-dir", help="对话记录目录")
 
     args = parser.parse_args()
 
@@ -240,12 +225,12 @@ def main():
     output = json.dumps(result, ensure_ascii=False, indent=2)
 
     if args.output:
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             f.write(output)
         print(f"结果已保存到: {args.output}")
     else:
         print(output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

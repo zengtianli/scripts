@@ -8,15 +8,15 @@
 支持 check（报告）和 fix（替换）两种模式。
 """
 
-import sys
-import re
-import json
-import shutil
 import argparse
+import json
+import re
+import shutil
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info, show_warning
+from display import show_error, show_info, show_success, show_warning
 from file_ops import show_version_info
 
 SCRIPT_NAME = "chart_insert"
@@ -57,12 +57,14 @@ def find_code_blocks(text: str) -> list[dict]:
                 block_start = i
                 block_lines = []
             else:
-                blocks.append({
-                    "start": block_start,
-                    "end": i,
-                    "content_lines": block_lines,
-                    "is_ascii_art": is_ascii_art_block(block_lines),
-                })
+                blocks.append(
+                    {
+                        "start": block_start,
+                        "end": i,
+                        "content_lines": block_lines,
+                        "is_ascii_art": is_ascii_art_block(block_lines),
+                    }
+                )
                 in_block = False
                 block_start = -1
                 block_lines = []
@@ -74,7 +76,7 @@ def find_code_blocks(text: str) -> list[dict]:
 
 def find_heading_for_block(lines: list[str], block_start: int) -> str | None:
     """向上查找代码块所在的最近标题编号（如 6.2.1）"""
-    heading_re = re.compile(r'^#{1,4}\s+(\d+(?:\.\d+)*)\s')
+    heading_re = re.compile(r"^#{1,4}\s+(\d+(?:\.\d+)*)\s")
     for i in range(block_start - 1, -1, -1):
         m = heading_re.match(lines[i].strip())
         if m:
@@ -91,11 +93,13 @@ def check_insertions(md_dir: Path, config: dict) -> list[dict]:
     for mapping in mappings:
         md_file = md_dir / mapping["file"]
         if not md_file.exists():
-            issues.append({
-                "file": mapping["file"],
-                "status": "missing",
-                "message": f"MD 文件不存在: {md_file}",
-            })
+            issues.append(
+                {
+                    "file": mapping["file"],
+                    "status": "missing",
+                    "message": f"MD 文件不存在: {md_file}",
+                }
+            )
             continue
 
         text = md_file.read_text(encoding="utf-8")
@@ -117,37 +121,43 @@ def check_insertions(md_dir: Path, config: dict) -> list[dict]:
                 if block["start"] > 0:
                     prev_line = lines[block["start"] - 1].strip()
                     if prev_line.startswith("![") and image_file in prev_line:
-                        issues.append({
-                            "file": mapping["file"],
-                            "status": "already_done",
-                            "line": block["start"] + 1,
-                            "heading": heading_match,
-                            "message": f"已替换为图片: {image_file}",
-                        })
+                        issues.append(
+                            {
+                                "file": mapping["file"],
+                                "status": "already_done",
+                                "line": block["start"] + 1,
+                                "heading": heading_match,
+                                "message": f"已替换为图片: {image_file}",
+                            }
+                        )
                         found = True
                         break
 
-                issues.append({
-                    "file": mapping["file"],
-                    "status": "pending",
-                    "line": block["start"] + 1,
-                    "heading": heading_match,
-                    "image": image_file,
-                    "caption": caption,
-                    "block_lines": len(block["content_lines"]),
-                    "message": f"L{block['start']+1}-L{block['end']+1}: "
-                               f"ASCII art ({len(block['content_lines'])}行) → {image_file}",
-                })
+                issues.append(
+                    {
+                        "file": mapping["file"],
+                        "status": "pending",
+                        "line": block["start"] + 1,
+                        "heading": heading_match,
+                        "image": image_file,
+                        "caption": caption,
+                        "block_lines": len(block["content_lines"]),
+                        "message": f"L{block['start'] + 1}-L{block['end'] + 1}: "
+                        f"ASCII art ({len(block['content_lines'])}行) → {image_file}",
+                    }
+                )
                 found = True
                 break
 
         if not found:
-            issues.append({
-                "file": mapping["file"],
-                "status": "not_found",
-                "heading": heading_match,
-                "message": f"未找到 §{heading_match} 下的 ASCII art 代码块",
-            })
+            issues.append(
+                {
+                    "file": mapping["file"],
+                    "status": "not_found",
+                    "heading": heading_match,
+                    "message": f"未找到 §{heading_match} 下的 ASCII art 代码块",
+                }
+            )
 
     return issues
 
@@ -196,12 +206,14 @@ def fix_insertions(md_dir: Path, config: dict, output_dir: Path | None = None) -
                             show_info(f"  {fname} §{heading_match}: 已替换，跳过")
                             break
 
-                    replacements.append({
-                        "start": block["start"],
-                        "end": block["end"],
-                        "image_path": image_path,
-                        "caption": caption,
-                    })
+                    replacements.append(
+                        {
+                            "start": block["start"],
+                            "end": block["end"],
+                            "image_path": image_path,
+                            "caption": caption,
+                        }
+                    )
                     break
 
         if not replacements:
@@ -210,11 +222,11 @@ def fix_insertions(md_dir: Path, config: dict, output_dir: Path | None = None) -
         # 从后往前替换
         replacements.sort(key=lambda r: r["start"], reverse=True)
         for rep in replacements:
-            image_line = f'![{rep["caption"]}]({rep["image_path"]})'
+            image_line = f"![{rep['caption']}]({rep['image_path']})"
             # 替换代码块（包括 ``` 行）为图片引用
-            lines[rep["start"]:rep["end"] + 1] = [image_line]
+            lines[rep["start"] : rep["end"] + 1] = [image_line]
             fix_count += 1
-            show_info(f"  {fname} L{rep['start']+1}: → {rep['image_path']}")
+            show_info(f"  {fname} L{rep['start'] + 1}: → {rep['image_path']}")
 
         # 写出
         out_file = (output_dir / fname) if output_dir else md_file
@@ -293,7 +305,7 @@ def main():
         show_error(f"配置文件不存在: {config_path}")
         sys.exit(1)
 
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         config = json.load(f)
 
     show_info(f"扫描目录: {md_dir}")

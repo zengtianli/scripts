@@ -16,14 +16,10 @@ CATEGORIES = {
     "5": "family",
     "6": "hobby",
     "7": "reading",
-    "8": "other"
+    "8": "other",
 }
 
-PRIORITIES = {
-    "1": "high",
-    "2": "medium",
-    "3": "low"
-}
+PRIORITIES = {"1": "high", "2": "medium", "3": "low"}
 
 
 def get_input(prompt, default=None):
@@ -105,7 +101,7 @@ def main():
         "content": content,
         "tags": tags,
         "priority": priority,
-        "metadata": metadata
+        "metadata": metadata,
     }
 
     # 确保日志目录存在
@@ -115,7 +111,7 @@ def main():
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
-    print(f"\n✅ 综合记录已保存")
+    print("\n✅ 综合记录已保存")
     print(f"   分类: {category}")
     print(f"   优先级: {priority}")
     print(f"   标签: {', '.join(tags) if tags else '无'}")

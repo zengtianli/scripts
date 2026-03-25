@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 文本格式自动修复工具 - DOCX版本
 支持处理Word文档中的格式问题
@@ -39,9 +38,10 @@ import copy
 import re
 import sys
 from pathlib import Path
+
 from docx import Document
-from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from finder import get_input_files
@@ -63,7 +63,7 @@ def fix_quotes(content, counter=0):
     返回: (结果文本, 本次替换数, 更新后的counter)
     """
     # 匹配所有可能的双引号类型
-    quote_pattern = '[\u0022\u201c\u201d\u2018\u2019\u300c\u300d]'
+    quote_pattern = "[\u0022\u201c\u201d\u2018\u2019\u300c\u300d]"
 
     count = len(re.findall(quote_pattern, content))
 
@@ -71,7 +71,8 @@ def fix_quotes(content, counter=0):
         nonlocal counter
         counter += 1
         # 奇数用中文左引号”，偶数用中文右引号”
-        return '\u201c' if counter % 2 == 1 else '\u201d'
+        return "\u201c" if counter % 2 == 1 else "\u201d"
+
     # 执行替换
     result = re.sub(quote_pattern, replace_quote, content)
 
@@ -84,18 +85,18 @@ def fix_punctuation(content):
     """
     # 英文标点到中文标点的映射
     punctuation_map = {
-        ',': '，',   # 逗号
-        ':': '：',   # 冒号
-        ';': '；',   # 分号
-        '!': '！',   # 感叹号
-        '?': '？',   # 问号
-        '(': '（',   # 左括号
-        ')': '）',   # 右括号
+        ",": "，",  # 逗号
+        ":": "：",  # 冒号
+        ";": "；",  # 分号
+        "!": "！",  # 感叹号
+        "?": "？",  # 问号
+        "(": "（",  # 左括号
+        ")": "）",  # 右括号
     }
-    
+
     result = content
     replacement_count = 0
-    
+
     # 逐个替换标点符号
     for eng_punct, chn_punct in punctuation_map.items():
         # 转义特殊字符
@@ -103,7 +104,7 @@ def fix_punctuation(content):
         count = len(re.findall(escaped_punct, result))
         replacement_count += count
         result = re.sub(escaped_punct, chn_punct, result)
-    
+
     return result, replacement_count
 
 
@@ -114,86 +115,79 @@ def fix_units(content):
     # 中文单位到符号的映射（按长度排序，优先匹配长的）
     units_map = {
         # 面积单位
-        '平方公里': 'km²',
-        '平方千米': 'km²',
-        '平方米': 'm²',
-        '平方厘米': 'cm²',
-        '平方毫米': 'mm²',
-        
+        "平方公里": "km²",
+        "平方千米": "km²",
+        "平方米": "m²",
+        "平方厘米": "cm²",
+        "平方毫米": "mm²",
         # 体积单位
-        '立方米': 'm³',
-        '立方厘米': 'cm³',
-        '立方毫米': 'mm³',
-        '立方公里': 'km³',
-        '立方千米': 'km³',
-        
+        "立方米": "m³",
+        "立方厘米": "cm³",
+        "立方毫米": "mm³",
+        "立方公里": "km³",
+        "立方千米": "km³",
         # 长度单位
-        '公里': 'km',
-        '千米': 'km',
-        '厘米': 'cm',
-        '毫米': 'mm',
-        '微米': 'μm',
-        '纳米': 'nm',
-        
+        "公里": "km",
+        "千米": "km",
+        "厘米": "cm",
+        "毫米": "mm",
+        "微米": "μm",
+        "纳米": "nm",
         # 质量单位
-        '公斤': 'kg',
-        '千克': 'kg',
-        '毫克': 'mg',
-        '微克': 'μg',
-        
+        "公斤": "kg",
+        "千克": "kg",
+        "毫克": "mg",
+        "微克": "μg",
         # 容量单位
-        '毫升': 'mL',
-        '微升': 'μL',
-        
+        "毫升": "mL",
+        "微升": "μL",
         # 时间单位
-        '小时': 'h',
-        '分钟': 'min',
-        '秒钟': 's',
-        
+        "小时": "h",
+        "分钟": "min",
+        "秒钟": "s",
         # 温度单位
-        '摄氏度': '℃',
-        '华氏度': '℉',
-        
+        "摄氏度": "℃",
+        "华氏度": "℉",
         # 直接替换 m2/m3 和 km2/km3
-        'km2': 'km²',
-        'km3': 'km³',
-        'm2': 'm²',
-        'm3': 'm³',
+        "km2": "km²",
+        "km3": "km³",
+        "m2": "m²",
+        "m3": "m³",
     }
-    
+
     result = content
     replacement_count = 0
-    
+
     # 按长度从长到短排序，避免误匹配（如"平方米"要在"米"之前）
     sorted_units = sorted(units_map.items(), key=lambda x: len(x[0]), reverse=True)
-    
+
     for chn_unit, symbol in sorted_units:
         count = result.count(chn_unit)
         if count > 0:
             replacement_count += count
             result = result.replace(chn_unit, symbol)
-    
+
     return result, replacement_count
 
 
-QUOTE_CHARS = {'\u201c', '\u201d'}
-QUOTE_FONT = '\u5b8b\u4f53'  # 宋体
+QUOTE_CHARS = {"\u201c", "\u201d"}
+QUOTE_FONT = "\u5b8b\u4f53"  # 宋体
 
 
 def _set_run_font_songti(run_element):
     """为 run 的 rPr 设置宋体字体（ascii + hAnsi + eastAsia）"""
-    rPr = run_element.find(qn('w:rPr'))
+    rPr = run_element.find(qn("w:rPr"))
     if rPr is None:
-        rPr = OxmlElement('w:rPr')
+        rPr = OxmlElement("w:rPr")
         run_element.insert(0, rPr)
-    rFonts = rPr.find(qn('w:rFonts'))
+    rFonts = rPr.find(qn("w:rFonts"))
     if rFonts is None:
-        rFonts = OxmlElement('w:rFonts')
+        rFonts = OxmlElement("w:rFonts")
         rPr.insert(0, rFonts)
-    rFonts.set(qn('w:ascii'), QUOTE_FONT)
-    rFonts.set(qn('w:hAnsi'), QUOTE_FONT)
-    rFonts.set(qn('w:eastAsia'), QUOTE_FONT)
-    rFonts.set(qn('w:hint'), 'eastAsia')
+    rFonts.set(qn("w:ascii"), QUOTE_FONT)
+    rFonts.set(qn("w:hAnsi"), QUOTE_FONT)
+    rFonts.set(qn("w:eastAsia"), QUOTE_FONT)
+    rFonts.set(qn("w:hint"), "eastAsia")
 
 
 def _split_run_at_quotes(run):
@@ -210,13 +204,13 @@ def _split_run_at_quotes(run):
     for c in text:
         if c in QUOTE_CHARS:
             if buf:
-                segments.append((''.join(buf), False))
+                segments.append(("".join(buf), False))
                 buf = []
             segments.append((c, True))
         else:
             buf.append(c)
     if buf:
-        segments.append((''.join(buf), False))
+        segments.append(("".join(buf), False))
     return segments
 
 
@@ -238,23 +232,23 @@ def _apply_quote_split(run, segments):
     for seg_text, is_quote in segments[1:]:
         new_r = copy.deepcopy(run._element)
         # 设置文本（清除 deepcopy 带来的旧文本）
-        for t_elem in new_r.findall(qn('w:t')):
+        for t_elem in new_r.findall(qn("w:t")):
             new_r.remove(t_elem)
-        t_elem = OxmlElement('w:t')
+        t_elem = OxmlElement("w:t")
         t_elem.text = seg_text
         # 保留空格
-        t_elem.set(qn('xml:space'), 'preserve')
+        t_elem.set(qn("xml:space"), "preserve")
         new_r.append(t_elem)
 
         if is_quote:
             _set_run_font_songti(new_r)
         else:
             # 非引号段恢复原 run 的字体（去掉宋体覆盖）
-            rPr = new_r.find(qn('w:rPr'))
+            rPr = new_r.find(qn("w:rPr"))
             if rPr is not None:
-                rFonts = rPr.find(qn('w:rFonts'))
-                orig_rPr = run._element.find(qn('w:rPr'))
-                orig_rFonts = orig_rPr.find(qn('w:rFonts')) if orig_rPr is not None else None
+                rFonts = rPr.find(qn("w:rFonts"))
+                orig_rPr = run._element.find(qn("w:rPr"))
+                orig_rFonts = orig_rPr.find(qn("w:rFonts")) if orig_rPr is not None else None
                 if rFonts is not None and orig_rFonts is not None:
                     # 用原始字体信息覆盖
                     rPr.replace(rFonts, copy.deepcopy(orig_rFonts))
@@ -291,9 +285,9 @@ def process_paragraph(paragraph, stats):
         fixed_text, unit_count = fix_units(fixed_text)
 
         # 更新统计
-        stats['quotes'] += quote_count
-        stats['punctuation'] += punct_count
-        stats['units'] += unit_count
+        stats["quotes"] += quote_count
+        stats["punctuation"] += punct_count
+        stats["units"] += unit_count
 
         if fixed_text != original_text:
             run.text = fixed_text
@@ -319,56 +313,53 @@ def process_docx(input_file):
     处理DOCX文件
     """
     input_path = Path(input_file)
-    
+
     if not input_path.exists():
         print(f"❌ 错误：文件不存在 - {input_file}")
         return False
-    
-    if input_path.suffix.lower() != '.docx':
-        print(f"❌ 错误：文件必须是.docx格式")
+
+    if input_path.suffix.lower() != ".docx":
+        print("❌ 错误：文件必须是.docx格式")
         return False
-    
+
     # 生成输出文件名
     output_path = input_path.parent / f"{input_path.stem}_fixed{input_path.suffix}"
-    
+
     try:
         # 读取文档
         print(f"📖 正在读取文件: {input_path.name}")
         doc = Document(input_path)
-        
+
         # 统计信息
-        stats = {
-            'quotes': 0,
-            'punctuation': 0,
-            'units': 0
-        }
-        
+        stats = {"quotes": 0, "punctuation": 0, "units": 0}
+
         # 处理所有段落
-        print(f"🔄 正在处理段落...")
+        print("🔄 正在处理段落...")
         for paragraph in doc.paragraphs:
             process_paragraph(paragraph, stats)
-        
+
         # 处理所有表格
-        print(f"🔄 正在处理表格...")
+        print("🔄 正在处理表格...")
         for table in doc.tables:
             process_table(table, stats)
-        
+
         # 处理页眉页脚
         if SKIP_FOOTER:
             # 彻底删除页眉页脚
-            print(f"🗑️  正在删除页眉页脚...")
+            print("🗑️  正在删除页眉页脚...")
             from docx.oxml.ns import qn
+
             for section in doc.sections:
                 sectPr = section._sectPr
                 # 删除所有页眉引用
-                for headerRef in sectPr.findall(qn('w:headerReference')):
+                for headerRef in sectPr.findall(qn("w:headerReference")):
                     sectPr.remove(headerRef)
                 # 删除所有页脚引用
-                for footerRef in sectPr.findall(qn('w:footerReference')):
+                for footerRef in sectPr.findall(qn("w:footerReference")):
                     sectPr.remove(footerRef)
         else:
             # 处理页眉页脚（格式修复）
-            print(f"🔄 正在处理页眉页脚...")
+            print("🔄 正在处理页眉页脚...")
             for section in doc.sections:
                 if section.header:
                     for paragraph in section.header.paragraphs:
@@ -380,29 +371,30 @@ def process_docx(input_file):
                         process_paragraph(paragraph, stats)
                     for table in section.footer.tables:
                         process_table(table, stats)
-        
+
         # 保存文件
-        print(f"💾 正在保存文件...")
+        print("💾 正在保存文件...")
         doc.save(output_path)
-        
-        print(f"✅ 处理完成！")
+
+        print("✅ 处理完成！")
         print(f"   - 共替换了 {stats['quotes']} 个引号")
         print(f"   - 共替换了 {stats['punctuation']} 个标点符号")
         print(f"   - 共转换了 {stats['units']} 个单位")
         print(f"   - 输出文件: {output_path.name}")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ 处理失败：{e}")
         import traceback
+
         traceback.print_exc()
         return False
 
 
 if __name__ == "__main__":
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='docx')
+    files = get_input_files(sys.argv[1:], expected_ext="docx")
 
     if not files:
         print("❌ 错误：缺少文件名参数")
@@ -430,4 +422,3 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 50)
     tracker.show_summary("文件处理")
-

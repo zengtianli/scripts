@@ -14,12 +14,7 @@ def get_frontmost_app():
     """获取当前前台应用名称"""
     try:
         # 使用 lsappinfo 获取前台应用
-        result = subprocess.run(
-            ["lsappinfo", "front"],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(["lsappinfo", "front"], capture_output=True, text=True, check=True)
 
         # 输出格式: "ASN:0x0-0x12345:"
         asn = result.stdout.strip()
@@ -28,16 +23,13 @@ def get_frontmost_app():
 
         # 获取应用信息
         info_result = subprocess.run(
-            ["lsappinfo", "info", "-only", "name", asn],
-            capture_output=True,
-            text=True,
-            check=True
+            ["lsappinfo", "info", "-only", "name", asn], capture_output=True, text=True, check=True
         )
 
         # 解析输出: "LSDisplayName"="AppName"
-        for line in info_result.stdout.split('\n'):
+        for line in info_result.stdout.split("\n"):
             if '"LSDisplayName"=' in line or '"name"=' in line:
-                app_name = line.split('=', 1)[1].strip('"')
+                app_name = line.split("=", 1)[1].strip('"')
                 return app_name
 
         return None
@@ -58,10 +50,7 @@ def log_app_usage(app_name):
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     # 记录数据
-    record = {
-        "timestamp": int(time.time()),
-        "app": app_name
-    }
+    record = {"timestamp": int(time.time()), "app": app_name}
 
     # 追加到文件
     with open(log_file, "a") as f:

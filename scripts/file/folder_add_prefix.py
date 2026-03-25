@@ -6,20 +6,21 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 
+from display import show_error, show_info, show_success
 from finder import get_input_files
-from display import show_success, show_error, show_info
+
 
 def main():
     folders = get_input_files([], allow_multiple=True)
 
     if not folders:
         return
-    
+
     success_count = 0
     skipped_count = 0
 
     for folder in folders:
-        folder = folder.rstrip('/')
+        folder = folder.rstrip("/")
         if not os.path.isdir(folder):
             show_info(f"跳过 {os.path.basename(folder)} - 不是文件夹")
             skipped_count += 1
@@ -64,6 +65,6 @@ def main():
     if skipped_count > 0:
         show_info(f"跳过了 {skipped_count} 个文件夹或空文件夹")
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()

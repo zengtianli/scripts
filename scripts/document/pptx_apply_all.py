@@ -15,9 +15,9 @@ PPT文档标准化一键处理工具
     python3 pptx_apply_all.py presentation.pptx
 """
 
-import sys
-import subprocess
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
@@ -29,22 +29,16 @@ PYTHON = sys.executable
 
 # 各个处理脚本的路径
 SCRIPTS = {
-    'text_formatter': SCRIPT_DIR / 'pptx_text_formatter.py',
-    'font_yahei': SCRIPT_DIR / 'pptx_font_yahei.py',
-    'table_style': SCRIPT_DIR / 'pptx_table_style.py',
+    "text_formatter": SCRIPT_DIR / "pptx_text_formatter.py",
+    "font_yahei": SCRIPT_DIR / "pptx_font_yahei.py",
+    "table_style": SCRIPT_DIR / "pptx_table_style.py",
 }
 
 
 def show_message(msg_type, message):
     """显示格式化消息"""
-    icons = {
-        'success': '✅',
-        'error': '❌',
-        'warning': '⚠️',
-        'info': 'ℹ️',
-        'processing': '🔄'
-    }
-    icon = icons.get(msg_type, 'ℹ️')
+    icons = {"success": "✅", "error": "❌", "warning": "⚠️", "info": "ℹ️", "processing": "🔄"}
+    icon = icons.get(msg_type, "ℹ️")
     print(f"{icon} {message}")
 
 
@@ -53,10 +47,10 @@ def backup_file(file_path):
     backup_path = f"{file_path}.backup"
     try:
         shutil.copy2(file_path, backup_path)
-        show_message('info', f"已备份原文件: {Path(backup_path).name}")
+        show_message("info", f"已备份原文件: {Path(backup_path).name}")
         return backup_path
     except Exception as e:
-        show_message('warning', f"备份文件失败: {e}")
+        show_message("warning", f"备份文件失败: {e}")
         return None
 
 
@@ -77,12 +71,7 @@ def run_script(script_path, input_file, args=None):
         cmd.extend(args)
 
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
 
         # 打印输出
         if result.stdout:
@@ -111,11 +100,11 @@ def apply_all(input_file):
 
     # 检查文件是否存在
     if not input_path.exists():
-        show_message('error', f"文件不存在: {input_file}")
+        show_message("error", f"文件不存在: {input_file}")
         sys.exit(1)
 
-    if input_path.suffix.lower() != '.pptx':
-        show_message('error', "只支持 .pptx 文件")
+    if input_path.suffix.lower() != ".pptx":
+        show_message("error", "只支持 .pptx 文件")
         sys.exit(1)
 
     print("=" * 70)
@@ -130,19 +119,19 @@ def apply_all(input_file):
     # 执行顺序
     steps = [
         {
-            'name': '步骤 1/3: 文本格式修复',
-            'script': SCRIPTS['text_formatter'],
-            'args': None,
+            "name": "步骤 1/3: 文本格式修复",
+            "script": SCRIPTS["text_formatter"],
+            "args": None,
         },
         {
-            'name': '步骤 2/3: 字体统一为微软雅黑',
-            'script': SCRIPTS['font_yahei'],
-            'args': None,
+            "name": "步骤 2/3: 字体统一为微软雅黑",
+            "script": SCRIPTS["font_yahei"],
+            "args": None,
         },
         {
-            'name': '步骤 3/3: 表格样式设置',
-            'script': SCRIPTS['table_style'],
-            'args': None,
+            "name": "步骤 3/3: 表格样式设置",
+            "script": SCRIPTS["table_style"],
+            "args": None,
         },
     ]
 
@@ -154,11 +143,11 @@ def apply_all(input_file):
         print(f"▶️  {step['name']}")
         print("=" * 70)
 
-        if run_script(step['script'], input_path, step['args']):
+        if run_script(step["script"], input_path, step["args"]):
             success_count += 1
             print(f"✅ {step['name']} 完成")
         else:
-            failed_steps.append(step['name'])
+            failed_steps.append(step["name"])
             print(f"⚠️ {step['name']} 失败（继续执行后续步骤）")
 
     # 总结
@@ -180,8 +169,8 @@ def apply_all(input_file):
 
 def main():
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='pptx', allow_multiple=False)
-    
+    files = get_input_files(sys.argv[1:], expected_ext="pptx", allow_multiple=False)
+
     if not files:
         print("PPT文档标准化一键处理工具")
         print("\n用法: python3 pptx_apply_all.py <input.pptx>")
@@ -199,4 +188,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

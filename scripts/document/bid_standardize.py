@@ -11,14 +11,14 @@
   6. 数据来源提取 — 行内 [数据来源：XX] 和 <!-- SOURCE: XX --> 提取为 blockquote
 """
 
-import sys
-import re
-import json
 import argparse
+import json
+import re
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info, show_warning
+from display import show_error, show_info, show_success
 from file_ops import show_version_info
 
 SCRIPT_NAME = "bid_standardize"
@@ -29,37 +29,38 @@ SCRIPT_UPDATED = "2026-03-14"
 # ── 编号标签正则 ──────────────────────────────────────────────
 
 NUMBERED_LABEL_RE = re.compile(
-    r'(创新点|难点|亮点|特点|重点|要点|优势|挑战)'
-    r'[一二三四五六七八九十\d]+'
-    r'[：:]'
+    r"(创新点|难点|亮点|特点|重点|要点|优势|挑战)"
+    r"[一二三四五六七八九十\d]+"
+    r"[：:]"
 )
 
 # ── 加粗标题正则 ─────────────────────────────────────────────
 
-BOLD_HEADING_RE = re.compile(r'^\*\*(.+)\*\*$')
+BOLD_HEADING_RE = re.compile(r"^\*\*(.+)\*\*$")
 
 # ── 标题编号正则 ─────────────────────────────────────────────
 
 # 匹配 ## X.Y 格式的二级标题
-H2_NUMBER_RE = re.compile(r'^##\s+(\d+\.\d+)\s')
+H2_NUMBER_RE = re.compile(r"^##\s+(\d+\.\d+)\s")
 
 # 匹配 ### X.Y.Z 格式的三级标题（已有编号）
-H3_NUMBER_RE = re.compile(r'^###\s+(\d+\.\d+\.\d+)\s')
+H3_NUMBER_RE = re.compile(r"^###\s+(\d+\.\d+\.\d+)\s")
 
 # 匹配 ### 开头但没有 X.Y.Z 编号的三级标题
-H3_NO_NUMBER_RE = re.compile(r'^###\s+(?!\d+\.\d+\.\d+\s)(.+)$')
+H3_NO_NUMBER_RE = re.compile(r"^###\s+(?!\d+\.\d+\.\d+\s)(.+)$")
 
 # ── 数据来源标注正则 ─────────────────────────────────────────
 
 # 行内中括号标注：[数据来源：XX] 或 [待核实：XX]
-INLINE_SOURCE_RE = re.compile(r'\[数据来源[：:](.*?)\]')
-INLINE_VERIFY_RE = re.compile(r'\[待核实[：:](.*?)\]')
+INLINE_SOURCE_RE = re.compile(r"\[数据来源[：:](.*?)\]")
+INLINE_VERIFY_RE = re.compile(r"\[待核实[：:](.*?)\]")
 
 # HTML 注释标注：<!-- SOURCE: XX -->
-HTML_SOURCE_RE = re.compile(r'\s*<!--\s*SOURCE:\s*(.*?)\s*-->')
+HTML_SOURCE_RE = re.compile(r"\s*<!--\s*SOURCE:\s*(.*?)\s*-->")
 
 
 # ── 工具函数 ──────────────────────────────────────────────────
+
 
 def is_in_code_block(lines: list[str], line_idx: int) -> bool:
     """判断某行是否在代码块内"""
@@ -72,7 +73,7 @@ def is_in_code_block(lines: list[str], line_idx: int) -> bool:
 
 def load_scoring(scoring_path: Path) -> dict:
     """加载 scoring.json，返回 {chapter_num: config}"""
-    with open(scoring_path, "r", encoding="utf-8") as f:
+    with open(scoring_path, encoding="utf-8") as f:
         data = json.load(f)
     result = {}
     for ch in data.get("chapters", []):
@@ -99,6 +100,7 @@ def build_scoring_blockquote(config: dict) -> str:
 
 # ── 检查函数 ──────────────────────────────────────────────────
 
+
 def check_heading_levels(lines: list[str]) -> list[dict]:
     """检查标题级别：章标题（含"第X章"）必须是 #"""
     issues = []
@@ -109,16 +111,18 @@ def check_heading_levels(lines: list[str]) -> list[dict]:
         if not stripped.startswith("#"):
             continue
         # 匹配 ## 第X章 或 ## 第一章 等
-        m = re.match(r'^(#{2,})\s+第[一二三四五六七八九十\d]+章', stripped)
+        m = re.match(r"^(#{2,})\s+第[一二三四五六七八九十\d]+章", stripped)
         if m:
             current_level = len(m.group(1))
-            issues.append({
-                "type": "标题级别",
-                "line": i + 1,
-                "current_level": current_level,
-                "content": stripped[:60],
-                "fixable": True,
-            })
+            issues.append(
+                {
+                    "type": "标题级别",
+                    "line": i + 1,
+                    "current_level": current_level,
+                    "content": stripped[:60],
+                    "fixable": True,
+                }
+            )
     return issues
 
 
@@ -136,7 +140,7 @@ def check_scoring_blockquote(lines: list[str], scoring_config: dict | None) -> l
         if is_in_code_block(lines, i):
             continue
         stripped = line.strip()
-        if re.match(r'^#{1,2}\s+', stripped):
+        if re.match(r"^#{1,2}\s+", stripped):
             chapter_line = i
             break
 
@@ -162,28 +166,32 @@ def check_scoring_blockquote(lines: list[str], scoring_config: dict | None) -> l
         while blockquote_end + 1 < len(lines) and lines[blockquote_end + 1].strip().startswith(">"):
             blockquote_end += 1
         # 检查内容是否匹配
-        existing = "\n".join(lines[blockquote_start:blockquote_end + 1])
+        existing = "\n".join(lines[blockquote_start : blockquote_end + 1])
         if existing.strip() == expected.strip():
             blockquote_matches = True
 
     if not has_blockquote:
-        issues.append({
-            "type": "评分引用",
-            "line": chapter_line + 1,
-            "status": "缺失",
-            "expected": expected,
-            "fixable": True,
-        })
+        issues.append(
+            {
+                "type": "评分引用",
+                "line": chapter_line + 1,
+                "status": "缺失",
+                "expected": expected,
+                "fixable": True,
+            }
+        )
     elif not blockquote_matches:
-        issues.append({
-            "type": "评分引用",
-            "line": blockquote_start + 1,
-            "status": "内容不匹配",
-            "expected": expected,
-            "blockquote_start": blockquote_start,
-            "blockquote_end": blockquote_end,
-            "fixable": True,
-        })
+        issues.append(
+            {
+                "type": "评分引用",
+                "line": blockquote_start + 1,
+                "status": "内容不匹配",
+                "expected": expected,
+                "blockquote_start": blockquote_start,
+                "blockquote_end": blockquote_end,
+                "fixable": True,
+            }
+        )
 
     return issues
 
@@ -202,13 +210,15 @@ def check_numbered_labels(lines: list[str]) -> list[dict]:
             continue
         m = NUMBERED_LABEL_RE.search(stripped)
         if m:
-            issues.append({
-                "type": "编号标签",
-                "line": i + 1,
-                "label": m.group(0),
-                "content": stripped[:60],
-                "fixable": True,
-            })
+            issues.append(
+                {
+                    "type": "编号标签",
+                    "line": i + 1,
+                    "label": m.group(0),
+                    "content": stripped[:60],
+                    "fixable": True,
+                }
+            )
     return issues
 
 
@@ -230,19 +240,21 @@ def check_bold_headings(lines: list[str]) -> list[dict]:
                 if is_in_code_block(lines, j):
                     continue
                 pline = lines[j].strip()
-                pm = re.match(r'^(#{1,6})\s', pline)
+                pm = re.match(r"^(#{1,6})\s", pline)
                 if pm:
                     parent_level = len(pm.group(1))
                     break
             target_level = parent_level + 1
-            issues.append({
-                "type": "加粗标题",
-                "line": i + 1,
-                "content": m.group(1),
-                "parent_level": parent_level,
-                "target_level": target_level,
-                "fixable": True,
-            })
+            issues.append(
+                {
+                    "type": "加粗标题",
+                    "line": i + 1,
+                    "content": m.group(1),
+                    "parent_level": parent_level,
+                    "target_level": target_level,
+                    "fixable": True,
+                }
+            )
     return issues
 
 
@@ -273,13 +285,15 @@ def check_heading_numbers(lines: list[str]) -> list[dict]:
         # 没有编号的 ###
         m3 = H3_NO_NUMBER_RE.match(stripped)
         if m3 and current_h2_num:
-            issues.append({
-                "type": "标题编号",
-                "line": i + 1,
-                "content": m3.group(1).strip(),
-                "parent_num": current_h2_num,
-                "fixable": True,
-            })
+            issues.append(
+                {
+                    "type": "标题编号",
+                    "line": i + 1,
+                    "content": m3.group(1).strip(),
+                    "parent_num": current_h2_num,
+                    "fixable": True,
+                }
+            )
 
     return issues
 
@@ -303,18 +317,21 @@ def check_source_annotations(lines: list[str]) -> list[dict]:
         found_html = HTML_SOURCE_RE.findall(line)
 
         if found_inline or found_verify or found_html:
-            issues.append({
-                "type": "数据来源标注",
-                "line": i + 1,
-                "inline_sources": found_inline,
-                "verify_notes": found_verify,
-                "html_sources": found_html,
-                "fixable": True,
-            })
+            issues.append(
+                {
+                    "type": "数据来源标注",
+                    "line": i + 1,
+                    "inline_sources": found_inline,
+                    "verify_notes": found_verify,
+                    "html_sources": found_html,
+                    "fixable": True,
+                }
+            )
     return issues
 
 
 # ── 修复函数 ──────────────────────────────────────────────────
+
 
 def fix_heading_levels(text: str) -> str:
     """修复标题级别：将 ## 第X章 降级为 # 第X章，其余标题对应降一级"""
@@ -326,7 +343,7 @@ def fix_heading_levels(text: str) -> str:
         if is_in_code_block(lines, i):
             continue
         stripped = line.strip()
-        if re.match(r'^##\s+第[一二三四五六七八九十\d]+章', stripped):
+        if re.match(r"^##\s+第[一二三四五六七八九十\d]+章", stripped):
             has_issue = True
             break
 
@@ -339,7 +356,7 @@ def fix_heading_levels(text: str) -> str:
         if is_in_code_block(lines, i):
             result.append(line)
             continue
-        m = re.match(r'^(#{2,})(\s+.*)$', line)
+        m = re.match(r"^(#{2,})(\s+.*)$", line)
         if m:
             new_hashes = "#" * (len(m.group(1)) - 1)
             result.append(f"{new_hashes}{m.group(2)}")
@@ -363,7 +380,7 @@ def fix_scoring_blockquote(text: str, scoring_config: dict | None) -> str:
         if is_in_code_block(lines, i):
             continue
         stripped = line.strip()
-        if re.match(r'^#{1,2}\s+', stripped):
+        if re.match(r"^#{1,2}\s+", stripped):
             chapter_line = i
             break
 
@@ -381,7 +398,7 @@ def fix_scoring_blockquote(text: str, scoring_config: dict | None) -> str:
         blockquote_end = j
         while blockquote_end + 1 < len(lines) and lines[blockquote_end + 1].strip().startswith(">"):
             blockquote_end += 1
-        lines[blockquote_start:blockquote_end + 1] = expected.split("\n")
+        lines[blockquote_start : blockquote_end + 1] = expected.split("\n")
     else:
         # 没有 blockquote，在章标题后插入
         insert_pos = chapter_line + 1
@@ -407,7 +424,7 @@ def fix_numbered_labels(text: str) -> str:
         if is_heading or is_bold:
             line = NUMBERED_LABEL_RE.sub("", line)
             # 清理可能残留的多余空格
-            line = re.sub(r'  +', ' ', line)
+            line = re.sub(r"  +", " ", line)
         result.append(line)
 
     return "\n".join(result)
@@ -435,7 +452,7 @@ def fix_bold_headings(text: str) -> str:
                 if is_in_code_block(lines, j):
                     continue
                 pline = lines[j].strip()
-                pm = re.match(r'^(#{1,6})\s', pline)
+                pm = re.match(r"^(#{1,6})\s", pline)
                 if pm:
                     parent_level = len(pm.group(1))
                     break
@@ -575,10 +592,16 @@ def fix_source_annotations(text: str) -> str:
 
 # ── 报告输出 ──────────────────────────────────────────────────
 
-def format_report(filepath: str, heading_issues: list, scoring_issues: list,
-                  label_issues: list, bold_issues: list = None,
-                  number_issues: list = None,
-                  source_issues: list = None) -> str:
+
+def format_report(
+    filepath: str,
+    heading_issues: list,
+    scoring_issues: list,
+    label_issues: list,
+    bold_issues: list = None,
+    number_issues: list = None,
+    source_issues: list = None,
+) -> str:
     """格式化检查报告"""
     if bold_issues is None:
         bold_issues = []
@@ -597,11 +620,7 @@ def format_report(filepath: str, heading_issues: list, scoring_issues: list,
     if heading_issues:
         parts.append(f"[标题级别] 发现 {len(heading_issues)} 处")
         for item in heading_issues:
-            parts.append(
-                f'  L{item["line"]}: '
-                f'当前 {"#" * item["current_level"]}（应为 #）'
-                f' — {item["content"]}'
-            )
+            parts.append(f"  L{item['line']}: 当前 {'#' * item['current_level']}（应为 #） — {item['content']}")
         total += len(heading_issues)
         fixable += sum(1 for i in heading_issues if i["fixable"])
     else:
@@ -612,7 +631,7 @@ def format_report(filepath: str, heading_issues: list, scoring_issues: list,
     if scoring_issues:
         parts.append(f"[评分引用] 发现 {len(scoring_issues)} 处")
         for item in scoring_issues:
-            parts.append(f'  L{item["line"]}: {item["status"]}')
+            parts.append(f"  L{item['line']}: {item['status']}")
         total += len(scoring_issues)
         fixable += sum(1 for i in scoring_issues if i["fixable"])
     else:
@@ -623,9 +642,7 @@ def format_report(filepath: str, heading_issues: list, scoring_issues: list,
     if label_issues:
         parts.append(f"[编号标签] 发现 {len(label_issues)} 处")
         for item in label_issues:
-            parts.append(
-                f'  L{item["line"]}: "{item["label"]}" — {item["content"]}'
-            )
+            parts.append(f'  L{item["line"]}: "{item["label"]}" — {item["content"]}')
         total += len(label_issues)
         fixable += sum(1 for i in label_issues if i["fixable"])
     else:
@@ -636,10 +653,7 @@ def format_report(filepath: str, heading_issues: list, scoring_issues: list,
     if bold_issues:
         parts.append(f"[加粗标题] 发现 {len(bold_issues)} 处")
         for item in bold_issues:
-            parts.append(
-                f'  L{item["line"]}: **{item["content"]}** '
-                f'→ {"#" * item["target_level"]} {item["content"]}'
-            )
+            parts.append(f"  L{item['line']}: **{item['content']}** → {'#' * item['target_level']} {item['content']}")
         total += len(bold_issues)
         fixable += sum(1 for i in bold_issues if i["fixable"])
     else:
@@ -650,10 +664,7 @@ def format_report(filepath: str, heading_issues: list, scoring_issues: list,
     if number_issues:
         parts.append(f"[标题编号] 发现 {len(number_issues)} 处无编号")
         for item in number_issues:
-            parts.append(
-                f'  L{item["line"]}: ### {item["content"]} '
-                f'→ 应编号为 {item["parent_num"]}.N'
-            )
+            parts.append(f"  L{item['line']}: ### {item['content']} → 应编号为 {item['parent_num']}.N")
         total += len(number_issues)
         fixable += sum(1 for i in number_issues if i["fixable"])
     else:
@@ -666,8 +677,7 @@ def format_report(filepath: str, heading_issues: list, scoring_issues: list,
         n_verify = sum(len(s["verify_notes"]) for s in source_issues)
         n_html = sum(len(s["html_sources"]) for s in source_issues)
         parts.append(
-            f"[数据来源标注] {len(source_issues)} 行需提取"
-            f"（行内{n_inline} + 待核实{n_verify} + HTML注释{n_html}）"
+            f"[数据来源标注] {len(source_issues)} 行需提取（行内{n_inline} + 待核实{n_verify} + HTML注释{n_html}）"
         )
         total += len(source_issues)
         fixable += sum(1 for i in source_issues if i["fixable"])
@@ -684,8 +694,8 @@ def format_report(filepath: str, heading_issues: list, scoring_issues: list,
 
 # ── 主流程 ────────────────────────────────────────────────────
 
-def process_file(filepath: Path, scoring: dict, do_fix: bool,
-                 output_dir: Path | None) -> dict:
+
+def process_file(filepath: Path, scoring: dict, do_fix: bool, output_dir: Path | None) -> dict:
     """处理单个文件"""
     text = filepath.read_text(encoding="utf-8")
     lines = text.split("\n")
@@ -702,15 +712,20 @@ def process_file(filepath: Path, scoring: dict, do_fix: bool,
     source_issues = check_source_annotations(lines)
 
     # 输出报告
-    report = format_report(str(filepath), heading_issues, scoring_issues,
-                           label_issues, bold_issues, number_issues,
-                           source_issues)
+    report = format_report(
+        str(filepath), heading_issues, scoring_issues, label_issues, bold_issues, number_issues, source_issues
+    )
     print(f"\n{'─' * 3} 结构标准化检查 {'─' * 3}\n")
     print(report)
 
-    total = (len(heading_issues) + len(scoring_issues)
-             + len(label_issues) + len(bold_issues)
-             + len(number_issues) + len(source_issues))
+    total = (
+        len(heading_issues)
+        + len(scoring_issues)
+        + len(label_issues)
+        + len(bold_issues)
+        + len(number_issues)
+        + len(source_issues)
+    )
     fixable = (
         sum(1 for i in heading_issues if i["fixable"])
         + sum(1 for i in scoring_issues if i["fixable"])

@@ -10,25 +10,26 @@
 JSON 配置格式见 --example 输出。
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
-import numpy as np
+from matplotlib.patches import FancyBboxPatch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info
-from file_ops import show_version_info
-
 from chart_common import (
-    setup_chinese_fonts, get_phase_color, save_figure,
-    GRID_COLOR, BG_COLOR, DEFAULT_DPI,
-    CHART_VERSION, CHART_AUTHOR, CHART_UPDATED,
+    CHART_AUTHOR,
+    CHART_UPDATED,
+    CHART_VERSION,
+    DEFAULT_DPI,
+    get_phase_color,
+    save_figure,
+    setup_chinese_fonts,
 )
+from display import show_error, show_info, show_success
+from file_ops import show_version_info
 
 SCRIPT_NAME = "chart_flow"
 
@@ -69,7 +70,7 @@ def draw_layers(config: dict, output_path: str):
     title = config.get("title", "架构图")
     figsize = tuple(config.get("figsize", [14, 12]))
     dpi = config.get("dpi", DEFAULT_DPI)
-    bottom_bar = config.get("bottom_bar", None)
+    bottom_bar = config.get("bottom_bar")
 
     n_layers = len(layers)
 
@@ -94,8 +95,7 @@ def draw_layers(config: dict, output_path: str):
     ax.axis("off")
 
     # 标题
-    ax.text(canvas_width / 2, total_height + 0.6, title,
-            ha="center", va="center", fontsize=16, fontweight="bold")
+    ax.text(canvas_width / 2, total_height + 0.6, title, ha="center", va="center", fontsize=16, fontweight="bold")
 
     # 从上到下绘制层
     for layer_idx, layer in enumerate(layers):
@@ -107,17 +107,19 @@ def draw_layers(config: dict, output_path: str):
 
         # 层背景
         layer_bg = FancyBboxPatch(
-            (0, y_bottom), canvas_width, layer_height,
+            (0, y_bottom),
+            canvas_width,
+            layer_height,
             boxstyle="round,pad=0.05",
-            facecolor=color, alpha=0.12,
-            edgecolor=color, linewidth=1.5,
+            facecolor=color,
+            alpha=0.12,
+            edgecolor=color,
+            linewidth=1.5,
         )
         ax.add_patch(layer_bg)
 
         # 层标题（左上角）
-        ax.text(0.2, y_top - 0.12, layer["name"],
-                ha="left", va="top", fontsize=10,
-                fontweight="bold", color=color)
+        ax.text(0.2, y_top - 0.12, layer["name"], ha="left", va="top", fontsize=10, fontweight="bold", color=color)
 
         # 内部 box
         boxes = layer.get("boxes", [])
@@ -132,33 +134,53 @@ def draw_layers(config: dict, output_path: str):
                 box_color = box.get("color", color)
 
                 rect = FancyBboxPatch(
-                    (box_x, box_y), box_width, box_h,
+                    (box_x, box_y),
+                    box_width,
+                    box_h,
                     boxstyle="round,pad=0.08",
-                    facecolor="white", edgecolor=box_color,
+                    facecolor="white",
+                    edgecolor=box_color,
                     linewidth=1.2,
                 )
                 ax.add_patch(rect)
-                ax.text(box_x + box_width / 2, box_y + box_h / 2,
-                        box["text"], ha="center", va="center",
-                        fontsize=9, fontweight="bold", color="#333333")
+                ax.text(
+                    box_x + box_width / 2,
+                    box_y + box_h / 2,
+                    box["text"],
+                    ha="center",
+                    va="center",
+                    fontsize=9,
+                    fontweight="bold",
+                    color="#333333",
+                )
 
         # 输出标注
         output_text = layer.get("output")
         if output_text:
-            ax.text(canvas_width - 0.2, y_bottom + 0.08, f"→ {output_text}",
-                    ha="right", va="bottom", fontsize=8,
-                    fontstyle="italic", color="#666666")
+            ax.text(
+                canvas_width - 0.2,
+                y_bottom + 0.08,
+                f"→ {output_text}",
+                ha="right",
+                va="bottom",
+                fontsize=8,
+                fontstyle="italic",
+                color="#666666",
+            )
 
         # 层间箭头
         if layer_idx < n_layers - 1:
             arrow_y_start = y_bottom - 0.05
             arrow_y_end = y_bottom - layer_gap + 0.05
             ax.annotate(
-                "", xy=(canvas_width / 2, arrow_y_end),
+                "",
+                xy=(canvas_width / 2, arrow_y_end),
                 xytext=(canvas_width / 2, arrow_y_start),
                 arrowprops=dict(
-                    arrowstyle="-|>", color="#666666",
-                    lw=2, mutation_scale=20,
+                    arrowstyle="-|>",
+                    color="#666666",
+                    lw=2,
+                    mutation_scale=20,
                 ),
             )
 
@@ -167,15 +189,26 @@ def draw_layers(config: dict, output_path: str):
         bar_y = -0.3
         bar_h = 0.6
         bar_bg = FancyBboxPatch(
-            (0, bar_y), canvas_width, bar_h,
+            (0, bar_y),
+            canvas_width,
+            bar_h,
             boxstyle="round,pad=0.05",
-            facecolor="#555555", alpha=0.15,
-            edgecolor="#555555", linewidth=1.5,
+            facecolor="#555555",
+            alpha=0.15,
+            edgecolor="#555555",
+            linewidth=1.5,
         )
         ax.add_patch(bar_bg)
-        ax.text(canvas_width / 2, bar_y + bar_h / 2, bottom_bar,
-                ha="center", va="center", fontsize=10,
-                fontweight="bold", color="#555555")
+        ax.text(
+            canvas_width / 2,
+            bar_y + bar_h / 2,
+            bottom_bar,
+            ha="center",
+            va="center",
+            fontsize=10,
+            fontweight="bold",
+            color="#555555",
+        )
 
     plt.tight_layout()
     save_figure(fig, output_path, dpi)
@@ -210,8 +243,7 @@ def draw_flow(config: dict, output_path: str):
         ax.set_ylim(0, figsize[1])
 
         # 标题
-        ax.text(figsize[0] / 2, figsize[1] - 0.5, title,
-                ha="center", va="center", fontsize=16, fontweight="bold")
+        ax.text(figsize[0] / 2, figsize[1] - 0.5, title, ha="center", va="center", fontsize=16, fontweight="bold")
 
         y_center = figsize[1] / 2 - 0.2
 
@@ -220,43 +252,70 @@ def draw_flow(config: dict, output_path: str):
             color = step.get("color") or get_phase_color(i)
 
             # 步骤编号圆圈
-            circle = plt.Circle((x + box_w / 2, y_center + box_h / 2 + 0.35),
-                               0.25, color=color, zorder=3)
+            circle = plt.Circle((x + box_w / 2, y_center + box_h / 2 + 0.35), 0.25, color=color, zorder=3)
             ax.add_patch(circle)
-            ax.text(x + box_w / 2, y_center + box_h / 2 + 0.35,
-                    str(i + 1), ha="center", va="center",
-                    fontsize=12, fontweight="bold", color="white", zorder=4)
+            ax.text(
+                x + box_w / 2,
+                y_center + box_h / 2 + 0.35,
+                str(i + 1),
+                ha="center",
+                va="center",
+                fontsize=12,
+                fontweight="bold",
+                color="white",
+                zorder=4,
+            )
 
             # 步骤框
             rect = FancyBboxPatch(
-                (x, y_center - box_h / 2), box_w, box_h,
+                (x, y_center - box_h / 2),
+                box_w,
+                box_h,
                 boxstyle="round,pad=0.1",
-                facecolor=color, alpha=0.15,
-                edgecolor=color, linewidth=1.5,
+                facecolor=color,
+                alpha=0.15,
+                edgecolor=color,
+                linewidth=1.5,
             )
             ax.add_patch(rect)
 
             # 步骤标题
-            ax.text(x + box_w / 2, y_center + 0.15,
-                    step["name"], ha="center", va="center",
-                    fontsize=10, fontweight="bold", color="#333333")
+            ax.text(
+                x + box_w / 2,
+                y_center + 0.15,
+                step["name"],
+                ha="center",
+                va="center",
+                fontsize=10,
+                fontweight="bold",
+                color="#333333",
+            )
 
             # 步骤描述
             desc = step.get("desc", "")
             if desc:
-                ax.text(x + box_w / 2, y_center - 0.2,
-                        desc, ha="center", va="center",
-                        fontsize=8, color="#666666",
-                        wrap=True)
+                ax.text(
+                    x + box_w / 2,
+                    y_center - 0.2,
+                    desc,
+                    ha="center",
+                    va="center",
+                    fontsize=8,
+                    color="#666666",
+                    wrap=True,
+                )
 
             # 箭头
             if i < n_steps - 1:
                 ax.annotate(
-                    "", xy=(x + box_w + gap - 0.1, y_center),
+                    "",
+                    xy=(x + box_w + gap - 0.1, y_center),
                     xytext=(x + box_w + 0.1, y_center),
                     arrowprops=dict(
-                        arrowstyle="-|>", color="#888888",
-                        lw=2, mutation_scale=18,
+                        arrowstyle="-|>",
+                        color="#888888",
+                        lw=2,
+                        mutation_scale=18,
                     ),
                 )
 
@@ -298,7 +357,7 @@ def main():
         show_error(f"配置文件不存在: {config_path}")
         sys.exit(1)
 
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         config = json.load(f)
 
     output = args.output or str(config_path.parent / "flow.png")

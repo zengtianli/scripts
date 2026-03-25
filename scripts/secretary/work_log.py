@@ -16,14 +16,10 @@ CATEGORIES = {
     "5": "documentation",
     "6": "bug_fix",
     "7": "deployment",
-    "8": "planning"
+    "8": "planning",
 }
 
-PRIORITIES = {
-    "1": "high",
-    "2": "medium",
-    "3": "low"
-}
+PRIORITIES = {"1": "high", "2": "medium", "3": "low"}
 
 
 def get_input(prompt, default=None):
@@ -83,7 +79,7 @@ def main():
         "content": content,
         "tags": tags,
         "priority": priority,
-        "metadata": metadata
+        "metadata": metadata,
     }
 
     # 确保日志目录存在
@@ -93,7 +89,7 @@ def main():
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
-    print(f"\n✅ 工作记录已保存")
+    print("\n✅ 工作记录已保存")
     print(f"   分类: {category}")
     print(f"   优先级: {priority}")
     print(f"   标签: {', '.join(tags) if tags else '无'}")

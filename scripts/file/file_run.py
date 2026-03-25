@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
-import subprocess
 import os
+import shutil
 import stat
+import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-import shutil
-
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 
+from display import show_error, show_info, show_success
 from finder import get_input_files
-from display import show_success, show_error, show_info
 
 PYTHON_PATH = shutil.which("python3") or "python3"
+
 
 def run_script(file_path):
     """运行单个脚本"""
@@ -22,25 +22,30 @@ def run_script(file_path):
     filename = os.path.basename(file_path)
     script_dir = os.path.dirname(file_path)
 
-    if file_ext not in ['.sh', '.py']:
+    if file_ext not in [".sh", ".py"]:
         return filename, False, "不是 shell 脚本或 python 文件"
 
-    if file_ext == '.sh':
+    if file_ext == ".sh":
         st = os.stat(file_path)
         if not (st.st_mode & stat.S_IXUSR):
             os.chmod(file_path, st.st_mode | stat.S_IXUSR)
 
     try:
-        if file_ext == '.py':
-            result = subprocess.run([PYTHON_PATH, file_path], capture_output=True, text=True, cwd=script_dir, timeout=300)
+        if file_ext == ".py":
+            result = subprocess.run(
+                [PYTHON_PATH, file_path], capture_output=True, text=True, cwd=script_dir, timeout=300
+            )
         else:
-            result = subprocess.run([file_path], capture_output=True, text=True, cwd=script_dir, shell=True, timeout=300)
+            result = subprocess.run(
+                [file_path], capture_output=True, text=True, cwd=script_dir, shell=True, timeout=300
+            )
         output = result.stdout + result.stderr
         return filename, result.returncode == 0, output
     except subprocess.TimeoutExpired:
         return filename, False, "运行超时（5分钟）"
     except Exception as e:
         return filename, False, str(e)
+
 
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "single"
@@ -50,7 +55,7 @@ def main():
         if not files:
             return
 
-        valid_files = [f for f in files if os.path.splitext(f)[1].lower() in ['.sh', '.py']]
+        valid_files = [f for f in files if os.path.splitext(f)[1].lower() in [".sh", ".py"]]
         if not valid_files:
             show_error("没有选中的 shell 脚本或 python 文件")
             return
@@ -90,5 +95,6 @@ def main():
         if output.strip():
             show_info(output.strip())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

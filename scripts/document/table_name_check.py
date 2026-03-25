@@ -14,13 +14,13 @@
 兼容：md_docx_template.py L431 re.match(r'^表\\d+', stripped) → table_title 样式
 """
 
-import sys
-import re
 import argparse
+import re
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info, show_warning
+from display import show_error, show_info, show_success
 from file_ops import show_version_info
 
 SCRIPT_NAME = "table_name_check"
@@ -29,10 +29,10 @@ SCRIPT_AUTHOR = "tianli"
 SCRIPT_UPDATED = "2026-03-14"
 
 # 表名正则：表X-Y 或 表X 开头
-TABLE_NAME_RE = re.compile(r'^表\d+')
+TABLE_NAME_RE = re.compile(r"^表\d+")
 
 # 表格分隔行正则：|---|---|
-TABLE_SEP_RE = re.compile(r'^\|[\s\-:]+(\|[\s\-:]+)+\|?\s*$')
+TABLE_SEP_RE = re.compile(r"^\|[\s\-:]+(\|[\s\-:]+)+\|?\s*$")
 
 
 def is_in_code_block(lines: list[str], line_idx: int) -> bool:
@@ -46,7 +46,7 @@ def is_in_code_block(lines: list[str], line_idx: int) -> bool:
 
 def extract_chapter_num(filename: str) -> int:
     """从文件名提取章节号：01.md → 1"""
-    m = re.match(r'(\d+)', filename)
+    m = re.match(r"(\d+)", filename)
     if m:
         return int(m.group(1))
     return 0
@@ -146,7 +146,7 @@ def check_table_intro(lines: list[str], table: dict, min_chars: int = 80) -> dic
                 continue
             if stripped.startswith(">"):
                 continue
-            clean = re.sub(r'[*#>\[\]`]', '', stripped)
+            clean = re.sub(r"[*#>\[\]`]", "", stripped)
             if len(clean) > len(best_intro):
                 best_intro = clean
 
@@ -169,7 +169,7 @@ def check_table_intro(lines: list[str], table: dict, min_chars: int = 80) -> dic
                 stripped = ""
         # 标题行或表格行不算引导
         if not stripped.startswith("#") and not (stripped.startswith("|") and stripped.endswith("|")):
-            clean = re.sub(r'[*#>\[\]`]', '', stripped)
+            clean = re.sub(r"[*#>\[\]`]", "", stripped)
             if len(clean) > len(best_intro):
                 best_intro = clean
 
@@ -214,11 +214,13 @@ def fix_insert_table_names(text: str, chapter_num: int, min_intro_chars: int = 8
         if name_issue:
             # 需要在表头行前插入表名占位
             table_name = f"表{chapter_num}-{table_counter} [待命名]"
-            insertions.append({
-                "line": table["header_line"],
-                "content": table_name,
-                "type": "name",
-            })
+            insertions.append(
+                {
+                    "line": table["header_line"],
+                    "content": table_name,
+                    "type": "name",
+                }
+            )
 
         if intro_issue:
             # 需要在表名行（或表头行）前插入引导标记
@@ -226,11 +228,13 @@ def fix_insert_table_names(text: str, chapter_num: int, min_intro_chars: int = 8
             # 如果同时要插入表名，引导标记在表名之前
             if name_issue:
                 insert_before = table["header_line"]
-            insertions.append({
-                "line": insert_before,
-                "content": "<!-- TABLE_NEEDS_INTRO -->",
-                "type": "intro",
-            })
+            insertions.append(
+                {
+                    "line": insert_before,
+                    "content": "<!-- TABLE_NEEDS_INTRO -->",
+                    "type": "intro",
+                }
+            )
 
     # 按行号从大到小排序，同一行先插 name 再插 intro（intro 在更前面）
     # 排序：先按 line 降序，同一行 name 在 intro 前面（name 先插入，在更靠近表头的位置）
@@ -251,6 +255,7 @@ def fix_insert_table_names(text: str, chapter_num: int, min_intro_chars: int = 8
 
 # ── 报告输出 ──────────────────────────────────────────────────
 
+
 def format_report(filepath: str, name_issues: list, intro_issues: list) -> str:
     """格式化检查报告"""
     parts = []
@@ -263,7 +268,7 @@ def format_report(filepath: str, name_issues: list, intro_issues: list) -> str:
     if name_issues:
         parts.append(f"[缺表名] {len(name_issues)} 个表格")
         for item in name_issues:
-            parts.append(f'  L{item["line"]}: 表格无表名')
+            parts.append(f"  L{item['line']}: 表格无表名")
         total += len(name_issues)
     else:
         parts.append("[缺表名] 无问题")
@@ -274,11 +279,11 @@ def format_report(filepath: str, name_issues: list, intro_issues: list) -> str:
         parts.append(f"[缺引导段落] {len(intro_issues)} 个表格")
         for item in intro_issues:
             if item["type"] == "缺引导段落":
-                parts.append(f'  L{item["line"]}: 标题后直接跟表格')
+                parts.append(f"  L{item['line']}: 标题后直接跟表格")
             else:
                 parts.append(
-                    f'  L{item["line"]}: 引导语仅{item["intro_len"]}字'
-                    f'（要求≥{item.get("min_chars", 80)}字）'
+                    f"  L{item['line']}: 引导语仅{item['intro_len']}字"
+                    f"（要求≥{item.get('min_chars', 80)}字）"
                     f' — "{item.get("intro_text", "")}"'
                 )
         total += len(intro_issues)
@@ -294,6 +299,7 @@ def format_report(filepath: str, name_issues: list, intro_issues: list) -> str:
 
 # ── 主流程 ────────────────────────────────────────────────────
 
+
 def process_file(filepath: Path, do_fix: bool, min_intro: int) -> dict:
     """处理单个文件"""
     text = filepath.read_text(encoding="utf-8")
@@ -304,8 +310,7 @@ def process_file(filepath: Path, do_fix: bool, min_intro: int) -> dict:
     if not tables:
         print(f"\n文件: {filepath}")
         print("  无表格，跳过\n")
-        return {"total": 0, "name_missing": 0, "intro_missing": 0,
-                "tables": 0, "file": str(filepath)}
+        return {"total": 0, "name_missing": 0, "intro_missing": 0, "tables": 0, "file": str(filepath)}
 
     name_issues = []
     intro_issues = []
@@ -352,12 +357,9 @@ def main():
 """,
     )
     parser.add_argument("input", help="MD 文件或目录路径")
-    parser.add_argument("--fix", action="store_true",
-                        help="插入占位表名和 TABLE_NEEDS_INTRO 标记")
-    parser.add_argument("--min-intro", type=int, default=80,
-                        help="引导段落最低字数（默认 80）")
-    parser.add_argument("--version", action="store_true",
-                        help="显示版本信息")
+    parser.add_argument("--fix", action="store_true", help="插入占位表名和 TABLE_NEEDS_INTRO 标记")
+    parser.add_argument("--min-intro", type=int, default=80, help="引导段落最低字数（默认 80）")
+    parser.add_argument("--version", action="store_true", help="显示版本信息")
 
     args = parser.parse_args()
 
@@ -375,8 +377,7 @@ def main():
     if input_path.is_dir():
         md_files = sorted(input_path.glob("*.md"))
         # 排除 merged.md
-        md_files = [f for f in md_files if f.name != "merged.md"
-                    and not f.name.startswith("~")]
+        md_files = [f for f in md_files if f.name != "merged.md" and not f.name.startswith("~")]
         if not md_files:
             show_error(f"目录中没有 .md 文件: {input_path}")
             sys.exit(1)

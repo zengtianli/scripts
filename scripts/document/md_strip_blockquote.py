@@ -6,12 +6,12 @@
 生成 docx 前需要去掉这些标注，只保留正文内容。
 """
 
-import sys
 import argparse
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info
+from display import show_error, show_info, show_success
 from file_ops import show_version_info
 
 SCRIPT_NAME = "md_strip_blockquote"

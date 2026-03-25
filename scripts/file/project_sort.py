@@ -156,9 +156,9 @@ def main():
         if not qualified:
             continue
 
-        logger.info("扫描: %s （%d 个项目组, %d 个文件）",
-                     d.name, len(qualified),
-                     sum(len(v) for v in qualified.values()))
+        logger.info(
+            "扫描: %s （%d 个项目组, %d 个文件）", d.name, len(qualified), sum(len(v) for v in qualified.values())
+        )
 
         moved, skipped = sort_files(d, groups, args.min, args.dry_run, logger)
         total_moved += moved

@@ -8,27 +8,33 @@
 JSON 配置格式见 --example 输出。
 """
 
-import sys
-import json
 import argparse
-from pathlib import Path
+import json
+import sys
 from datetime import datetime, timedelta
+from pathlib import Path
 
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
-import numpy as np
+import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info
-from file_ops import show_version_info
-
 # 同目录公共模块
 from chart_common import (
-    setup_chinese_fonts, get_phase_color, save_figure,
-    MILESTONE_COLOR, MILESTONE_EDGE, GRID_COLOR, BG_COLOR,
-    DEFAULT_DPI, CHART_VERSION, CHART_AUTHOR, CHART_UPDATED,
+    BG_COLOR,
+    CHART_AUTHOR,
+    CHART_UPDATED,
+    CHART_VERSION,
+    DEFAULT_DPI,
+    GRID_COLOR,
+    MILESTONE_COLOR,
+    MILESTONE_EDGE,
+    get_phase_color,
+    save_figure,
+    setup_chinese_fonts,
 )
+from display import show_error, show_info, show_success
+from file_ops import show_version_info
 
 SCRIPT_NAME = "chart_gantt"
 
@@ -66,6 +72,7 @@ EXAMPLE_CONFIG = """{
 
 
 # ── 核心绘图 ──────────────────────────────────────────────────
+
 
 def parse_date(s: str) -> datetime:
     """解析日期字符串，支持 YYYY-MM-DD 和 YYYY-MM"""
@@ -121,54 +128,83 @@ def draw_gantt(config: dict, output_path: str):
     # 绘制阶段条
     for i, p in enumerate(phases):
         ax.barh(
-            i, p["_duration"], left=p["_start"],
-            height=bar_height, color=p["_color"],
-            alpha=0.85, edgecolor="#333333", linewidth=0.8,
+            i,
+            p["_duration"],
+            left=p["_start"],
+            height=bar_height,
+            color=p["_color"],
+            alpha=0.85,
+            edgecolor="#333333",
+            linewidth=0.8,
             zorder=2,
         )
         # 条内文字：短名称 + 日期范围
         short = p.get("short", p["name"])
-        date_range = f'{p["_start"].strftime("%m.%d")}—{p["_end"].strftime("%m.%d")}'
+        date_range = f"{p['_start'].strftime('%m.%d')}—{p['_end'].strftime('%m.%d')}"
         mid = p["_start"] + timedelta(days=p["_duration"] / 2)
 
         if p["_duration"] > 30:
-            ax.text(mid, i, f"{short}\n{date_range}",
-                    ha="center", va="center", fontsize=9,
-                    fontweight="bold", color="white", zorder=3)
+            ax.text(
+                mid,
+                i,
+                f"{short}\n{date_range}",
+                ha="center",
+                va="center",
+                fontsize=9,
+                fontweight="bold",
+                color="white",
+                zorder=3,
+            )
         else:
             # 短条：文字放在右侧
-            ax.text(p["_end"] + timedelta(days=2), i,
-                    f"{short} ({date_range})",
-                    ha="left", va="center", fontsize=8,
-                    color="#333333", zorder=3)
+            ax.text(
+                p["_end"] + timedelta(days=2),
+                i,
+                f"{short} ({date_range})",
+                ha="left",
+                va="center",
+                fontsize=8,
+                color="#333333",
+                zorder=3,
+            )
 
     # 绘制里程碑
     for m in milestones:
         # 找到最近的阶段 y 位置
         y = -0.8  # 放在最上方
         ax.scatter(
-            m["_date"], y, marker="D", s=120,
-            color=MILESTONE_COLOR, edgecolor=MILESTONE_EDGE,
-            linewidth=1.5, zorder=4,
+            m["_date"],
+            y,
+            marker="D",
+            s=120,
+            color=MILESTONE_COLOR,
+            edgecolor=MILESTONE_EDGE,
+            linewidth=1.5,
+            zorder=4,
         )
         label_text = m["name"]
         if m.get("label"):
             label_text += f"\n({m['label']})"
         ax.annotate(
-            label_text, (m["_date"], y),
-            textcoords="offset points", xytext=(0, -18),
-            ha="center", va="top", fontsize=7.5,
-            fontweight="bold", color="#333333",
+            label_text,
+            (m["_date"], y),
+            textcoords="offset points",
+            xytext=(0, -18),
+            ha="center",
+            va="top",
+            fontsize=7.5,
+            fontweight="bold",
+            color="#333333",
         )
         # 竖虚线
-        ax.axvline(m["_date"], color=MILESTONE_COLOR, linestyle="--",
-                   alpha=0.3, linewidth=0.8, zorder=1)
+        ax.axvline(m["_date"], color=MILESTONE_COLOR, linestyle="--", alpha=0.3, linewidth=0.8, zorder=1)
 
     # ── 坐标轴 ──
     ax.set_yticks(y_positions)
     ax.set_yticklabels(
         [p.get("short", p["name"]) for p in phases],
-        fontsize=11, fontweight="bold",
+        fontsize=11,
+        fontweight="bold",
     )
     ax.invert_yaxis()
 
@@ -186,31 +222,23 @@ def draw_gantt(config: dict, output_path: str):
     plt.setp(ax.get_xticklabels(), rotation=30, ha="right", fontsize=10)
 
     # 网格
-    ax.grid(True, axis="x", which="major", color=GRID_COLOR,
-            linestyle="-", linewidth=0.8, alpha=0.7)
-    ax.grid(True, axis="x", which="minor", color=GRID_COLOR,
-            linestyle=":", linewidth=0.4, alpha=0.5)
+    ax.grid(True, axis="x", which="major", color=GRID_COLOR, linestyle="-", linewidth=0.8, alpha=0.7)
+    ax.grid(True, axis="x", which="minor", color=GRID_COLOR, linestyle=":", linewidth=0.4, alpha=0.5)
     ax.grid(False, axis="y")
 
     # 标题
     if subtitle:
-        ax.set_title(f"{title}\n{subtitle}", fontsize=16,
-                     fontweight="bold", pad=15)
+        ax.set_title(f"{title}\n{subtitle}", fontsize=16, fontweight="bold", pad=15)
     else:
         ax.set_title(title, fontsize=16, fontweight="bold", pad=15)
 
     # 图例
-    legend_patches = [
-        mpatches.Patch(color=p["_color"], label=p.get("short", p["name"]))
-        for p in phases
-    ]
+    legend_patches = [mpatches.Patch(color=p["_color"], label=p.get("short", p["name"])) for p in phases]
     if milestones:
         legend_patches.append(
-            plt.scatter([], [], marker="D", s=80, color=MILESTONE_COLOR,
-                       edgecolor=MILESTONE_EDGE, label="里程碑")
+            plt.scatter([], [], marker="D", s=80, color=MILESTONE_COLOR, edgecolor=MILESTONE_EDGE, label="里程碑")
         )
-    ax.legend(handles=legend_patches, loc="upper right", fontsize=9,
-              framealpha=0.9)
+    ax.legend(handles=legend_patches, loc="upper right", fontsize=9, framealpha=0.9)
 
     # 边框
     for spine in ["top", "right"]:
@@ -222,6 +250,7 @@ def draw_gantt(config: dict, output_path: str):
 
 
 # ── CLI ───────────────────────────────────────────────────────
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -257,7 +286,7 @@ def main():
         show_error(f"配置文件不存在: {config_path}")
         sys.exit(1)
 
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         config = json.load(f)
 
     output = args.output or str(config_path.parent / "gantt.png")

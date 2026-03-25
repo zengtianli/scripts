@@ -8,19 +8,9 @@ from pathlib import Path
 
 LOG_FILE = Path.home() / "Library" / "Logs" / "secretary" / "investment_log.jsonl"
 
-CATEGORIES = {
-    "1": "stock_idea",
-    "2": "crypto",
-    "3": "macro",
-    "4": "portfolio",
-    "5": "research"
-}
+CATEGORIES = {"1": "stock_idea", "2": "crypto", "3": "macro", "4": "portfolio", "5": "research"}
 
-PRIORITIES = {
-    "1": "high",
-    "2": "medium",
-    "3": "low"
-}
+PRIORITIES = {"1": "high", "2": "medium", "3": "low"}
 
 
 def get_input(prompt, default=None):
@@ -75,7 +65,7 @@ def main():
         "content": content,
         "tags": tags,
         "priority": priority,
-        "metadata": metadata
+        "metadata": metadata,
     }
 
     # 确保日志目录存在
@@ -85,7 +75,7 @@ def main():
     with open(LOG_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
 
-    print(f"\n✅ 投资记录已保存")
+    print("\n✅ 投资记录已保存")
     print(f"   分类: {category}")
     print(f"   优先级: {priority}")
     print(f"   标签: {', '.join(tags) if tags else '无'}")

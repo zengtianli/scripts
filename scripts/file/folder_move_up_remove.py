@@ -7,8 +7,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 
+from display import show_error, show_info, show_success
 from finder import get_input_files
-from display import show_success, show_error, show_info
+
 
 def process_folder(folder, parent_dir, prefix="", depth=0):
     """递归处理文件夹"""
@@ -16,7 +17,7 @@ def process_folder(folder, parent_dir, prefix="", depth=0):
     show_info(f"{prefix}处理文件夹: {folder_name} (深度: {depth})")
 
     # 删除 .DS_Store
-    ds_store = os.path.join(folder, '.DS_Store')
+    ds_store = os.path.join(folder, ".DS_Store")
     if os.path.exists(ds_store):
         os.remove(ds_store)
         show_info(f"{prefix}  已删除 .DS_Store 文件")
@@ -59,17 +60,18 @@ def process_folder(folder, parent_dir, prefix="", depth=0):
 
     return False
 
+
 def main():
     folders = get_input_files([], allow_multiple=True)
 
     if not folders:
         return
-    
+
     success_count = 0
     skipped_count = 0
 
     for folder in folders:
-        folder = folder.rstrip('/')
+        folder = folder.rstrip("/")
         if not os.path.isdir(folder):
             show_info(f"跳过 {os.path.basename(folder)} - 不是文件夹")
             skipped_count += 1
@@ -91,6 +93,6 @@ def main():
     if skipped_count > 0:
         show_info(f"跳过了 {skipped_count} 个项目")
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()

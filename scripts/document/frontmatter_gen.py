@@ -4,15 +4,16 @@
 扫描指定目录下的 Markdown 文件，调用 Claude Haiku API 生成
 description + tags 的 YAML frontmatter 并写入文件头部。
 """
-import sys
+
+import argparse
+import json
 import os
 import re
-import json
+import sys
 import time
-import argparse
-from urllib.request import Request, urlopen
-from urllib.error import HTTPError
 from pathlib import Path
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 IGNORE_DIRS = {".git", "_site", "__pycache__", "node_modules", ".DS_Store"}
 
@@ -20,7 +21,7 @@ SYSTEM_PROMPT = (
     "你是文档分析助手。根据文档内容生成 YAML frontmatter。"
     "只返回 frontmatter 块（含 --- 分隔符），不要其他文字。"
     "description 用中文，≤50字。tags 3-5 个，用中英文均可。"
-    "格式：\n---\ndescription: \"描述\"\ntags: [tag1, tag2, tag3]\n---"
+    '格式：\n---\ndescription: "描述"\ntags: [tag1, tag2, tag3]\n---'
 )
 
 
@@ -131,13 +132,9 @@ def process_file(filepath: str, content: str, base_url: str, token: str) -> str 
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="批量为 Markdown 文件生成 YAML frontmatter（Claude Haiku API）"
-    )
+    parser = argparse.ArgumentParser(description="批量为 Markdown 文件生成 YAML frontmatter（Claude Haiku API）")
     parser.add_argument("src_dir", help="要扫描的目录路径")
-    parser.add_argument(
-        "--dry-run", action="store_true", help="只列出会处理的文件，不调用 API"
-    )
+    parser.add_argument("--dry-run", action="store_true", help="只列出会处理的文件，不调用 API")
     parser.add_argument("--file", dest="single_file", help="只处理单个文件（相对于 src_dir 的路径）")
     args = parser.parse_args()
 
@@ -213,7 +210,7 @@ def main():
         fm = process_file(abs_path, content, base_url, token)
         if fm is None:
             failed += 1
-            print(f"  FAILED")
+            print("  FAILED")
             continue
 
         # 写入文件头部

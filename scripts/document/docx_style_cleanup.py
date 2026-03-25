@@ -14,11 +14,7 @@ Word 文档样式清理工具 (docx_style_cleanup.py)
 """
 
 import argparse
-import copy
 import json
-import os
-import re
-import shutil
 import sys
 import zipfile
 from io import BytesIO
@@ -214,7 +210,7 @@ def main():
 
     # 加载配置
     if args.config:
-        with open(args.config, "r", encoding="utf-8") as f:
+        with open(args.config, encoding="utf-8") as f:
             config = json.load(f)
     else:
         config = {}
@@ -238,7 +234,7 @@ def main():
         save_docx(files, styles_tree, doc_tree, args.output)
         print(f"\n📄 已保存到 {args.output}")
     elif args.preview:
-        print(f"\n（预览模式，未修改文件）")
+        print("\n（预览模式，未修改文件）")
 
 
 if __name__ == "__main__":

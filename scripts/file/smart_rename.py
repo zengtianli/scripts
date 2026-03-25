@@ -53,8 +53,17 @@ action 可选值：rename（重命名）、archive（归档旧版本）、delete
 
 # Document extensions that support content extraction
 CONTENT_EXTRACTABLE = {
-    ".docx", ".doc", ".pdf", ".xlsx", ".xls",
-    ".pptx", ".ppt", ".txt", ".md", ".html", ".csv",
+    ".docx",
+    ".doc",
+    ".pdf",
+    ".xlsx",
+    ".xls",
+    ".pptx",
+    ".ppt",
+    ".txt",
+    ".md",
+    ".html",
+    ".csv",
 }
 
 
@@ -114,6 +123,7 @@ def extract_content_preview(filepath: Path, max_chars: int = 500) -> str:
 
 def _extract_docx(filepath: Path, max_chars: int) -> str:
     from docx import Document
+
     doc = Document(str(filepath))
     texts = []
     for para in doc.paragraphs[:5]:
@@ -126,6 +136,7 @@ def _extract_docx(filepath: Path, max_chars: int) -> str:
 
 def _extract_pdf(filepath: Path, max_chars: int) -> str:
     import pdfplumber
+
     with pdfplumber.open(str(filepath)) as pdf:
         if not pdf.pages:
             return ""
@@ -135,6 +146,7 @@ def _extract_pdf(filepath: Path, max_chars: int) -> str:
 
 def _extract_xlsx(filepath: Path, max_chars: int) -> str:
     from openpyxl import load_workbook
+
     wb = load_workbook(str(filepath), read_only=True, data_only=True)
     parts = [f"工作表: {', '.join(wb.sheetnames)}"]
     ws = wb.active
@@ -149,6 +161,7 @@ def _extract_xlsx(filepath: Path, max_chars: int) -> str:
 
 def _extract_pptx(filepath: Path, max_chars: int) -> str:
     from pptx import Presentation
+
     prs = Presentation(str(filepath))
     titles = []
     for slide in prs.slides[:5]:
@@ -194,16 +207,18 @@ def scan_files(
                 logger.info("  提取内容: %s", item.name)
                 preview = extract_content_preview(item, max_chars)
 
-            files.append({
-                "path": str(item),
-                "dir": item.parent.name,
-                "name": item.name,
-                "ext": ext,
-                "size": item.stat().st_size,
-                "mtime": datetime.fromtimestamp(item.stat().st_mtime).strftime("%Y-%m-%d"),
-                "md5": compute_md5(item),
-                "content_preview": preview,
-            })
+            files.append(
+                {
+                    "path": str(item),
+                    "dir": item.parent.name,
+                    "name": item.name,
+                    "ext": ext,
+                    "size": item.stat().st_size,
+                    "mtime": datetime.fromtimestamp(item.stat().st_mtime).strftime("%Y-%m-%d"),
+                    "md5": compute_md5(item),
+                    "content_preview": preview,
+                }
+            )
             if dry_run_limit and len(files) >= dry_run_limit:
                 return files
     return files
@@ -237,9 +252,7 @@ def find_similar_names(files: list[dict], threshold: float = 0.7) -> list[list[i
                 continue
             if files[i]["dir"] != files[j]["dir"]:
                 continue
-            ratio = difflib.SequenceMatcher(
-                None, files[i]["name"], files[j]["name"]
-            ).ratio()
+            ratio = difflib.SequenceMatcher(None, files[i]["name"], files[j]["name"]).ratio()
             if ratio >= threshold:
                 group.append(j)
                 visited.add(j)
@@ -263,7 +276,7 @@ def build_batch_prompt(files: list[dict], indices: list[int], dup_indices: set[i
     for batch_pos, idx in enumerate(indices, 1):
         f = files[idx]
         size_kb = f["size"] / 1024
-        line = f'{batch_pos}. 文件名: {f["name"]} | 大小: {size_kb:.0f}KB | 修改: {f["mtime"]} | 目录: {f["dir"]}'
+        line = f"{batch_pos}. 文件名: {f['name']} | 大小: {size_kb:.0f}KB | 修改: {f['mtime']} | 目录: {f['dir']}"
         if idx in dup_indices:
             line += " | [MD5重复]"
         if f["content_preview"]:
@@ -327,7 +340,7 @@ def analyze_with_ai(
 
     # Process in batches
     for batch_start in range(0, len(all_indices), batch_size):
-        batch = all_indices[batch_start: batch_start + batch_size]
+        batch = all_indices[batch_start : batch_start + batch_size]
         batch_num = batch_start // batch_size + 1
         total_batches = (len(all_indices) + batch_size - 1) // batch_size
         logger.info("AI 分析 batch %d/%d (%d 个文件)...", batch_num, total_batches, len(batch))
@@ -358,6 +371,7 @@ def analyze_with_ai(
         # Brief pause between batches
         if batch_start + batch_size < len(all_indices):
             import time
+
             time.sleep(1)
 
     # Fill any None results
@@ -448,9 +462,7 @@ def parse_plan_md(plan_path: Path) -> list[dict]:
     operations = []
 
     # Match table rows: | # | action | old_name | new_name | note |
-    row_pattern = re.compile(
-        r"\|\s*(\d+)\s*\|\s*(\w+)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.*?)\s*\|"
-    )
+    row_pattern = re.compile(r"\|\s*(\d+)\s*\|\s*(\w+)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*(.*?)\s*\|")
 
     for line in text.splitlines():
         m = row_pattern.match(line.strip())
@@ -460,13 +472,15 @@ def parse_plan_md(plan_path: Path) -> list[dict]:
         # Skip header rows
         if action in ("操作", "---"):
             continue
-        operations.append({
-            "index": int(idx_str),
-            "action": action.strip(),
-            "old_name": old_name.strip(),
-            "new_name": new_name.strip(),
-            "note": note.strip(),
-        })
+        operations.append(
+            {
+                "index": int(idx_str),
+                "action": action.strip(),
+                "old_name": old_name.strip(),
+                "new_name": new_name.strip(),
+                "note": note.strip(),
+            }
+        )
 
     return operations
 
@@ -634,12 +648,8 @@ def cmd_analyze(args, config, logger):
     generate_plan_md(files, ai_results, plan_path, logger)
 
     # Save raw file list + AI results for retry/execute
-    raw_path.write_text(
-        json.dumps(files, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    prev_results_path.write_text(
-        json.dumps(ai_results, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    raw_path.write_text(json.dumps(files, ensure_ascii=False, indent=2), encoding="utf-8")
+    prev_results_path.write_text(json.dumps(ai_results, ensure_ascii=False, indent=2), encoding="utf-8")
     logger.info("文件元信息已保存: %s", raw_path)
     logger.info("请审核 %s 后运行: python3 smart_rename.py execute", plan_path)
 

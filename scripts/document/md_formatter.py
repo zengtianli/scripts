@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 文本格式自动修复工具
 支持批量处理Markdown文件中的格式问题
@@ -50,19 +49,20 @@ def fix_quotes(content):
     """
     # 匹配所有可能的双引号类型
     # ", ", ", ", 「, 」以及英文双引号"
-    quote_pattern = r'["""''「」]'
-    
+    quote_pattern = r'["""' "「」]"
+
     # 计数器，用于判断奇偶
     counter = 0
-    
+
     def replace_quote(match):
         nonlocal counter
         counter += 1
         # 奇数用中文左引号"，偶数用中文右引号"
-        return '“' if counter % 2 == 1 else '”'
+        return "“" if counter % 2 == 1 else "”"
+
     # 执行替换
     result = re.sub(quote_pattern, replace_quote, content)
-    
+
     return result, counter
 
 
@@ -72,18 +72,18 @@ def fix_punctuation(content):
     """
     # 英文标点到中文标点的映射
     punctuation_map = {
-        ',': '，',   # 逗号
-        ':': '：',   # 冒号
-        ';': '；',   # 分号
-        '!': '！',   # 感叹号
-        '?': '？',   # 问号
-        '(': '（',   # 左括号
-        ')': '）',   # 右括号
+        ",": "，",  # 逗号
+        ":": "：",  # 冒号
+        ";": "；",  # 分号
+        "!": "！",  # 感叹号
+        "?": "？",  # 问号
+        "(": "（",  # 左括号
+        ")": "）",  # 右括号
     }
-    
+
     result = content
     replacement_count = 0
-    
+
     # 逐个替换标点符号
     for eng_punct, chn_punct in punctuation_map.items():
         # 转义特殊字符
@@ -91,7 +91,7 @@ def fix_punctuation(content):
         count = len(re.findall(escaped_punct, result))
         replacement_count += count
         result = re.sub(escaped_punct, chn_punct, result)
-    
+
     return result, replacement_count
 
 
@@ -102,59 +102,53 @@ def fix_units(content):
     # 中文单位到符号的映射（按长度排序，优先匹配长的）
     units_map = {
         # 面积单位
-        '平方公里': 'km²',
-        '平方千米': 'km²',
-        '平方米': 'm²',
-        '平方厘米': 'cm²',
-        '平方毫米': 'mm²',
-        
+        "平方公里": "km²",
+        "平方千米": "km²",
+        "平方米": "m²",
+        "平方厘米": "cm²",
+        "平方毫米": "mm²",
         # 体积单位
-        '立方米': 'm³',
-        '立方厘米': 'cm³',
-        '立方毫米': 'mm³',
-        '立方公里': 'km³',
-        '立方千米': 'km³',
-        
+        "立方米": "m³",
+        "立方厘米": "cm³",
+        "立方毫米": "mm³",
+        "立方公里": "km³",
+        "立方千米": "km³",
         # 长度单位
-        '公里': 'km',
-        '千米': 'km',
-        '厘米': 'cm',
-        '毫米': 'mm',
-        '微米': 'μm',
-        '纳米': 'nm',
-        
+        "公里": "km",
+        "千米": "km",
+        "厘米": "cm",
+        "毫米": "mm",
+        "微米": "μm",
+        "纳米": "nm",
         # 质量单位
-        '公斤': 'kg',
-        '千克': 'kg',
-        '毫克': 'mg',
-        '微克': 'μg',
-        
+        "公斤": "kg",
+        "千克": "kg",
+        "毫克": "mg",
+        "微克": "μg",
         # 容量单位
-        '毫升': 'mL',
-        '微升': 'μL',
-        
+        "毫升": "mL",
+        "微升": "μL",
         # 时间单位
-        '小时': 'h',
-        '分钟': 'min',
-        '秒钟': 's',
-        
+        "小时": "h",
+        "分钟": "min",
+        "秒钟": "s",
         # 温度单位
-        '摄氏度': '℃',
-        '华氏度': '℉',
+        "摄氏度": "℃",
+        "华氏度": "℉",
     }
-    
+
     result = content
     replacement_count = 0
-    
+
     # 按长度从长到短排序，避免误匹配（如"平方米"要在"米"之前）
     sorted_units = sorted(units_map.items(), key=lambda x: len(x[0]), reverse=True)
-    
+
     for chn_unit, symbol in sorted_units:
         count = result.count(chn_unit)
         if count > 0:
             replacement_count += count
             result = result.replace(chn_unit, symbol)
-    
+
     return result, replacement_count
 
 
@@ -163,44 +157,44 @@ def process_file(input_file):
     处理单个文件
     """
     input_path = Path(input_file)
-    
+
     if not input_path.exists():
         print(f"❌ 错误：文件不存在 - {input_file}")
         return False
-    
+
     # 生成输出文件名
     output_path = input_path.parent / f"{input_path.stem}_fixed{input_path.suffix}"
-    
+
     try:
         # 读取文件
         print(f"📖 正在读取文件: {input_path.name}")
-        with open(input_path, 'r', encoding='utf-8') as f:
+        with open(input_path, encoding="utf-8") as f:
             content = f.read()
-        
+
         # 处理引号
-        print(f"🔄 正在处理引号...")
+        print("🔄 正在处理引号...")
         fixed_content, quote_count = fix_quotes(content)
-        
+
         # 处理标点符号
-        print(f"🔄 正在处理标点符号...")
+        print("🔄 正在处理标点符号...")
         fixed_content, punct_count = fix_punctuation(fixed_content)
-        
+
         # 处理单位转换
-        print(f"🔄 正在转换单位...")
+        print("🔄 正在转换单位...")
         fixed_content, unit_count = fix_units(fixed_content)
-        
+
         # 保存文件
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(fixed_content)
-        
-        print(f"✅ 处理完成！")
+
+        print("✅ 处理完成！")
         print(f"   - 共替换了 {quote_count} 个引号")
         print(f"   - 共替换了 {punct_count} 个标点符号")
         print(f"   - 共转换了 {unit_count} 个单位")
         print(f"   - 输出文件: {output_path.name}")
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ 处理失败：{e}")
         return False
@@ -208,7 +202,7 @@ def process_file(input_file):
 
 if __name__ == "__main__":
     # 获取输入文件（优先命令行参数，否则从 Finder 获取）
-    files = get_input_files(sys.argv[1:], expected_ext='md')
+    files = get_input_files(sys.argv[1:], expected_ext="md")
 
     if not files:
         print("❌ 错误：缺少文件名参数")
@@ -236,4 +230,3 @@ if __name__ == "__main__":
 
     print("\n" + "=" * 50)
     tracker.show_summary("文件处理")
-

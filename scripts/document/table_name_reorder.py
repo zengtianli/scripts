@@ -18,12 +18,12 @@
     | header |
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
 
-TABLE_NAME_RE = re.compile(r'^表\d+-\d+\s')
-TABLE_SEP_RE = re.compile(r'^\|[\s\-:]+(\|[\s\-:]+)+\|?\s*$')
+TABLE_NAME_RE = re.compile(r"^表\d+-\d+\s")
+TABLE_SEP_RE = re.compile(r"^\|[\s\-:]+(\|[\s\-:]+)+\|?\s*$")
 
 
 def is_table_header(line: str) -> bool:
@@ -93,7 +93,7 @@ def fix_file(filepath: Path) -> int:
             # 删除表名和表头之间的空行
             new_segment = [name_line, lines[table_header_idx]]
             # 替换从 name_line_idx 到 table_header_idx
-            lines[name_line_idx:table_header_idx + 1] = [name_line, lines[table_header_idx]]
+            lines[name_line_idx : table_header_idx + 1] = [name_line, lines[table_header_idx]]
             # 不计为修复
             i = name_line_idx + 2
             continue
@@ -108,7 +108,7 @@ def fix_file(filepath: Path) -> int:
         new_segment.append(lines[table_header_idx])
 
         # 替换从 name_line_idx 到 table_header_idx（包含）
-        lines[name_line_idx:table_header_idx + 1] = new_segment
+        lines[name_line_idx : table_header_idx + 1] = new_segment
         fixes += 1
 
         # 继续处理下一个

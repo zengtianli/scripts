@@ -3,9 +3,9 @@
 
 import json
 import sys
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import defaultdict
 
 LOG_FILE = Path.home() / "Library" / "Logs" / "secretary" / "work_log.jsonl"
 
@@ -18,7 +18,7 @@ def load_logs(days=7):
     cutoff_date = datetime.now().astimezone() - timedelta(days=days)
     logs = []
 
-    with open(LOG_FILE, "r", encoding="utf-8") as f:
+    with open(LOG_FILE, encoding="utf-8") as f:
         for line in f:
             try:
                 entry = json.loads(line.strip())
@@ -83,7 +83,7 @@ def generate_report(days=7):
     # 生成报告
     print(f"# 💼 工作报告（最近 {days} 天）\n")
     print(f"生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-    print(f"## 📈 概览\n")
+    print("## 📈 概览\n")
     print(f"- 总记录数：{len(logs)}")
     print(f"- 高优先级：{len(by_priority['high'])}")
     print(f"- 中优先级：{len(by_priority['medium'])}")
@@ -120,7 +120,7 @@ def generate_report(days=7):
         "documentation": "文档",
         "bug_fix": "Bug 修复",
         "deployment": "部署",
-        "planning": "规划"
+        "planning": "规划",
     }
     for category, entries in sorted(by_category.items()):
         category_name = category_names.get(category, category)

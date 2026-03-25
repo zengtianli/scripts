@@ -26,10 +26,10 @@ import json
 import os
 import subprocess
 import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.request import Request, urlopen
 from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -229,10 +229,7 @@ def validate_path(path_str: str) -> str:
         # Allow the root directory itself or anything inside it
         if resolved == root.rstrip("/") or resolved.startswith(root):
             return resolved
-    raise ValueError(
-        f"Path '{path_str}' is outside allowed directories. "
-        f"Allowed: {DOCS_ROOT}, {CC_ROOT}"
-    )
+    raise ValueError(f"Path '{path_str}' is outside allowed directories. Allowed: {DOCS_ROOT}, {CC_ROOT}")
 
 
 # ---------------------------------------------------------------------------
@@ -314,10 +311,7 @@ def tool_merge_files(paths: list[str], output_path: str) -> str:
     try:
         os.makedirs(os.path.dirname(safe_output), exist_ok=True)
         Path(safe_output).write_text(merged, encoding="utf-8")
-        return (
-            f"OK: Merged {len(paths)} files into {safe_output} "
-            f"({len(merged)} bytes)"
-        )
+        return f"OK: Merged {len(paths)} files into {safe_output} ({len(merged)} bytes)"
     except Exception as e:
         return f"Error writing merged file: {e}"
 
@@ -358,9 +352,20 @@ def tool_search_files(pattern: str, path: str | None = None) -> str:
         return f"Error: Not a directory: {safe_dir}"
     try:
         proc = subprocess.run(
-            ["grep", "-r", "-n", "-i", "--include=*.md", "--include=*.txt",
-             "--include=*.py", "--include=*.json", "--include=*.yaml",
-             "--include=*.yml", pattern, safe_dir],
+            [
+                "grep",
+                "-r",
+                "-n",
+                "-i",
+                "--include=*.md",
+                "--include=*.txt",
+                "--include=*.py",
+                "--include=*.json",
+                "--include=*.yaml",
+                "--include=*.yml",
+                pattern,
+                safe_dir,
+            ],
             capture_output=True,
             text=True,
             timeout=15,
@@ -427,7 +432,7 @@ def call_claude(messages: list[dict], tools: list[dict], system: str) -> dict:
                 return json.loads(resp.read().decode("utf-8"))
         except HTTPError as e:
             if e.code == 429 and attempt < max_retries:
-                wait = 2 ** attempt
+                wait = 2**attempt
                 log(f"Rate limited, retrying in {wait}s...")
                 time.sleep(wait)
                 continue
@@ -500,19 +505,20 @@ def run_chat(user_message: str, history: list[dict] | None = None) -> dict:
 
             log(f"  -> Result: {result[:200]}")
 
-            tool_results.append({
-                "type": "tool_result",
-                "tool_use_id": tool_id,
-                "content": result,
-            })
+            tool_results.append(
+                {
+                    "type": "tool_result",
+                    "tool_use_id": tool_id,
+                    "content": result,
+                }
+            )
 
         # Append tool results as user message
         messages.append({"role": "user", "content": tool_results})
 
     # Exhausted max rounds
     return {
-        "response": "I've reached the maximum number of tool-use rounds (10). "
-                     "Please try a simpler request.",
+        "response": "I've reached the maximum number of tool-use rounds (10). Please try a simpler request.",
         "tool_calls": total_tool_calls,
     }
 

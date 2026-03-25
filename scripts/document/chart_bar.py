@@ -8,24 +8,28 @@
 JSON 配置格式见 --example 输出。
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info
-from file_ops import show_version_info
-
 from chart_common import (
-    setup_chinese_fonts, get_phase_color, save_figure,
-    GRID_COLOR, BG_COLOR, DEFAULT_DPI,
-    CHART_VERSION, CHART_AUTHOR, CHART_UPDATED,
+    BG_COLOR,
+    CHART_AUTHOR,
+    CHART_UPDATED,
+    CHART_VERSION,
+    DEFAULT_DPI,
+    GRID_COLOR,
+    get_phase_color,
+    save_figure,
+    setup_chinese_fonts,
 )
+from display import show_error, show_info, show_success
+from file_ops import show_version_info
 
 SCRIPT_NAME = "chart_bar"
 
@@ -67,8 +71,7 @@ def draw_horizontal_bar(config: dict, output_path: str):
     ax.set_facecolor(BG_COLOR)
 
     y_pos = np.arange(len(items))
-    bars = ax.barh(y_pos, values, height=0.55, color=colors,
-                   edgecolor="#333333", linewidth=0.8, alpha=0.9)
+    bars = ax.barh(y_pos, values, height=0.55, color=colors, edgecolor="#333333", linewidth=0.8, alpha=0.9)
 
     # 条内/条右标注
     max_val = max(values)
@@ -80,11 +83,9 @@ def draw_horizontal_bar(config: dict, output_path: str):
             label_text = f"{val} {unit}"
 
         if val > max_val * 0.3:
-            ax.text(val / 2, i, label_text, ha="center", va="center",
-                    fontsize=10, fontweight="bold", color="white")
+            ax.text(val / 2, i, label_text, ha="center", va="center", fontsize=10, fontweight="bold", color="white")
         else:
-            ax.text(val + max_val * 0.01, i, label_text, ha="left",
-                    va="center", fontsize=9, color="#333333")
+            ax.text(val + max_val * 0.01, i, label_text, ha="left", va="center", fontsize=9, color="#333333")
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(labels, fontsize=11, fontweight="bold")
@@ -96,14 +97,20 @@ def draw_horizontal_bar(config: dict, output_path: str):
     if show_total:
         total_val = sum(values)
         total_label = config.get("total_label", "合计")
-        ax.text(0.98, 0.02, f"{total_label}：{total_val:.2f} {unit}",
-                transform=ax.transAxes, ha="right", va="bottom",
-                fontsize=11, fontweight="bold", color="#666666",
-                bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
-                         edgecolor="#CCCCCC", alpha=0.9))
+        ax.text(
+            0.98,
+            0.02,
+            f"{total_label}：{total_val:.2f} {unit}",
+            transform=ax.transAxes,
+            ha="right",
+            va="bottom",
+            fontsize=11,
+            fontweight="bold",
+            color="#666666",
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor="#CCCCCC", alpha=0.9),
+        )
 
-    ax.grid(True, axis="x", color=GRID_COLOR, linestyle="-",
-            linewidth=0.6, alpha=0.7)
+    ax.grid(True, axis="x", color=GRID_COLOR, linestyle="-", linewidth=0.6, alpha=0.7)
     ax.grid(False, axis="y")
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
@@ -132,8 +139,7 @@ def draw_vertical_bar(config: dict, output_path: str):
     ax.set_facecolor(BG_COLOR)
 
     x_pos = np.arange(len(items))
-    bars = ax.bar(x_pos, values, width=0.55, color=colors,
-                  edgecolor="#333333", linewidth=0.8, alpha=0.9)
+    bars = ax.bar(x_pos, values, width=0.55, color=colors, edgecolor="#333333", linewidth=0.8, alpha=0.9)
 
     # 柱顶标注
     for bar, val in zip(bars, values):
@@ -143,17 +149,23 @@ def draw_vertical_bar(config: dict, output_path: str):
             text = f"{val}\n({pct}%)"
         else:
             text = f"{val}"
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(),
-                text, ha="center", va="bottom", fontsize=9,
-                fontweight="bold", color="#333333")
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height(),
+            text,
+            ha="center",
+            va="bottom",
+            fontsize=9,
+            fontweight="bold",
+            color="#333333",
+        )
 
     ax.set_xticks(x_pos)
     ax.set_xticklabels(labels, fontsize=10, fontweight="bold")
     ax.set_ylabel(unit, fontsize=11)
     ax.set_title(title, fontsize=16, fontweight="bold", pad=15)
 
-    ax.grid(True, axis="y", color=GRID_COLOR, linestyle="-",
-            linewidth=0.6, alpha=0.7)
+    ax.grid(True, axis="y", color=GRID_COLOR, linestyle="-", linewidth=0.6, alpha=0.7)
     ax.grid(False, axis="x")
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
@@ -186,13 +198,18 @@ def draw_grouped_bar(config: dict, output_path: str):
     for i, s in enumerate(series):
         offset = (i - n_series / 2 + 0.5) * bar_width
         color = s.get("color") or get_phase_color(i)
-        bars = ax.bar(x + offset, s["values"], bar_width * 0.9,
-                      label=s["name"], color=color, edgecolor="#333333",
-                      linewidth=0.6, alpha=0.9)
+        bars = ax.bar(
+            x + offset,
+            s["values"],
+            bar_width * 0.9,
+            label=s["name"],
+            color=color,
+            edgecolor="#333333",
+            linewidth=0.6,
+            alpha=0.9,
+        )
         for bar, val in zip(bars, s["values"]):
-            ax.text(bar.get_x() + bar.get_width() / 2,
-                    bar.get_height(), f"{val}",
-                    ha="center", va="bottom", fontsize=8)
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), f"{val}", ha="center", va="bottom", fontsize=8)
 
     ax.set_xticks(x)
     ax.set_xticklabels(groups, fontsize=10, fontweight="bold")
@@ -200,8 +217,7 @@ def draw_grouped_bar(config: dict, output_path: str):
     ax.set_title(title, fontsize=16, fontweight="bold", pad=15)
     ax.legend(fontsize=10, framealpha=0.9)
 
-    ax.grid(True, axis="y", color=GRID_COLOR, linestyle="-",
-            linewidth=0.6, alpha=0.7)
+    ax.grid(True, axis="y", color=GRID_COLOR, linestyle="-", linewidth=0.6, alpha=0.7)
     for spine in ["top", "right"]:
         ax.spines[spine].set_visible(False)
 
@@ -243,7 +259,7 @@ def main():
         show_error(f"配置文件不存在: {config_path}")
         sys.exit(1)
 
-    with open(config_path, "r", encoding="utf-8") as f:
+    with open(config_path, encoding="utf-8") as f:
         config = json.load(f)
 
     output = args.output or str(config_path.parent / "bar.png")

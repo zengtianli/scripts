@@ -6,10 +6,11 @@
 所有 chart_*.py 脚本共用。
 """
 
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib.font_manager import FontProperties
 from pathlib import Path
+
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 
 # ── 版本信息 ──────────────────────────────────────────────────
 
@@ -49,6 +50,7 @@ GRID_COLOR = "#E0E0E0"
 
 # ── 中文字体 ──────────────────────────────────────────────────
 
+
 def setup_chinese_fonts() -> FontProperties:
     """设置 matplotlib 中文字体支持（macOS 优先）"""
     font_candidates = [
@@ -58,11 +60,13 @@ def setup_chinese_fonts() -> FontProperties:
         "SimHei",
         "DejaVu Sans",
     ]
-    plt.rcParams.update({
-        "font.sans-serif": font_candidates,
-        "axes.unicode_minus": False,
-        "font.family": "sans-serif",
-    })
+    plt.rcParams.update(
+        {
+            "font.sans-serif": font_candidates,
+            "axes.unicode_minus": False,
+            "font.family": "sans-serif",
+        }
+    )
     mpl.rc("font", **{"sans-serif": font_candidates})
 
     # macOS 字体路径
@@ -83,6 +87,5 @@ def get_phase_color(index: int) -> str:
 
 def save_figure(fig, output_path: str, dpi: int = DEFAULT_DPI):
     """统一保存图片"""
-    fig.savefig(output_path, dpi=dpi, bbox_inches="tight",
-                facecolor="white", edgecolor="none")
+    fig.savefig(output_path, dpi=dpi, bbox_inches="tight", facecolor="white", edgecolor="none")
     plt.close(fig)

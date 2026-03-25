@@ -7,14 +7,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 
+from display import show_error, show_info, show_success
 from finder import get_input_files
-from display import show_success, show_error, show_info
 
 LPR_TYPES = {".pdf", ".jpg", ".jpeg", ".png", ".tiff", ".tif", ".gif", ".bmp", ".txt", ".ps", ".eps"}
+
 
 def print_with_lpr(filepath: str, copies: int) -> bool:
     result = subprocess.run(["lpr", "-#", str(copies), filepath], capture_output=True, text=True)
     return result.returncode == 0
+
 
 def print_with_system(filepath: str, copies: int) -> bool:
     script = f'''
@@ -30,6 +32,7 @@ def print_with_system(filepath: str, copies: int) -> bool:
         if copies > 1:
             time.sleep(1)
     return True
+
 
 def main():
     copies = 1
@@ -65,6 +68,7 @@ def main():
     if printed:
         copies_text = f" x{copies}" if copies > 1 else ""
         show_success(f"已发送 {printed} 个文件到打印机{copies_text}")
+
 
 if __name__ == "__main__":
     main()

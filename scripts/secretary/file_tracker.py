@@ -4,12 +4,11 @@
 监控关键目录，追踪今天新建、修改的文件
 """
 
-import os
 import json
+import os
 import sys
-from datetime import datetime, date
+from datetime import date, datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 
 class FileTracker:
@@ -17,16 +16,27 @@ class FileTracker:
 
     # 监控的关键目录
     WATCH_DIRS = {
-        'work': os.path.expanduser('~/work'),
-        'personal': os.path.expanduser('~/cursor-shared'),
-        'zdwp': os.path.expanduser('~/Downloads/zdwp'),
+        "work": os.path.expanduser("~/work"),
+        "personal": os.path.expanduser("~/cursor-shared"),
+        "zdwp": os.path.expanduser("~/Downloads/zdwp"),
     }
 
     # 忽略的目录和文件
     IGNORE_PATTERNS = {
-        '.git', '.next', '__pycache__', '.DS_Store', 'node_modules',
-        '.pnpm', '.cache', '.venv', 'dist', 'build', '.pytest_cache',
-        '.mypy_cache', '.ruff_cache', '.turbo'
+        ".git",
+        ".next",
+        "__pycache__",
+        ".DS_Store",
+        "node_modules",
+        ".pnpm",
+        ".cache",
+        ".venv",
+        "dist",
+        "build",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".ruff_cache",
+        ".turbo",
     }
 
     def __init__(self, target_date: date = None):
@@ -37,8 +47,8 @@ class FileTracker:
             target_date: 目标日期，默认为今天
         """
         self.target_date = target_date or date.today()
-        self.work_files: List[Dict] = []
-        self.personal_files: List[Dict] = []
+        self.work_files: list[dict] = []
+        self.personal_files: list[dict] = []
 
     def should_ignore(self, path: str) -> bool:
         """检查路径是否应该被忽略"""
@@ -60,7 +70,7 @@ class FileTracker:
         """
         # 简化判断：假设 ctime 和 mtime 接近则为新建
         # 实际应用中可以通过 git status 或其他方式更准确判断
-        return 'modified'
+        return "modified"
 
     def format_timestamp(self, mtime: float) -> str:
         """将时间戳格式化为 ISO 8601 格式"""
@@ -95,46 +105,46 @@ class FileTracker:
                     # 只追踪目标日期的文件
                     if file_date == self.target_date:
                         file_record = {
-                            'path': filepath,
-                            'action': self.get_file_action(mtime),
-                            'time': self.format_timestamp(mtime),
-                            'size': stat_info.st_size,
+                            "path": filepath,
+                            "action": self.get_file_action(mtime),
+                            "time": self.format_timestamp(mtime),
+                            "size": stat_info.st_size,
                         }
 
-                        if category == 'work':
+                        if category == "work":
                             self.work_files.append(file_record)
-                        elif category == 'personal':
+                        elif category == "personal":
                             self.personal_files.append(file_record)
 
-                except (OSError, ValueError) as e:
+                except (OSError, ValueError):
                     # 跳过无法访问的文件
                     continue
 
     def track_all(self) -> None:
         """追踪所有监控目录"""
         for category, dir_path in self.WATCH_DIRS.items():
-            if category == 'work':
-                self.track_directory(dir_path, 'work')
-            elif category in ('personal', 'zdwp'):
+            if category == "work":
+                self.track_directory(dir_path, "work")
+            elif category in ("personal", "zdwp"):
                 # zdwp 属于 personal 分类
-                self.track_directory(dir_path, 'personal')
+                self.track_directory(dir_path, "personal")
 
     def sort_files(self) -> None:
         """按时间排序文件列表"""
-        self.work_files.sort(key=lambda x: x['time'])
-        self.personal_files.sort(key=lambda x: x['time'])
+        self.work_files.sort(key=lambda x: x["time"])
+        self.personal_files.sort(key=lambda x: x["time"])
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         """转换为字典格式"""
         return {
-            'date': self.target_date.isoformat(),
-            'work_files': self.work_files,
-            'personal_files': self.personal_files,
-            'summary': {
-                'work_count': len(self.work_files),
-                'personal_count': len(self.personal_files),
-                'total_count': len(self.work_files) + len(self.personal_files),
-            }
+            "date": self.target_date.isoformat(),
+            "work_files": self.work_files,
+            "personal_files": self.personal_files,
+            "summary": {
+                "work_count": len(self.work_files),
+                "personal_count": len(self.personal_files),
+                "total_count": len(self.work_files) + len(self.personal_files),
+            },
         }
 
     def to_json(self, indent: int = 2) -> str:
@@ -146,21 +156,21 @@ def main():
     """主函数"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='文件系统变化追踪器')
+    parser = argparse.ArgumentParser(description="文件系统变化追踪器")
     parser.add_argument(
-        '--date',
+        "--date",
         type=str,
-        help='目标日期 (YYYY-MM-DD 格式，默认为今天)',
+        help="目标日期 (YYYY-MM-DD 格式，默认为今天)",
     )
     parser.add_argument(
-        '--output',
+        "--output",
         type=str,
-        help='输出文件路径 (默认输出到 stdout)',
+        help="输出文件路径 (默认输出到 stdout)",
     )
     parser.add_argument(
-        '--pretty',
-        action='store_true',
-        help='美化输出',
+        "--pretty",
+        action="store_true",
+        help="美化输出",
     )
 
     args = parser.parse_args()
@@ -169,9 +179,9 @@ def main():
     target_date = None
     if args.date:
         try:
-            target_date = datetime.strptime(args.date, '%Y-%m-%d').date()
+            target_date = datetime.strptime(args.date, "%Y-%m-%d").date()
         except ValueError:
-            print(f'错误：日期格式不正确，应为 YYYY-MM-DD', file=sys.stderr)
+            print("错误：日期格式不正确，应为 YYYY-MM-DD", file=sys.stderr)
             sys.exit(1)
 
     # 创建追踪器并执行追踪
@@ -183,12 +193,12 @@ def main():
     output = tracker.to_json(indent=2 if args.pretty else None)
 
     if args.output:
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             f.write(output)
-        print(f'已保存到: {args.output}', file=sys.stderr)
+        print(f"已保存到: {args.output}", file=sys.stderr)
     else:
         print(output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

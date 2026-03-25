@@ -33,9 +33,7 @@ CDP_PORT = 9222
 def get_token_from_cdp():
     """通过 CDP 从运行中的 Typeless 获取 token"""
     try:
-        targets = json.loads(
-            urllib.request.urlopen(f"http://127.0.0.1:{CDP_PORT}/json/list").read()
-        )
+        targets = json.loads(urllib.request.urlopen(f"http://127.0.0.1:{CDP_PORT}/json/list").read())
     except Exception:
         print("错误: 无法连接 Typeless 调试端口。请先用调试模式启动:")
         print("  /Applications/Typeless.app/Contents/MacOS/Typeless --remote-debugging-port=9222 &")
@@ -47,25 +45,31 @@ def get_token_from_cdp():
         sys.exit(1)
 
     import asyncio
+
     try:
         import websockets
     except ImportError:
         print("安装 websockets...")
         import subprocess
+
         subprocess.check_call([sys.executable, "-m", "pip", "install", "websockets", "-q"])
         import websockets
 
     async def _get():
         async with websockets.connect(hub["webSocketDebuggerUrl"]) as ws:
-            await ws.send(json.dumps({
-                "id": 1,
-                "method": "Runtime.evaluate",
-                "params": {
-                    "expression": "window.ipcRenderer.invoke('user:get-current').then(r => JSON.stringify(r))",
-                    "awaitPromise": True,
-                    "returnByValue": True,
-                },
-            }))
+            await ws.send(
+                json.dumps(
+                    {
+                        "id": 1,
+                        "method": "Runtime.evaluate",
+                        "params": {
+                            "expression": "window.ipcRenderer.invoke('user:get-current').then(r => JSON.stringify(r))",
+                            "awaitPromise": True,
+                            "returnByValue": True,
+                        },
+                    }
+                )
+            )
             resp = json.loads(await ws.recv())
             data = json.loads(resp["result"]["result"]["value"])
             return data["refresh_token"]
@@ -96,8 +100,7 @@ def list_words(token):
     offset = 0
     size = 150
     while True:
-        result = api_request("GET", "/user/dictionary/list", token,
-                             params={"size": str(size), "offset": str(offset)})
+        result = api_request("GET", "/user/dictionary/list", token, params={"size": str(size), "offset": str(offset)})
         words = result.get("data", {}).get("words", [])
         all_words.extend(words)
         total = result.get("data", {}).get("total_count", 0)
@@ -118,8 +121,9 @@ def delete_word(token, term):
     match = next((w for w in all_words if w["term"] == term), None)
     if not match:
         return {"status": "NOT_FOUND", "msg": f"'{term}' not found in dictionary"}
-    return api_request("POST", "/user/dictionary/delete", token,
-                       data={"user_dictionary_id": match["user_dictionary_id"]})
+    return api_request(
+        "POST", "/user/dictionary/delete", token, data={"user_dictionary_id": match["user_dictionary_id"]}
+    )
 
 
 def batch_add(token, words):

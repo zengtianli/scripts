@@ -12,12 +12,12 @@ dereference_links.py - 将符号链接替换为实际文件
 """
 
 import os
-import sys
 import shutil
+import sys
 from pathlib import Path
-from typing import List
 
-def find_symlinks(target_dir: Path) -> List[Path]:
+
+def find_symlinks(target_dir: Path) -> list[Path]:
     """递归查找所有符号链接"""
     links = []
 
@@ -43,6 +43,7 @@ def find_symlinks(target_dir: Path) -> List[Path]:
         print(f"⚠️  权限错误: {e}")
 
     return links
+
 
 def dereference_links(target_dir: Path, dry_run: bool = False) -> None:
     """将符号链接替换为实际文件"""
@@ -76,7 +77,7 @@ def dereference_links(target_dir: Path, dry_run: bool = False) -> None:
             print(f"   → {real_path}")
 
             if dry_run:
-                print(f"   [DRY RUN] 将会替换")
+                print("   [DRY RUN] 将会替换")
                 success_count += 1
                 continue
 
@@ -86,10 +87,10 @@ def dereference_links(target_dir: Path, dry_run: bool = False) -> None:
             # 复制真实文件/目录
             if real_path.is_dir():
                 shutil.copytree(real_path, link, symlinks=False)
-                print(f"   ✅ 已复制目录")
+                print("   ✅ 已复制目录")
             else:
                 shutil.copy2(real_path, link)
-                print(f"   ✅ 已复制文件")
+                print("   ✅ 已复制文件")
 
             success_count += 1
 
@@ -109,12 +110,13 @@ def dereference_links(target_dir: Path, dry_run: bool = False) -> None:
     print("=" * 60)
     if dry_run:
         print(f"🎉 预览完成！找到 {success_count} 个符号链接")
-        print(f"   运行时将替换这些链接为实际文件")
+        print("   运行时将替换这些链接为实际文件")
     else:
-        print(f"🎉 完成！")
+        print("🎉 完成！")
         print(f"   ✅ 成功: {success_count}")
         if error_count > 0:
             print(f"   ❌ 失败: {error_count}")
+
 
 def main():
     """主函数"""
@@ -142,6 +144,7 @@ def main():
         print("🔍 预览模式（不会实际修改文件）\n")
 
     dereference_links(target, dry_run)
+
 
 if __name__ == "__main__":
     main()

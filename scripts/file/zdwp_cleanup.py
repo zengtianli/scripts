@@ -101,6 +101,7 @@ def read_docx_first_paragraphs(filepath: Path, n: int = 3) -> str | None:
     """尝试读取 docx 的前 n 段文字。失败返回 None。"""
     try:
         import docx
+
         doc = docx.Document(str(filepath))
         texts = []
         for i, para in enumerate(doc.paragraphs):
@@ -213,7 +214,7 @@ class Rule1:
 
     def report_md(self, root: Path) -> str:
         lines = [
-            f"## 规则 1：垃圾文件（直接删除）",
+            "## 规则 1：垃圾文件（直接删除）",
             f"共 {self.total_files + self.total_dirs} 项"
             f"（{self.total_files} 个文件, {self.total_dirs} 个目录），"
             f"释放 {human_size(self.total_bytes)}",
@@ -228,9 +229,7 @@ class Rule1:
             dir_count = len(entries)
             file_count = sum(fc for _, fc, _ in entries)
             sz = sum(s for _, _, s in entries)
-            lines.append(
-                f"| {typ}/ | {dir_count} dirs, {file_count} files | {human_size(sz)} |"
-            )
+            lines.append(f"| {typ}/ | {dir_count} dirs, {file_count} files | {human_size(sz)} |")
         return "\n".join(lines)
 
     def execute(self, root: Path):
@@ -276,10 +275,7 @@ class Rule2:
         for dirpath, dirnames, filenames in os.walk(root):
             dp = Path(dirpath)
             # 跳过特殊目录（含 .git、_trash、垃圾目录、虚拟环境）
-            dirnames[:] = [
-                d for d in dirnames
-                if not should_skip_dir(d) and d not in JUNK_DIRS and d not in VENV_DIRS
-            ]
+            dirnames[:] = [d for d in dirnames if not should_skip_dir(d) and d not in JUNK_DIRS and d not in VENV_DIRS]
 
             # 建立目录内文件名索引（小写 stem -> 完整 Path）
             name_index: dict[str, list[Path]] = defaultdict(list)
@@ -329,40 +325,38 @@ class Rule2:
 
     def report_md(self, root: Path) -> str:
         lines = [
-            f"## 规则 2：疑似重复（移到 _trash/）",
+            "## 规则 2：疑似重复（移到 _trash/）",
             f"共 {len(self.duplicates) + len(self.copy_keyword)} 个文件",
             "",
         ]
 
         if self.duplicates or self.copy_keyword:
-            lines.extend([
-                "| 文件 | 原件 | 操作 |",
-                "|------|------|------|",
-            ])
+            lines.extend(
+                [
+                    "| 文件 | 原件 | 操作 |",
+                    "|------|------|------|",
+                ]
+            )
             for dup, orig in self.duplicates:
-                lines.append(
-                    f"| {dup.relative_to(root)} | {orig.relative_to(root)} | → _trash/ |"
-                )
+                lines.append(f"| {dup.relative_to(root)} | {orig.relative_to(root)} | → _trash/ |")
             for dup, orig in self.copy_keyword:
                 orig_str = str(orig.relative_to(root)) if orig else "（关键词匹配）"
-                lines.append(
-                    f"| {dup.relative_to(root)} | {orig_str} | → _trash/ |"
-                )
+                lines.append(f"| {dup.relative_to(root)} | {orig_str} | → _trash/ |")
         else:
             lines.append("无疑似重复文件。")
 
         if self.orphans:
-            lines.extend([
-                "",
-                "### 孤立重复（无原件，保留）",
-                "",
-                "| 文件 | 备注 |",
-                "|------|------|",
-            ])
+            lines.extend(
+                [
+                    "",
+                    "### 孤立重复（无原件，保留）",
+                    "",
+                    "| 文件 | 备注 |",
+                    "|------|------|",
+                ]
+            )
             for p in self.orphans:
-                lines.append(
-                    f"| {p.relative_to(root)} | 同目录无原件，保留 |"
-                )
+                lines.append(f"| {p.relative_to(root)} | 同目录无原件，保留 |")
 
         return "\n".join(lines)
 
@@ -401,9 +395,7 @@ class Rule3:
     def scan(self, root: Path):
         # 收集所有二进制文件，按目录和基础名分组
         # dir -> base_name -> [(path, date_str_or_none, mtime)]
-        dir_groups: dict[Path, dict[str, list[tuple[Path, str | None, float]]]] = (
-            defaultdict(lambda: defaultdict(list))
-        )
+        dir_groups: dict[Path, dict[str, list[tuple[Path, str | None, float]]]] = defaultdict(lambda: defaultdict(list))
 
         binary_files: list[Path] = []
         for dirpath, dirnames, filenames in os.walk(root):
@@ -411,10 +403,7 @@ class Rule3:
             dirnames[:] = [
                 d
                 for d in dirnames
-                if not should_skip_dir(d)
-                and d not in JUNK_DIRS
-                and d not in VENV_DIRS
-                and d != "_trash"
+                if not should_skip_dir(d) and d not in JUNK_DIRS and d not in VENV_DIRS and d != "_trash"
             ]
             for fn in filenames:
                 fp = dp / fn
@@ -504,9 +493,7 @@ class Rule3:
                         mtime_date = datetime.fromtimestamp(mtime).strftime("%Y%m%d")
                         new_name = f"{mtime_date}_{stem}{ext}"
                         if new_name != fp.name:
-                            self.suggestions.append(
-                                (fp, new_name, f"添加日期前缀（mtime）")
-                            )
+                            self.suggestions.append((fp, new_name, "添加日期前缀（mtime）"))
                         processed_paths.add(fp)
 
                     # 3c: 不明文件名识别
@@ -545,15 +532,17 @@ class Rule3:
 
     def report_md(self, root: Path) -> str:
         lines = [
-            f"## 规则 3：重命名建议",
+            "## 规则 3：重命名建议",
             f"共 {len(self.suggestions)} 个文件",
             "",
         ]
         if self.suggestions:
-            lines.extend([
-                "| 原文件名 | 建议新名 | 原因 |",
-                "|----------|----------|------|",
-            ])
+            lines.extend(
+                [
+                    "| 原文件名 | 建议新名 | 原因 |",
+                    "|----------|----------|------|",
+                ]
+            )
             for fp, new_name, reason in self.suggestions:
                 rel = fp.relative_to(root)
                 lines.append(f"| {rel} | {new_name} | {reason} |")
@@ -565,13 +554,15 @@ class Rule3:
         """导出重命名计划为 JSON，供用户确认后执行。"""
         data = []
         for fp, new_name, reason in self.suggestions:
-            data.append({
-                "original": str(fp),
-                "relative": str(fp.relative_to(root)),
-                "suggested_name": new_name,
-                "reason": reason,
-                "confirmed": False,
-            })
+            data.append(
+                {
+                    "original": str(fp),
+                    "relative": str(fp.relative_to(root)),
+                    "suggested_name": new_name,
+                    "reason": reason,
+                    "confirmed": False,
+                }
+            )
         with open(output, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         print(f"重命名计划已导出到: {output}")
@@ -584,7 +575,7 @@ class Rule3:
             print(f"  请先运行 dry-run 生成报告，编辑 {confirmed_path} 中的 confirmed 字段后再执行。")
             return
 
-        with open(confirmed_path, "r", encoding="utf-8") as f:
+        with open(confirmed_path, encoding="utf-8") as f:
             data = json.load(f)
 
         count = 0
@@ -662,7 +653,7 @@ def main():
     print("=" * 60)
 
     report_parts = [
-        f"# ZDWP 文件清理报告",
+        "# ZDWP 文件清理报告",
         f"> 生成时间: {now} | 模式: {mode_str} | 规则: {args.rules}",
         "",
     ]
@@ -672,8 +663,7 @@ def main():
         print("\n[规则 1] 扫描垃圾文件...")
         r1 = Rule1()
         r1.scan(root)
-        print(f"  发现 {r1.total_files} 个文件, {r1.total_dirs} 个目录，"
-              f"共 {human_size(r1.total_bytes)}")
+        print(f"  发现 {r1.total_files} 个文件, {r1.total_dirs} 个目录，共 {human_size(r1.total_bytes)}")
         report_parts.append(r1.report_md(root))
         report_parts.append("")
         if is_execute:
@@ -718,9 +708,9 @@ def main():
         print(f"报告已生成: {report_path}")
         if 3 in rules:
             print(f"重命名计划: {root / '_cleanup_rename_plan.json'}")
-            print(f"\n下一步：")
+            print("\n下一步：")
             print(f"  1. 查看报告: cat {report_path}")
-            print(f"  2. 编辑重命名计划，将需要执行的项 confirmed 改为 true")
+            print("  2. 编辑重命名计划，将需要执行的项 confirmed 改为 true")
             print(f"     cp {root / '_cleanup_rename_plan.json'} {root / '_cleanup_confirmed.json'}")
             print(f"  3. 执行: python3 {__file__} --execute")
 

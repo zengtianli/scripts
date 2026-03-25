@@ -17,18 +17,19 @@
   4. 有序列表 → 段落（调用 bullet_to_paragraph 模块）
 """
 
-import sys
-import re
 import argparse
+import re
+import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_info, show_warning
-from file_ops import show_version_info, show_help_header, show_help_footer
+from display import show_error, show_info, show_success, show_warning
+from file_ops import show_version_info
 
 # 尝试导入 bullet_to_paragraph 模块
 try:
-    from bullet_to_paragraph import extract_bullet_blocks, convert_bullet_block
+    from bullet_to_paragraph import convert_bullet_block, extract_bullet_blocks
+
     BULLET_MODULE_AVAILABLE = True
 except ImportError:
     BULLET_MODULE_AVAILABLE = False
@@ -48,37 +49,54 @@ FORBIDDEN_WORDS = {
 # ── 数据模式：匹配含数字+单位的句子片段 ────────────────────
 
 DATA_PATTERN = re.compile(
-    r'\d+[\d.,]*\s*(?:万|亿|千|百)?'
-    r'(?:m³|m²|km²|km|hm²|万m³|亿m³|万元|亿元|元|%|‰|℃|mm|cm|MW|kW|GW|万kW'
-    r'|吨|万吨|亿吨|公顷|亩|万亩|人|万人|户|万户|座|个|处|条|段|台|套|站'
-    r'|立方米每秒|m³/s|L/s)'
+    r"\d+[\d.,]*\s*(?:万|亿|千|百)?"
+    r"(?:m³|m²|km²|km|hm²|万m³|亿m³|万元|亿元|元|%|‰|℃|mm|cm|MW|kW|GW|万kW"
+    r"|吨|万吨|亿吨|公顷|亩|万亩|人|万人|户|万户|座|个|处|条|段|台|套|站"
+    r"|立方米每秒|m³/s|L/s)"
 )
 
-SOURCE_PATTERN = re.compile(r'\[(?:数据)?来源[：:]')
+SOURCE_PATTERN = re.compile(r"\[(?:数据)?来源[：:]")
 
 # 更宽泛的来源识别：根据/依据/按照/《》引用 等
 SOURCE_INDICATORS = re.compile(
-    r'根据|依据|按照|参照|来源于|数据来源|来自|出自|引自|摘自|'
-    r'《[^》]+》'
+    r"根据|依据|按照|参照|来源于|数据来源|来自|出自|引自|摘自|"
+    r"《[^》]+》"
 )
 
 # 已有 SOURCE 注释
-EXISTING_SOURCE_COMMENT = re.compile(r'<!--\s*SOURCE:')
+EXISTING_SOURCE_COMMENT = re.compile(r"<!--\s*SOURCE:")
 
 # 招标文件相关章节关键词
 BID_SECTION_KEYWORDS = [
-    "验收", "工作要求", "工作内容", "付款", "提交标准",
-    "预期成果", "成果提交", "成果验收", "质量标准",
+    "验收",
+    "工作要求",
+    "工作内容",
+    "付款",
+    "提交标准",
+    "预期成果",
+    "成果提交",
+    "成果验收",
+    "质量标准",
 ]
 
 # 要求/标准句式（表示数据来自招标要求）
 REQUIREMENT_PHRASES = [
-    "不少于", "达到", "控制在", "不低于", "不超过", "不小于",
-    "≥", "≤", "覆盖率", "通过率", "合格率",
+    "不少于",
+    "达到",
+    "控制在",
+    "不低于",
+    "不超过",
+    "不小于",
+    "≥",
+    "≤",
+    "覆盖率",
+    "通过率",
+    "合格率",
 ]
 
 
 # ── 工具函数 ────────────────────────────────────────────────
+
 
 def is_in_code_block(lines: list[str], line_idx: int) -> bool:
     """判断某行是否在代码块（```）内"""
@@ -97,6 +115,7 @@ def is_in_table(line: str) -> bool:
 
 # ── 检查函数 ────────────────────────────────────────────────
 
+
 def check_forbidden_words(lines: list[str]) -> list[dict]:
     """检查禁用词，返回问题列表"""
     issues = []
@@ -110,14 +129,16 @@ def check_forbidden_words(lines: list[str]) -> list[dict]:
                 start = max(0, col - 15)
                 end = min(len(line), col + len(word) + 15)
                 context = line[start:end].strip()
-                issues.append({
-                    "type": "禁用词",
-                    "line": i + 1,
-                    "word": word,
-                    "replacement": replacement,
-                    "context": context,
-                    "fixable": True,
-                })
+                issues.append(
+                    {
+                        "type": "禁用词",
+                        "line": i + 1,
+                        "word": word,
+                        "replacement": replacement,
+                        "context": context,
+                        "fixable": True,
+                    }
+                )
                 col = line.find(word, col + len(word))
     return issues
 
@@ -132,18 +153,20 @@ def check_bullet_points(lines: list[str]) -> list[dict]:
     for i, line in enumerate(lines):
         if is_in_code_block(lines, i) or is_in_table(line):
             if in_block:
-                issues.append({
-                    "type": "bullet",
-                    "line_start": block_start + 1,
-                    "line_end": block_start + block_count,
-                    "count": block_count,
-                    "fixable": BULLET_MODULE_AVAILABLE,
-                })
+                issues.append(
+                    {
+                        "type": "bullet",
+                        "line_start": block_start + 1,
+                        "line_end": block_start + block_count,
+                        "count": block_count,
+                        "fixable": BULLET_MODULE_AVAILABLE,
+                    }
+                )
                 in_block = False
                 block_count = 0
             continue
 
-        if re.match(r'^- ', line):
+        if re.match(r"^- ", line):
             if not in_block:
                 in_block = True
                 block_start = i
@@ -151,25 +174,29 @@ def check_bullet_points(lines: list[str]) -> list[dict]:
             block_count += 1
         else:
             if in_block:
-                issues.append({
-                    "type": "bullet",
-                    "line_start": block_start + 1,
-                    "line_end": block_start + block_count,
-                    "count": block_count,
-                    "fixable": BULLET_MODULE_AVAILABLE,
-                })
+                issues.append(
+                    {
+                        "type": "bullet",
+                        "line_start": block_start + 1,
+                        "line_end": block_start + block_count,
+                        "count": block_count,
+                        "fixable": BULLET_MODULE_AVAILABLE,
+                    }
+                )
                 in_block = False
                 block_count = 0
 
     # 文件末尾仍在 block 中
     if in_block:
-        issues.append({
-            "type": "bullet",
-            "line_start": block_start + 1,
-            "line_end": block_start + block_count,
-            "count": block_count,
-            "fixable": BULLET_MODULE_AVAILABLE,
-        })
+        issues.append(
+            {
+                "type": "bullet",
+                "line_start": block_start + 1,
+                "line_end": block_start + block_count,
+                "count": block_count,
+                "fixable": BULLET_MODULE_AVAILABLE,
+            }
+        )
 
     return issues
 
@@ -243,13 +270,15 @@ def check_data_sources(lines: list[str]) -> list[dict]:
         if source_type == "表格数据":
             continue
 
-        issues.append({
-            "type": "数据来源",
-            "line": i + 1,
-            "data": matches[0],
-            "source_type": source_type,
-            "fixable": True,
-        })
+        issues.append(
+            {
+                "type": "数据来源",
+                "line": i + 1,
+                "data": matches[0],
+                "source_type": source_type,
+                "fixable": True,
+            }
+        )
 
     return issues
 
@@ -258,7 +287,7 @@ def check_data_sources(lines: list[str]) -> list[dict]:
 ASCII_ART_CHARS = set("│┌└┃─┐┘▼├┤┬┴╪╭╮╯╰═╬╠╣╦╩║")
 
 # 有序列表正则
-NUMBERED_LIST_RE = re.compile(r'^\d+\.\s+')
+NUMBERED_LIST_RE = re.compile(r"^\d+\.\s+")
 
 
 def _is_ascii_art_line(line: str) -> bool:
@@ -316,12 +345,14 @@ def check_duplicate_lines(lines: list[str]) -> list[dict]:
         if i >= 1:
             prev = lines[i - 1].strip()
             if prev == stripped and prev:
-                issues.append({
-                    "type": "重复行",
-                    "line": i + 1,
-                    "content": stripped[:60],
-                    "fixable": True,
-                })
+                issues.append(
+                    {
+                        "type": "重复行",
+                        "line": i + 1,
+                        "content": stripped[:60],
+                        "fixable": True,
+                    }
+                )
                 continue
 
         # 检查与间隔1行的前一行是否重复（中间是空行）
@@ -329,12 +360,14 @@ def check_duplicate_lines(lines: list[str]) -> list[dict]:
             between = lines[i - 1].strip()
             prev2 = lines[i - 2].strip()
             if between == "" and prev2 == stripped and prev2:
-                issues.append({
-                    "type": "重复行",
-                    "line": i + 1,
-                    "content": stripped[:60],
-                    "fixable": True,
-                })
+                issues.append(
+                    {
+                        "type": "重复行",
+                        "line": i + 1,
+                        "content": stripped[:60],
+                        "fixable": True,
+                    }
+                )
 
     return issues
 
@@ -349,13 +382,15 @@ def check_numbered_lists(lines: list[str]) -> list[dict]:
     for i, line in enumerate(lines):
         if is_in_code_block(lines, i) or is_in_table(line):
             if in_block:
-                issues.append({
-                    "type": "numbered_list",
-                    "line_start": block_start + 1,
-                    "line_end": block_start + block_count,
-                    "count": block_count,
-                    "fixable": BULLET_MODULE_AVAILABLE,
-                })
+                issues.append(
+                    {
+                        "type": "numbered_list",
+                        "line_start": block_start + 1,
+                        "line_end": block_start + block_count,
+                        "count": block_count,
+                        "fixable": BULLET_MODULE_AVAILABLE,
+                    }
+                )
                 in_block = False
                 block_count = 0
             continue
@@ -368,25 +403,29 @@ def check_numbered_lists(lines: list[str]) -> list[dict]:
             block_count += 1
         else:
             if in_block:
-                issues.append({
-                    "type": "numbered_list",
-                    "line_start": block_start + 1,
-                    "line_end": block_start + block_count,
-                    "count": block_count,
-                    "fixable": BULLET_MODULE_AVAILABLE,
-                })
+                issues.append(
+                    {
+                        "type": "numbered_list",
+                        "line_start": block_start + 1,
+                        "line_end": block_start + block_count,
+                        "count": block_count,
+                        "fixable": BULLET_MODULE_AVAILABLE,
+                    }
+                )
                 in_block = False
                 block_count = 0
 
     # 文件末尾仍在 block 中
     if in_block:
-        issues.append({
-            "type": "numbered_list",
-            "line_start": block_start + 1,
-            "line_end": block_start + block_count,
-            "count": block_count,
-            "fixable": BULLET_MODULE_AVAILABLE,
-        })
+        issues.append(
+            {
+                "type": "numbered_list",
+                "line_start": block_start + 1,
+                "line_end": block_start + block_count,
+                "count": block_count,
+                "fixable": BULLET_MODULE_AVAILABLE,
+            }
+        )
 
     return issues
 
@@ -433,16 +472,18 @@ def check_table_intro(lines: list[str], min_chars: int = 80) -> list[dict]:
             break
 
         # 计算引导语长度（去除 markdown 标记）
-        clean_intro = re.sub(r'[*#>\[\]`]', '', intro_text)
+        clean_intro = re.sub(r"[*#>\[\]`]", "", intro_text)
         if len(clean_intro) < min_chars:
-            issues.append({
-                "type": "表格引导语",
-                "line": i + 1,
-                "intro_len": len(clean_intro),
-                "intro_text": intro_text[:60],
-                "min_chars": min_chars,
-                "fixable": False,  # 需要 API 或人工扩写
-            })
+            issues.append(
+                {
+                    "type": "表格引导语",
+                    "line": i + 1,
+                    "intro_len": len(clean_intro),
+                    "intro_text": intro_text[:60],
+                    "min_chars": min_chars,
+                    "fixable": False,  # 需要 API 或人工扩写
+                }
+            )
 
     return issues
 
@@ -466,51 +507,58 @@ def check_scoring_alignment(lines: list[str], scoring_file: Path) -> list[dict]:
     scoring_items = []
 
     # 模式1：序号. 内容（X分）
-    for m in re.finditer(r'(\d+)[.、]\s*(.+?)[（(](\d+)分[）)]', scoring_text):
-        scoring_items.append({
-            "index": int(m.group(1)),
-            "desc": m.group(2).strip(),
-            "score": int(m.group(3)),
-        })
-
-    # 模式2：表格行 | 序号 | 内容 | 分值 |
-    if not scoring_items:
-        for m in re.finditer(r'\|\s*(\d+)\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|', scoring_text):
-            scoring_items.append({
+    for m in re.finditer(r"(\d+)[.、]\s*(.+?)[（(](\d+)分[）)]", scoring_text):
+        scoring_items.append(
+            {
                 "index": int(m.group(1)),
                 "desc": m.group(2).strip(),
                 "score": int(m.group(3)),
-            })
+            }
+        )
+
+    # 模式2：表格行 | 序号 | 内容 | 分值 |
+    if not scoring_items:
+        for m in re.finditer(r"\|\s*(\d+)\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|", scoring_text):
+            scoring_items.append(
+                {
+                    "index": int(m.group(1)),
+                    "desc": m.group(2).strip(),
+                    "score": int(m.group(3)),
+                }
+            )
 
     for item in scoring_items:
         # 提取关键词（取描述中长度 >= 2 的中文词组）
-        keywords = re.findall(r'[\u4e00-\u9fff]{2,}', item["desc"])
+        keywords = re.findall(r"[\u4e00-\u9fff]{2,}", item["desc"])
         # 至少有一半关键词出现在正文中才算响应
         if not keywords:
             continue
         matched = sum(1 for kw in keywords if kw in content_text)
         ratio = matched / len(keywords)
         item["responded"] = ratio >= 0.5
-        issues.append({
-            "type": "评分对齐",
-            "index": item["index"],
-            "score": item["score"],
-            "desc": item["desc"][:30],
-            "responded": item["responded"],
-            "fixable": False,
-        })
+        issues.append(
+            {
+                "type": "评分对齐",
+                "index": item["index"],
+                "score": item["score"],
+                "desc": item["desc"][:30],
+                "responded": item["responded"],
+                "fixable": False,
+            }
+        )
 
     return issues
 
 
 # ── 修复函数 ────────────────────────────────────────────────
 
+
 def fix_forbidden_words(text: str) -> str:
     """替换禁用词"""
     # 先处理 "我们" 的上下文敏感替换
     # "我们团队/公司/单位" → "本项目团队/本单位/本单位"
-    text = re.sub(r'我们(团队)', r'本项目\1', text)
-    text = re.sub(r'我们(公司|单位)', r'本\1', text)
+    text = re.sub(r"我们(团队)", r"本项目\1", text)
+    text = re.sub(r"我们(公司|单位)", r"本\1", text)
     # 剩余的独立 "我们" → "本项目团队"
     text = text.replace("我们", "本项目团队")
 
@@ -523,12 +571,14 @@ def fix_forbidden_words(text: str) -> str:
 def _get_anthropic_client():
     """创建 Anthropic API 客户端（用于 bullet point 转换）"""
     import os
+
     base_url = os.environ.get("MMKG_BASE_URL")
     auth_token = os.environ.get("MMKG_AUTH_TOKEN")
     if not base_url or not auth_token:
         return None
     try:
         import anthropic
+
         return anthropic.Anthropic(base_url=base_url, api_key=auth_token)
     except Exception:
         return None
@@ -571,7 +621,7 @@ def fix_data_sources(text: str, issues: list[dict]) -> str:
         line_idx = issue["line"] - 1
         source = issue.get("source_type", "PLACEHOLDER")
         line = lines[line_idx].rstrip()
-        lines[line_idx] = f'{line} <!-- SOURCE: {source} -->'
+        lines[line_idx] = f"{line} <!-- SOURCE: {source} -->"
 
     return "\n".join(lines)
 
@@ -625,10 +675,17 @@ def fix_numbered_lists(text: str) -> str:
 
 # ── 报告输出 ────────────────────────────────────────────────
 
-def format_report(filepath: str, forbidden: list, bullets: list,
-                  data_sources: list, scoring: list,
-                  duplicates: list = None, numbered: list = None,
-                  table_intros: list = None) -> str:
+
+def format_report(
+    filepath: str,
+    forbidden: list,
+    bullets: list,
+    data_sources: list,
+    scoring: list,
+    duplicates: list = None,
+    numbered: list = None,
+    table_intros: list = None,
+) -> str:
     """格式化输出检查报告"""
     if duplicates is None:
         duplicates = []
@@ -648,10 +705,7 @@ def format_report(filepath: str, forbidden: list, bullets: list,
     if forbidden:
         parts.append(f"[禁用词] 发现 {len(forbidden)} 处")
         for item in forbidden:
-            parts.append(
-                f'  L{item["line"]}: "...{item["context"]}..." '
-                f'→ 建议改为 "{item["replacement"]}"'
-            )
+            parts.append(f'  L{item["line"]}: "...{item["context"]}..." → 建议改为 "{item["replacement"]}"')
         total += len(forbidden)
         fixable += sum(1 for i in forbidden if i["fixable"])
     else:
@@ -663,10 +717,7 @@ def format_report(filepath: str, forbidden: list, bullets: list,
         bullet_count = sum(b["count"] for b in bullets)
         parts.append(f"[Bullet Point] 发现 {bullet_count} 处")
         for item in bullets:
-            parts.append(
-                f'  L{item["line_start"]}-{item["line_end"]}: '
-                f'{item["count"]} 个 bullet point'
-            )
+            parts.append(f"  L{item['line_start']}-{item['line_end']}: {item['count']} 个 bullet point")
         total += bullet_count
         fixable += sum(b["count"] for b in bullets if b["fixable"])
     else:
@@ -677,9 +728,7 @@ def format_report(filepath: str, forbidden: list, bullets: list,
     if duplicates:
         parts.append(f"[重复行] 发现 {len(duplicates)} 处")
         for item in duplicates:
-            parts.append(
-                f'  L{item["line"]}: "{item["content"]}"'
-            )
+            parts.append(f'  L{item["line"]}: "{item["content"]}"')
         total += len(duplicates)
         fixable += sum(1 for i in duplicates if i["fixable"])
     else:
@@ -691,10 +740,7 @@ def format_report(filepath: str, forbidden: list, bullets: list,
         numbered_count = sum(n["count"] for n in numbered)
         parts.append(f"[有序列表] 发现 {numbered_count} 处")
         for item in numbered:
-            parts.append(
-                f'  L{item["line_start"]}-{item["line_end"]}: '
-                f'{item["count"]} 个有序列表项'
-            )
+            parts.append(f"  L{item['line_start']}-{item['line_end']}: {item['count']} 个有序列表项")
         total += numbered_count
         fixable += sum(n["count"] for n in numbered if n["fixable"])
     else:
@@ -713,9 +759,7 @@ def format_report(filepath: str, forbidden: list, bullets: list,
             parts.append(f"  → {st}: {len(items)} 处")
         for item in data_sources:
             st = item.get("source_type", "PLACEHOLDER")
-            parts.append(
-                f'  L{item["line"]}: "{item["data"]}" → {st}'
-            )
+            parts.append(f'  L{item["line"]}: "{item["data"]}" → {st}')
         total += len(data_sources)
         fixable += len(data_sources)
     else:
@@ -727,8 +771,8 @@ def format_report(filepath: str, forbidden: list, bullets: list,
         parts.append(f"[表格引导语] {len(table_intros)} 处引导语过短")
         for item in table_intros:
             parts.append(
-                f'  L{item["line"]}: 引导语仅{item["intro_len"]}字'
-                f'（要求≥{item["min_chars"]}字）'
+                f"  L{item['line']}: 引导语仅{item['intro_len']}字"
+                f"（要求≥{item['min_chars']}字）"
                 f' — "{item["intro_text"]}..."'
             )
         total += len(table_intros)
@@ -742,9 +786,9 @@ def format_report(filepath: str, forbidden: list, bullets: list,
         for item in scoring:
             mark = "+" if item["responded"] else "x"
             parts.append(
-                f'  {mark} 第{item["index"]}项（{item["score"]}分）: '
-                f'{"已响应" if item["responded"] else "未找到对应内容"} '
-                f'— {item["desc"]}'
+                f"  {mark} 第{item['index']}项（{item['score']}分）: "
+                f"{'已响应' if item['responded'] else '未找到对应内容'} "
+                f"— {item['desc']}"
             )
         not_responded = [i for i in scoring if not i["responded"]]
         total += len(not_responded)
@@ -762,6 +806,7 @@ def format_report(filepath: str, forbidden: list, bullets: list,
 
 
 # ── 主流程 ──────────────────────────────────────────────────
+
 
 def process_file(filepath: Path, args) -> dict:
     """处理单个文件，返回统计信息"""
@@ -782,8 +827,14 @@ def process_file(filepath: Path, args) -> dict:
 
     # 输出报告
     report = format_report(
-        str(filepath), forbidden, bullets, data_sources, scoring,
-        duplicates=duplicates, numbered=numbered, table_intros=table_intros,
+        str(filepath),
+        forbidden,
+        bullets,
+        data_sources,
+        scoring,
+        duplicates=duplicates,
+        numbered=numbered,
+        table_intros=table_intros,
     )
     print(f"\n{'=' * 3} 质量检查报告 {'=' * 3}\n")
     print(report)

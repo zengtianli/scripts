@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-import subprocess
 import os
+import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 
+from display import show_error, show_success
 from finder import get_finder_selected_folder
-from display import show_success, show_error
+
 
 def select_in_finder(path):
     """在 Finder 中选中文件/文件夹"""
@@ -18,7 +19,8 @@ def select_in_finder(path):
         select POSIX file "{path}"
     end tell
     '''
-    subprocess.run(['osascript', '-e', script])
+    subprocess.run(["osascript", "-e", script])
+
 
 def main():
     target_dir = get_finder_selected_folder()
@@ -42,10 +44,10 @@ def main():
     try:
         os.makedirs(new_folder_path)
         select_in_finder(new_folder_path)
-        show_success(f"已创建文件夹 \"{new_folder_name}\"")
+        show_success(f'已创建文件夹 "{new_folder_name}"')
     except Exception as e:
         show_error(f"创建文件夹失败: {e}")
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()

@@ -4,13 +4,13 @@
 整合应用追踪、工作日志、综合日志、项目数据，生成完整的每日报告
 """
 
+import argparse
 import json
 import sys
-from pathlib import Path
-from datetime import datetime
 from collections import defaultdict
-from typing import List, Dict, Any
-import argparse
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 # 添加 lib 路径
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
@@ -28,13 +28,13 @@ PROJECTS_DB = SECRETARY_DIR / "projects.db"
 SUMMARY_DIR = SECRETARY_DIR / "daily_summary"
 
 
-def read_jsonl(file_path: Path, date_str: str = None) -> List[Dict[str, Any]]:
+def read_jsonl(file_path: Path, date_str: str = None) -> list[dict[str, Any]]:
     """读取 JSONL 文件，可选按日期过滤"""
     if not file_path.exists():
         return []
 
     records = []
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -43,14 +43,14 @@ def read_jsonl(file_path: Path, date_str: str = None) -> List[Dict[str, Any]]:
                 record = json.loads(line)
                 if date_str:
                     # 过滤指定日期的记录
-                    if 'timestamp' in record:
-                        ts = record['timestamp']
+                    if "timestamp" in record:
+                        ts = record["timestamp"]
                         if isinstance(ts, int):
                             # Unix timestamp
-                            record_date = datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+                            record_date = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
                         else:
                             # ISO 8601 format
-                            record_date = ts.split('T')[0]
+                            record_date = ts.split("T")[0]
                         if record_date == date_str:
                             records.append(record)
                 else:
@@ -60,7 +60,7 @@ def read_jsonl(file_path: Path, date_str: str = None) -> List[Dict[str, Any]]:
     return records
 
 
-def analyze_app_usage(date_str: str) -> Dict[str, int]:
+def analyze_app_usage(date_str: str) -> dict[str, int]:
     """分析应用使用情况"""
     records = read_jsonl(WORK_TRACKER_LOG, date_str)
     if not records:
@@ -69,7 +69,7 @@ def analyze_app_usage(date_str: str) -> Dict[str, int]:
     # 统计每个应用的使用次数（每条记录代表 1 分钟）
     app_counts = defaultdict(int)
     for record in records:
-        app = record.get('app', 'Unknown')
+        app = record.get("app", "Unknown")
         app_counts[app] += 1
 
     # 转换为分钟数并排序
@@ -86,18 +86,15 @@ def format_time(minutes: int) -> str:
     return f"{mins}m"
 
 
-def load_secretary_logs(date_str: str) -> Dict[str, List[Dict[str, Any]]]:
+def load_secretary_logs(date_str: str) -> dict[str, list[dict[str, Any]]]:
     """加载工作和综合秘书日志"""
     work_logs = read_jsonl(WORK_LOG, date_str)
     personal_logs = read_jsonl(PERSONAL_LOG, date_str)
 
-    return {
-        'work': work_logs,
-        'personal': personal_logs
-    }
+    return {"work": work_logs, "personal": personal_logs}
 
 
-def load_project_data() -> Dict[str, List[Dict[str, Any]]]:
+def load_project_data() -> dict[str, list[dict[str, Any]]]:
     """加载项目数据"""
     try:
         pm = ProjectManager(str(PROJECTS_DB))
@@ -106,41 +103,42 @@ def load_project_data() -> Dict[str, List[Dict[str, Any]]]:
         in_progress = pm.list_projects(status="in_progress")
         blocked = pm.list_projects(status="blocked")
 
-        return {
-            'in_progress': in_progress,
-            'blocked': blocked
-        }
+        return {"in_progress": in_progress, "blocked": blocked}
     except Exception as e:
         print(f"警告：无法加载项目数据：{e}", file=sys.stderr)
-        return {'in_progress': [], 'blocked': []}
+        return {"in_progress": [], "blocked": []}
 
 
-def build_timeline(work_logs: List[Dict], personal_logs: List[Dict], app_usage_records: List[Dict]) -> List[Dict]:
+def build_timeline(work_logs: list[dict], personal_logs: list[dict], app_usage_records: list[dict]) -> list[dict]:
     """构建时间线（从早到晚）"""
     timeline = []
 
     # 添加工作日志
     for log in work_logs:
-        timeline.append({
-            'timestamp': log['timestamp'],
-            'type': 'work',
-            'content': log['content'],
-            'category': log.get('category', ''),
-            'tags': log.get('tags', [])
-        })
+        timeline.append(
+            {
+                "timestamp": log["timestamp"],
+                "type": "work",
+                "content": log["content"],
+                "category": log.get("category", ""),
+                "tags": log.get("tags", []),
+            }
+        )
 
     # 添加综合日志
     for log in personal_logs:
-        timeline.append({
-            'timestamp': log['timestamp'],
-            'type': 'personal',
-            'content': log['content'],
-            'category': log.get('category', ''),
-            'tags': log.get('tags', [])
-        })
+        timeline.append(
+            {
+                "timestamp": log["timestamp"],
+                "type": "personal",
+                "content": log["content"],
+                "category": log.get("category", ""),
+                "tags": log.get("tags", []),
+            }
+        )
 
     # 按时间排序
-    timeline.sort(key=lambda x: x['timestamp'])
+    timeline.sort(key=lambda x: x["timestamp"])
     return timeline
 
 
@@ -153,7 +151,7 @@ def generate_report(date_str: str) -> str:
     app_records = read_jsonl(WORK_TRACKER_LOG, date_str)
 
     # 构建时间线
-    timeline = build_timeline(logs['work'], logs['personal'], app_records)
+    timeline = build_timeline(logs["work"], logs["personal"], app_records)
 
     # 生成 Markdown
     lines = []
@@ -174,9 +172,9 @@ def generate_report(date_str: str) -> str:
         # 按小时分组
         by_hour = defaultdict(list)
         for item in timeline:
-            ts = item['timestamp']
-            if isinstance(ts, str) and 'T' in ts:
-                hour = ts.split('T')[1][:2]
+            ts = item["timestamp"]
+            if isinstance(ts, str) and "T" in ts:
+                hour = ts.split("T")[1][:2]
                 by_hour[hour].append(item)
 
         # 按小时输出
@@ -184,11 +182,11 @@ def generate_report(date_str: str) -> str:
             items = by_hour[hour]
             lines.append(f"### {hour}:00")
             for item in items:
-                ts = item['timestamp']
-                time_str = ts.split('T')[1][:5] if 'T' in ts else ''
-                content = item['content']
-                tags = ' '.join(f"#{tag}" for tag in item.get('tags', []))
-                icon = "💼" if item['type'] == 'work' else "🌟"
+                ts = item["timestamp"]
+                time_str = ts.split("T")[1][:5] if "T" in ts else ""
+                content = item["content"]
+                tags = " ".join(f"#{tag}" for tag in item.get("tags", []))
+                icon = "💼" if item["type"] == "work" else "🌟"
                 lines.append(f"- {icon} [{time_str}] {content} {tags}")
             lines.append("")
 
@@ -205,30 +203,30 @@ def generate_report(date_str: str) -> str:
     lines.append("## 💼 工作秘书\n")
 
     # 项目进展
-    if projects['in_progress'] or projects['blocked']:
+    if projects["in_progress"] or projects["blocked"]:
         lines.append("### 项目进展")
-        for project in projects['in_progress']:
+        for project in projects["in_progress"]:
             lines.append(f"**{project['name']}** (进行中)")
-            if project.get('current_task'):
+            if project.get("current_task"):
                 lines.append(f"- 当前任务：{project['current_task']}")
-            if project.get('next_steps'):
+            if project.get("next_steps"):
                 lines.append(f"- 下一步：{project['next_steps']}")
             lines.append("")
 
-        for project in projects['blocked']:
+        for project in projects["blocked"]:
             lines.append(f"**{project['name']}** (阻塞)")
-            if project.get('blocked_reason'):
+            if project.get("blocked_reason"):
                 lines.append(f"- 阻塞原因：{project['blocked_reason']}")
             lines.append("")
 
     # 工作记录
-    if logs['work']:
+    if logs["work"]:
         lines.append("### 工作记录")
-        for log in logs['work']:
-            ts = log['timestamp']
-            time_str = ts.split('T')[1][:5] if 'T' in ts else ''
-            content = log['content']
-            tags = ' '.join(f"#{tag}" for tag in log.get('tags', []))
+        for log in logs["work"]:
+            ts = log["timestamp"]
+            time_str = ts.split("T")[1][:5] if "T" in ts else ""
+            content = log["content"]
+            tags = " ".join(f"#{tag}" for tag in log.get("tags", []))
             lines.append(f"- [{time_str}] {content} {tags}")
         lines.append("")
 
@@ -237,37 +235,37 @@ def generate_report(date_str: str) -> str:
 
     # 按分类分组
     by_category = defaultdict(list)
-    for log in logs['personal']:
-        category = log.get('category', 'other')
+    for log in logs["personal"]:
+        category = log.get("category", "other")
         by_category[category].append(log)
 
     # 分类映射
     category_map = {
-        'investment': ('投资', '💰'),
-        'stock_idea': ('投资想法', '💡'),
-        'crypto': ('加密货币', '₿'),
-        'macro': ('宏观经济', '📈'),
-        'learning': ('学习', '📚'),
-        'practice': ('实践练习', '💻'),
-        'course': ('课程', '🎓'),
-        'reading': ('阅读', '📖'),
-        'health': ('健康', '🏃'),
-        'social': ('社交', '👥'),
-        'family': ('家庭', '👨‍👩‍👧'),
-        'hobby': ('爱好', '🎨'),
-        'todo': ('待办事项', '✅'),
-        'event': ('事件', '📅'),
-        'other': ('其他', '📝')
+        "investment": ("投资", "💰"),
+        "stock_idea": ("投资想法", "💡"),
+        "crypto": ("加密货币", "₿"),
+        "macro": ("宏观经济", "📈"),
+        "learning": ("学习", "📚"),
+        "practice": ("实践练习", "💻"),
+        "course": ("课程", "🎓"),
+        "reading": ("阅读", "📖"),
+        "health": ("健康", "🏃"),
+        "social": ("社交", "👥"),
+        "family": ("家庭", "👨‍👩‍👧"),
+        "hobby": ("爱好", "🎨"),
+        "todo": ("待办事项", "✅"),
+        "event": ("事件", "📅"),
+        "other": ("其他", "📝"),
     }
 
     for category, (name, icon) in category_map.items():
         if category in by_category:
             lines.append(f"### {icon} {name}")
             for log in by_category[category]:
-                ts = log['timestamp']
-                time_str = ts.split('T')[1][:5] if 'T' in ts else ''
-                content = log['content']
-                tags = ' '.join(f"#{tag}" for tag in log.get('tags', []))
+                ts = log["timestamp"]
+                time_str = ts.split("T")[1][:5] if "T" in ts else ""
+                content = log["content"]
+                tags = " ".join(f"#{tag}" for tag in log.get("tags", []))
                 lines.append(f"- [{time_str}] {content} {tags}")
             lines.append("")
 
@@ -282,22 +280,22 @@ def generate_report(date_str: str) -> str:
     lines.append("---\n")
     lines.append(f"生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def save_report(date_str: str, content: str) -> Path:
     """保存报告到文件"""
     SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
     file_path = SUMMARY_DIR / f"{date_str}.md"
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
     return file_path
 
 
 def main():
-    parser = argparse.ArgumentParser(description='每日报告生成器')
-    parser.add_argument('--date', help='日期（YYYY-MM-DD），默认今天')
-    parser.add_argument('--output', help='输出文件路径（可选）')
+    parser = argparse.ArgumentParser(description="每日报告生成器")
+    parser.add_argument("--date", help="日期（YYYY-MM-DD），默认今天")
+    parser.add_argument("--output", help="输出文件路径（可选）")
 
     args = parser.parse_args()
 
@@ -305,7 +303,7 @@ def main():
     if args.date:
         date_str = args.date
     else:
-        date_str = datetime.now().strftime('%Y-%m-%d')
+        date_str = datetime.now().strftime("%Y-%m-%d")
 
     # 生成报告
     print(f"正在生成 {date_str} 的每日报告...")
@@ -315,7 +313,7 @@ def main():
     if args.output:
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(report)
         print(f"✅ 报告已保存到：{output_path}")
     else:
@@ -327,6 +325,5 @@ def main():
     print(report)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

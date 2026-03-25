@@ -16,16 +16,13 @@
 
 import argparse
 import json
-import re
-import sys
-from collections import Counter
 
 
 def load_rules(paths: list[str]) -> list[dict]:
     """加载一个或多个 rules JSON 文件"""
     all_rules = []
     for path in paths:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             rules = json.load(f)
         all_rules.extend(rules)
     return all_rules
@@ -98,9 +95,9 @@ def classify_by_dimension(rules: list[dict]) -> dict[str, list[dict]]:
 def classify_by_type(rules: list[dict]) -> dict[str, list[dict]]:
     """按修改类型分类"""
     types = {
-        "文字修订": [],    # find != replace, replace 非空
-        "删除建议": [],    # replace 为空
-        "仅批注": [],      # find == replace 或无 replace
+        "文字修订": [],  # find != replace, replace 非空
+        "删除建议": [],  # replace 为空
+        "仅批注": [],  # find == replace 或无 replace
     }
     for rule in rules:
         find = rule.get("find", "")
@@ -117,7 +114,7 @@ def classify_by_type(rules: list[dict]) -> dict[str, list[dict]]:
 def generate_summary(rules: list[dict]) -> str:
     """生成 Markdown 摘要报告"""
     lines = []
-    lines.append(f"# 审阅摘要报告\n")
+    lines.append("# 审阅摘要报告\n")
     lines.append(f"共 **{len(rules)}** 条审阅意见。\n")
 
     # 按类型统计
@@ -165,8 +162,7 @@ def main():
     )
     parser.add_argument("inputs", nargs="+", help="输入 rules JSON 文件")
     parser.add_argument("-o", "--output", help="输出文件路径")
-    parser.add_argument("--merge", action="store_true",
-                        help="合并多个规则文件并去重")
+    parser.add_argument("--merge", action="store_true", help="合并多个规则文件并去重")
 
     args = parser.parse_args()
 

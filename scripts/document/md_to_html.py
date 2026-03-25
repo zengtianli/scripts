@@ -7,11 +7,11 @@
     python3 md_to_html.py file1.md file2.md     # 多个文件
 """
 
-import sys
 import os
 import re
-import webbrowser
+import sys
 import tempfile
+import webbrowser
 from pathlib import Path
 
 # 内联 CSS，不依赖外部文件
@@ -58,75 +58,85 @@ def md_to_html_simple(md_text):
     # 转义 HTML 特殊字符（但保留已有的 HTML 标签）
     # 先处理代码块
     code_blocks = []
+
     def save_code(m):
         code_blocks.append(m.group(1))
-        return f'__CODE_BLOCK_{len(code_blocks)-1}__'
-    html = re.sub(r'```[\w]*\n(.*?)```', save_code, html, flags=re.DOTALL)
+        return f"__CODE_BLOCK_{len(code_blocks) - 1}__"
+
+    html = re.sub(r"```[\w]*\n(.*?)```", save_code, html, flags=re.DOTALL)
 
     inline_codes = []
+
     def save_inline(m):
         inline_codes.append(m.group(1))
-        return f'__INLINE_CODE_{len(inline_codes)-1}__'
-    html = re.sub(r'`([^`]+)`', save_inline, html)
+        return f"__INLINE_CODE_{len(inline_codes) - 1}__"
+
+    html = re.sub(r"`([^`]+)`", save_inline, html)
 
     # 表格
     def convert_table(m):
-        lines = m.group(0).strip().split('\n')
+        lines = m.group(0).strip().split("\n")
         rows = []
         for i, line in enumerate(lines):
             line = line.strip()
-            if not line.startswith('|'):
+            if not line.startswith("|"):
                 continue
-            cells = [c.strip() for c in line.split('|')[1:-1]]
-            if i == 1 and all(re.match(r'^[-:]+$', c) for c in cells):
+            cells = [c.strip() for c in line.split("|")[1:-1]]
+            if i == 1 and all(re.match(r"^[-:]+$", c) for c in cells):
                 continue  # separator row
-            tag = 'th' if i == 0 else 'td'
-            row = ''.join(f'<{tag}>{c}</{tag}>' for c in cells)
-            rows.append(f'<tr>{row}</tr>')
-        return f'<table>{"".join(rows)}</table>'
-    html = re.sub(r'(\|.+\|[\n\r]+)+', convert_table, html)
+            tag = "th" if i == 0 else "td"
+            row = "".join(f"<{tag}>{c}</{tag}>" for c in cells)
+            rows.append(f"<tr>{row}</tr>")
+        return f"<table>{''.join(rows)}</table>"
+
+    html = re.sub(r"(\|.+\|[\n\r]+)+", convert_table, html)
 
     # Headers
-    html = re.sub(r'^### (.+)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
-    html = re.sub(r'^## (.+)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
-    html = re.sub(r'^# (.+)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
+    html = re.sub(r"^### (.+)$", r"<h3>\1</h3>", html, flags=re.MULTILINE)
+    html = re.sub(r"^## (.+)$", r"<h2>\1</h2>", html, flags=re.MULTILINE)
+    html = re.sub(r"^# (.+)$", r"<h1>\1</h1>", html, flags=re.MULTILINE)
 
     # Bold, italic
-    html = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', html)
-    html = re.sub(r'\*(.+?)\*', r'<em>\1</em>', html)
+    html = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", html)
+    html = re.sub(r"\*(.+?)\*", r"<em>\1</em>", html)
 
     # Checkbox
-    html = re.sub(r'- \[x\]', r'<li><input type="checkbox" checked disabled>', html)
-    html = re.sub(r'- \[ \]', r'<li><input type="checkbox" disabled>', html)
+    html = re.sub(r"- \[x\]", r'<li><input type="checkbox" checked disabled>', html)
+    html = re.sub(r"- \[ \]", r'<li><input type="checkbox" disabled>', html)
 
     # Lists
-    html = re.sub(r'^- (.+)$', r'<li>\1</li>', html, flags=re.MULTILINE)
+    html = re.sub(r"^- (.+)$", r"<li>\1</li>", html, flags=re.MULTILINE)
 
     # Blockquote
-    html = re.sub(r'^> (.+)$', r'<blockquote>\1</blockquote>', html, flags=re.MULTILINE)
+    html = re.sub(r"^> (.+)$", r"<blockquote>\1</blockquote>", html, flags=re.MULTILINE)
 
     # HR
-    html = re.sub(r'^---+$', r'<hr>', html, flags=re.MULTILINE)
+    html = re.sub(r"^---+$", r"<hr>", html, flags=re.MULTILINE)
 
     # Links
-    html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', html)
+    html = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', html)
 
     # Paragraphs (lines that aren't already HTML)
-    lines = html.split('\n')
+    lines = html.split("\n")
     result = []
     for line in lines:
         stripped = line.strip()
-        if stripped and not stripped.startswith('<') and not stripped.startswith('__CODE') and not stripped.startswith('__INLINE'):
-            result.append(f'<p>{line}</p>')
+        if (
+            stripped
+            and not stripped.startswith("<")
+            and not stripped.startswith("__CODE")
+            and not stripped.startswith("__INLINE")
+        ):
+            result.append(f"<p>{line}</p>")
         else:
             result.append(line)
-    html = '\n'.join(result)
+    html = "\n".join(result)
 
     # Restore code blocks
     for i, block in enumerate(code_blocks):
-        html = html.replace(f'__CODE_BLOCK_{i}__', f'<pre><code>{block}</code></pre>')
+        html = html.replace(f"__CODE_BLOCK_{i}__", f"<pre><code>{block}</code></pre>")
     for i, code in enumerate(inline_codes):
-        html = html.replace(f'__INLINE_CODE_{i}__', f'<code>{code}</code>')
+        html = html.replace(f"__INLINE_CODE_{i}__", f"<code>{code}</code>")
 
     return html
 
@@ -134,11 +144,11 @@ def md_to_html_simple(md_text):
 def render_file(md_path, output_dir=None):
     """渲染单个 MD 文件为 HTML"""
     md_path = Path(md_path)
-    md_text = md_path.read_text(encoding='utf-8')
+    md_text = md_path.read_text(encoding="utf-8")
 
     title = md_path.stem
     # 从第一个 # 标题提取
-    title_match = re.search(r'^# (.+)$', md_text, re.MULTILINE)
+    title_match = re.search(r"^# (.+)$", md_text, re.MULTILINE)
     if title_match:
         title = title_match.group(1)
 
@@ -167,14 +177,14 @@ def render_file(md_path, output_dir=None):
         out = Path(tempfile.mkdtemp()) / f"{md_path.stem}.html"
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(html, encoding='utf-8')
+    out.write_text(html, encoding="utf-8")
     return out
 
 
 def render_directory(dir_path, output_dir=None):
     """渲染整个目录为带索引的 HTML"""
     dir_path = Path(dir_path)
-    md_files = sorted(dir_path.glob('**/*.md'), key=lambda p: p.stat().st_mtime, reverse=True)
+    md_files = sorted(dir_path.glob("**/*.md"), key=lambda p: p.stat().st_mtime, reverse=True)
 
     if not md_files:
         print(f"目录 {dir_path} 中没有找到 .md 文件")
@@ -193,13 +203,13 @@ def render_directory(dir_path, output_dir=None):
         rel = md.relative_to(dir_path)
         mtime = os.path.getmtime(md)
         from datetime import datetime
-        date_str = datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M')
+
+        date_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
         file_links.append((rel, out.name, date_str))
 
     # 生成索引页
-    items = '\n'.join(
-        f'<li><a href="{name}">{rel}</a><span class="date">{date}</span></li>'
-        for rel, name, date in file_links
+    items = "\n".join(
+        f'<li><a href="{name}">{rel}</a><span class="date">{date}</span></li>' for rel, name, date in file_links
     )
 
     index_html = f"""<!DOCTYPE html>
@@ -217,8 +227,8 @@ def render_directory(dir_path, output_dir=None):
 </body>
 </html>"""
 
-    index_path = output_dir / 'index.html'
-    index_path.write_text(index_html, encoding='utf-8')
+    index_path = output_dir / "index.html"
+    index_path.write_text(index_html, encoding="utf-8")
     return index_path
 
 
@@ -232,19 +242,19 @@ def main():
     if os.path.isdir(target):
         out = render_directory(target)
         print(f"✅ 索引页: {out}")
-        webbrowser.open(f'file://{out}')
+        webbrowser.open(f"file://{out}")
     elif len(sys.argv) > 2:
         # 多个文件
         tmpdir = Path(tempfile.mkdtemp())
         for f in sys.argv[1:]:
             render_file(f, tmpdir)
         out = render_directory_from_files(sys.argv[1:], tmpdir)
-        webbrowser.open(f'file://{out}')
+        webbrowser.open(f"file://{out}")
     else:
         out = render_file(target)
         print(f"✅ {out}")
-        webbrowser.open(f'file://{out}')
+        webbrowser.open(f"file://{out}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

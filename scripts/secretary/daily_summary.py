@@ -4,12 +4,11 @@
 整合应用追踪数据和三个秘书的日志，生成每日总结
 """
 
-import json
-import sys
-from pathlib import Path
-from datetime import datetime, timedelta
-from collections import defaultdict
 import argparse
+import json
+from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
 
 # 数据路径
 WORK_TRACKER_LOG = Path.home() / "Library/Logs/work_tracker.jsonl"
@@ -26,7 +25,7 @@ def read_jsonl(file_path, date_str=None):
         return []
 
     records = []
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -35,14 +34,14 @@ def read_jsonl(file_path, date_str=None):
                 record = json.loads(line)
                 if date_str:
                     # 过滤指定日期的记录
-                    if 'timestamp' in record:
-                        ts = record['timestamp']
+                    if "timestamp" in record:
+                        ts = record["timestamp"]
                         if isinstance(ts, int):
                             # Unix timestamp
-                            record_date = datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
+                            record_date = datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
                         else:
                             # ISO 8601 format
-                            record_date = ts.split('T')[0]
+                            record_date = ts.split("T")[0]
                         if record_date == date_str:
                             records.append(record)
                 else:
@@ -61,7 +60,7 @@ def analyze_app_usage(date_str):
     # 统计每个应用的使用次数（每条记录代表 1 分钟）
     app_counts = defaultdict(int)
     for record in records:
-        app = record.get('app', 'Unknown')
+        app = record.get("app", "Unknown")
         app_counts[app] += 1
 
     # 转换为分钟数并排序
@@ -86,11 +85,7 @@ def load_secretary_logs(date_str):
     learning = read_jsonl(LEARNING_LOG, date_str)
     life = read_jsonl(LIFE_LOG, date_str)
 
-    return {
-        'investment': investment,
-        'learning': learning,
-        'life': life
-    }
+    return {"investment": investment, "learning": learning, "life": life}
 
 
 def generate_summary(date_str):
@@ -125,64 +120,64 @@ def generate_summary(date_str):
         lines.append("")
 
     # 投资秘书
-    if logs['investment']:
+    if logs["investment"]:
         lines.append("## 💰 投资秘书\n")
         # 按优先级分组
         by_priority = defaultdict(list)
-        for record in logs['investment']:
-            priority = record.get('priority', 'medium')
+        for record in logs["investment"]:
+            priority = record.get("priority", "medium")
             by_priority[priority].append(record)
 
-        for priority in ['high', 'medium', 'low']:
+        for priority in ["high", "medium", "low"]:
             if priority in by_priority:
-                priority_name = {'high': '高优先级', 'medium': '中优先级', 'low': '低优先级'}[priority]
+                priority_name = {"high": "高优先级", "medium": "中优先级", "low": "低优先级"}[priority]
                 lines.append(f"### {priority_name}")
                 for record in by_priority[priority]:
-                    ts = record.get('timestamp', '')
-                    time_str = ts.split('T')[1][:5] if 'T' in ts else ''
-                    content = record.get('content', '')
-                    tags = ' '.join(f"#{tag}" for tag in record.get('tags', []))
+                    ts = record.get("timestamp", "")
+                    time_str = ts.split("T")[1][:5] if "T" in ts else ""
+                    content = record.get("content", "")
+                    tags = " ".join(f"#{tag}" for tag in record.get("tags", []))
                     lines.append(f"- [{time_str}] {content} {tags}")
                 lines.append("")
 
     # 学习秘书
-    if logs['learning']:
+    if logs["learning"]:
         lines.append("## 📚 学习秘书\n")
         lines.append("### 今日学习")
-        for record in logs['learning']:
-            ts = record.get('timestamp', '')
-            time_str = ts.split('T')[1][:5] if 'T' in ts else ''
-            content = record.get('content', '')
-            tags = ' '.join(f"#{tag}" for tag in record.get('tags', []))
+        for record in logs["learning"]:
+            ts = record.get("timestamp", "")
+            time_str = ts.split("T")[1][:5] if "T" in ts else ""
+            content = record.get("content", "")
+            tags = " ".join(f"#{tag}" for tag in record.get("tags", []))
             lines.append(f"- [{time_str}] {content} {tags}")
         lines.append("")
 
     # 生活秘书
-    if logs['life']:
+    if logs["life"]:
         lines.append("## 🏃 生活秘书\n")
         # 按分类分组
         by_category = defaultdict(list)
-        for record in logs['life']:
-            category = record.get('category', 'other')
+        for record in logs["life"]:
+            category = record.get("category", "other")
             by_category[category].append(record)
 
         category_names = {
-            'health': '健康',
-            'social': '社交',
-            'family': '家庭',
-            'hobby': '爱好',
-            'todo': '待办事项',
-            'event': '事件'
+            "health": "健康",
+            "social": "社交",
+            "family": "家庭",
+            "hobby": "爱好",
+            "todo": "待办事项",
+            "event": "事件",
         }
 
         for category, name in category_names.items():
             if category in by_category:
                 lines.append(f"### {name}")
                 for record in by_category[category]:
-                    ts = record.get('timestamp', '')
-                    time_str = ts.split('T')[1][:5] if 'T' in ts else ''
-                    content = record.get('content', '')
-                    tags = ' '.join(f"#{tag}" for tag in record.get('tags', []))
+                    ts = record.get("timestamp", "")
+                    time_str = ts.split("T")[1][:5] if "T" in ts else ""
+                    content = record.get("content", "")
+                    tags = " ".join(f"#{tag}" for tag in record.get("tags", []))
                     lines.append(f"- [{time_str}] {content} {tags}")
                 lines.append("")
 
@@ -196,14 +191,14 @@ def generate_summary(date_str):
     lines.append("---\n")
     lines.append(f"生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-    return '\n'.join(lines)
+    return "\n".join(lines)
 
 
 def save_summary(date_str, content):
     """保存总结到文件"""
     SUMMARY_DIR.mkdir(parents=True, exist_ok=True)
     file_path = SUMMARY_DIR / f"{date_str}.md"
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
     return file_path
 
@@ -235,7 +230,7 @@ def add_plan(date_str):
     # 读取现有总结
     file_path = SUMMARY_DIR / f"{date_str}.md"
     if file_path.exists():
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
     else:
         content = generate_summary(date_str)
@@ -254,7 +249,7 @@ def add_plan(date_str):
             content = content[:start] + plan_section + content[end:]
 
     # 保存
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
 
     print(f"\n明日计划已添加到：{file_path}")
@@ -273,7 +268,7 @@ def add_review(date_str):
     # 读取现有总结
     file_path = SUMMARY_DIR / f"{date_str}.md"
     if file_path.exists():
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
     else:
         content = generate_summary(date_str)
@@ -295,17 +290,16 @@ def add_review(date_str):
             content = content[:start] + review_section + content[end:]
 
     # 保存
-    with open(file_path, 'w', encoding='utf-8') as f:
+    with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
 
     print(f"\n今日评估已添加到：{file_path}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description='总秘书每日汇总')
-    parser.add_argument('--mode', choices=['summary', 'plan', 'review'],
-                       default='summary', help='运行模式')
-    parser.add_argument('--date', help='日期（YYYY-MM-DD），默认今天')
+    parser = argparse.ArgumentParser(description="总秘书每日汇总")
+    parser.add_argument("--mode", choices=["summary", "plan", "review"], default="summary", help="运行模式")
+    parser.add_argument("--date", help="日期（YYYY-MM-DD），默认今天")
 
     args = parser.parse_args()
 
@@ -313,16 +307,16 @@ def main():
     if args.date:
         date_str = args.date
     else:
-        date_str = datetime.now().strftime('%Y-%m-%d')
+        date_str = datetime.now().strftime("%Y-%m-%d")
 
     # 根据模式执行
-    if args.mode == 'summary':
+    if args.mode == "summary":
         show_summary(date_str)
-    elif args.mode == 'plan':
+    elif args.mode == "plan":
         add_plan(date_str)
-    elif args.mode == 'review':
+    elif args.mode == "review":
         add_review(date_str)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -23,7 +23,7 @@ import shutil
 import sys
 import tempfile
 import zipfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from lxml import etree
 
@@ -47,6 +47,7 @@ def qn(tag: str) -> str:
 #  功能1: 读取修订
 # ═══════════════════════════════════════════════════════════════════
 
+
 def read_track_changes(docx_path: str, fmt: str = "md") -> str:
     """读取 .docx 中的修订和批注，返回 Markdown 或 JSON"""
     changes = []
@@ -61,31 +62,30 @@ def read_track_changes(docx_path: str, fmt: str = "md") -> str:
             date = ins.get(qn("w:date"), "")
             text = _extract_text(ins)
             if text.strip():
-                changes.append({"type": "insert", "author": author,
-                                "date": date, "text": text})
+                changes.append({"type": "insert", "author": author, "date": date, "text": text})
 
         for dl in tree.iter(qn("w:del")):
             author = dl.get(qn("w:author"), "未知")
             date = dl.get(qn("w:date"), "")
             text = _extract_del_text(dl)
             if text.strip():
-                changes.append({"type": "delete", "author": author,
-                                "date": date, "text": text})
+                changes.append({"type": "delete", "author": author, "date": date, "text": text})
 
         if "word/comments.xml" in zf.namelist():
             comments_xml = zf.read("word/comments.xml")
             ctree = etree.fromstring(comments_xml)
             for comment in ctree.iter(qn("w:comment")):
-                comments.append({
-                    "id": comment.get(qn("w:id"), ""),
-                    "author": comment.get(qn("w:author"), "未知"),
-                    "date": comment.get(qn("w:date"), ""),
-                    "text": _extract_text(comment),
-                })
+                comments.append(
+                    {
+                        "id": comment.get(qn("w:id"), ""),
+                        "author": comment.get(qn("w:author"), "未知"),
+                        "date": comment.get(qn("w:date"), ""),
+                        "text": _extract_text(comment),
+                    }
+                )
 
     if fmt == "json":
-        return json.dumps({"changes": changes, "comments": comments},
-                          ensure_ascii=False, indent=2)
+        return json.dumps({"changes": changes, "comments": comments}, ensure_ascii=False, indent=2)
 
     # Markdown 格式
     lines = []
@@ -126,13 +126,14 @@ def _extract_del_text(node) -> str:
 #  功能2: 写入修订（review 命令）
 # ═══════════════════════════════════════════════════════════════════
 
+
 class DocxReviewer:
     """对 .docx 文件应用替换规则，生成带修订标记的新文件。保持原文格式不变。"""
 
     def __init__(self, docx_path: str, author: str = "CC审阅"):
         self.docx_path = docx_path
         self.author = author
-        self.date = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.date = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
         self.comment_id_counter = 0
         self.comments = []
         self.revision_id_counter = 100
@@ -168,13 +169,11 @@ class DocxReviewer:
         """应用替换规则列表。返回成功替换的数量。"""
         count = 0
         for rule in rules:
-            n = self._apply_one_rule(
-                rule["find"], rule["replace"], rule.get("comment"))
+            n = self._apply_one_rule(rule["find"], rule["replace"], rule.get("comment"))
             count += n
         return count
 
-    def _apply_one_rule(self, find: str, replace: str,
-                        comment: str | None) -> int:
+    def _apply_one_rule(self, find: str, replace: str, comment: str | None) -> int:
         body = self.doc_root.find(qn("w:body"))
         if body is None:
             return 0
@@ -234,13 +233,12 @@ class DocxReviewer:
             return None
 
         return {
-            "runs": active_runs[start_run_idx:end_run_idx + 1],
+            "runs": active_runs[start_run_idx : end_run_idx + 1],
             "start_offset": start_offset,
             "end_offset": end_offset,
         }
 
-    def _replace_in_paragraph(self, para, match, find_text, replace_text,
-                              comment_text):
+    def _replace_in_paragraph(self, para, match, find_text, replace_text, comment_text):
         """拆分 run，插入 del/ins 标记，保持原有格式"""
         runs = match["runs"]
         start_offset = match["start_offset"]
@@ -312,10 +310,14 @@ class DocxReviewer:
             ref_elem.set(qn("w:id"), str(comment_id))
             nodes.append(ref_run)
 
-            self.comments.append({
-                "id": comment_id, "author": self.author,
-                "date": self.date, "text": comment_text,
-            })
+            self.comments.append(
+                {
+                    "id": comment_id,
+                    "author": self.author,
+                    "date": self.date,
+                    "text": comment_text,
+                }
+            )
 
         if suffix_text:
             nodes.append(self._make_run(suffix_text, rpr_template))
@@ -375,8 +377,7 @@ class DocxReviewer:
             t.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
 
         with open(comments_path, "wb") as f:
-            f.write(etree.tostring(croot, xml_declaration=True,
-                                   encoding="UTF-8", standalone=True))
+            f.write(etree.tostring(croot, xml_declaration=True, encoding="UTF-8", standalone=True))
         self._ensure_content_type("comments")
         self._ensure_rels("comments")
 
@@ -396,12 +397,10 @@ class DocxReviewer:
             o.set("PartName", part_name)
             o.set("ContentType", ct)
             with open(ct_path, "wb") as f:
-                f.write(etree.tostring(ct_tree, xml_declaration=True,
-                                       encoding="UTF-8", standalone=True))
+                f.write(etree.tostring(ct_tree, xml_declaration=True, encoding="UTF-8", standalone=True))
 
     def _ensure_rels(self, part: str):
-        rels_path = os.path.join(self.tmpdir, "word", "_rels",
-                                 "document.xml.rels")
+        rels_path = os.path.join(self.tmpdir, "word", "_rels", "document.xml.rels")
         rels_tree = etree.parse(rels_path)
         rels_root = rels_tree.getroot()
         rels_ns = "http://schemas.openxmlformats.org/package/2006/relationships"
@@ -420,15 +419,13 @@ class DocxReviewer:
             new_rel.set("Type", REL_COMMENTS)
             new_rel.set("Target", "comments.xml")
             with open(rels_path, "wb") as f:
-                f.write(etree.tostring(rels_tree, xml_declaration=True,
-                                       encoding="UTF-8", standalone=True))
+                f.write(etree.tostring(rels_tree, xml_declaration=True, encoding="UTF-8", standalone=True))
 
     def save(self, output_path: str):
         """保存修改后的 .docx"""
         doc_path = os.path.join(self.tmpdir, "word", "document.xml")
         with open(doc_path, "wb") as f:
-            f.write(etree.tostring(self.doc_tree, xml_declaration=True,
-                                   encoding="UTF-8", standalone=True))
+            f.write(etree.tostring(self.doc_tree, xml_declaration=True, encoding="UTF-8", standalone=True))
         self._write_comments_xml()
 
         output_path = os.path.abspath(output_path)
@@ -444,8 +441,7 @@ class DocxReviewer:
             shutil.rmtree(self.tmpdir, ignore_errors=True)
 
 
-def review_docx(input_path: str, output_path: str, rules: list[dict],
-                author: str = "CC审阅") -> int:
+def review_docx(input_path: str, output_path: str, rules: list[dict], author: str = "CC审阅") -> int:
     """便捷函数：对 .docx 应用替换规则，输出带修订标记的新文件。"""
     reviewer = DocxReviewer(input_path, author=author)
     try:
@@ -461,6 +457,7 @@ def review_docx(input_path: str, output_path: str, rules: list[dict],
 #  CLI 入口
 # ═══════════════════════════════════════════════════════════════════
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Word 审阅修订工具",
@@ -471,8 +468,7 @@ def main():
 
     rp = sub.add_parser("read", help="读取修订和批注")
     rp.add_argument("input", help="输入 .docx 文件")
-    rp.add_argument("--format", "-f", choices=["md", "json"],
-                    default="md", help="输出格式 (默认: md)")
+    rp.add_argument("--format", "-f", choices=["md", "json"], default="md", help="输出格式 (默认: md)")
 
     wp = sub.add_parser("review", help="写入修订标记")
     wp.add_argument("input", help="输入 .docx 文件")
@@ -490,7 +486,7 @@ def main():
     if args.command == "read":
         print(read_track_changes(args.input, args.format))
     elif args.command == "review":
-        with open(args.rules, "r", encoding="utf-8") as f:
+        with open(args.rules, encoding="utf-8") as f:
             rules = json.load(f)
         count = review_docx(args.input, args.output, rules, author=args.author)
         print(f"完成：{count} 处替换已写入 {args.output}")

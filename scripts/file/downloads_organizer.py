@@ -184,9 +184,7 @@ def main():
 
     for scan_dir in scan_dirs:
         logger.info("扫描: %s", scan_dir)
-        moved, skipped = scan_directory(
-            scan_dir, target_dir, ext_map, fallback, ignore_prefixes, logger, args.dry_run
-        )
+        moved, skipped = scan_directory(scan_dir, target_dir, ext_map, fallback, ignore_prefixes, logger, args.dry_run)
         total_moved += moved
         total_skipped += skipped
 

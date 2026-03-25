@@ -8,18 +8,10 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 LOG_FILE = Path.home() / "Library" / "Logs" / "secretary" / "life_log.jsonl"
 
-CATEGORIES = {
-    "health": "健康",
-    "social": "社交",
-    "family": "家庭",
-    "hobby": "爱好",
-    "todo": "待办",
-    "event": "事件"
-}
+CATEGORIES = {"health": "健康", "social": "社交", "family": "家庭", "hobby": "爱好", "todo": "待办", "event": "事件"}
 
 PRIORITIES = ["high", "medium", "low"]
 
@@ -27,9 +19,9 @@ PRIORITIES = ["high", "medium", "low"]
 def log_entry(
     content: str,
     category: str = "event",
-    tags: Optional[list] = None,
+    tags: list | None = None,
     priority: str = "medium",
-    metadata: Optional[dict] = None
+    metadata: dict | None = None,
 ) -> None:
     """记录生活日志条目"""
 
@@ -50,7 +42,7 @@ def log_entry(
         "category": category,
         "content": content,
         "tags": tags or [],
-        "priority": priority
+        "priority": priority,
     }
 
     if metadata:
@@ -64,7 +56,7 @@ def log_entry(
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
     # 输出确认信息
-    print(f"✅ 已记录生活日志")
+    print("✅ 已记录生活日志")
     print(f"📁 分类：{CATEGORIES[category]}")
     print(f"📝 内容：{content}")
     if tags:
@@ -140,11 +132,9 @@ def main():
 
         parser = argparse.ArgumentParser(description="生活秘书 - 记录生活日志")
         parser.add_argument("content", help="记录内容")
-        parser.add_argument("-c", "--category", default="event",
-                          choices=list(CATEGORIES.keys()), help="分类")
+        parser.add_argument("-c", "--category", default="event", choices=list(CATEGORIES.keys()), help="分类")
         parser.add_argument("-t", "--tags", nargs="+", help="标签列表")
-        parser.add_argument("-p", "--priority", default="medium",
-                          choices=PRIORITIES, help="优先级")
+        parser.add_argument("-p", "--priority", default="medium", choices=PRIORITIES, help="优先级")
 
         args = parser.parse_args()
         log_entry(args.content, args.category, args.tags, args.priority)

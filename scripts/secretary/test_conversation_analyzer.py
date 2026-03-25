@@ -62,7 +62,7 @@ def test_full_analysis():
     print(f"建议数: {len(result['suggestions'])}")
 
     print("\n前 3 个建议:")
-    for i, suggestion in enumerate(result['suggestions'][:3], 1):
+    for i, suggestion in enumerate(result["suggestions"][:3], 1):
         print(f"{i}. [{suggestion['type']}] {suggestion['content'][:80]}")
         print(f"   置信度: {suggestion['confidence']}")
 
@@ -75,7 +75,7 @@ def test_compact_format():
     analyzer = ConversationAnalyzer()
     result = analyzer.analyze(compact=True)
 
-    print(f"压缩格式输出:")
+    print("压缩格式输出:")
     print(json.dumps(result, ensure_ascii=False, indent=2)[:500])
     print()
 
@@ -111,9 +111,10 @@ def main():
     except Exception as e:
         print(f"测试失败: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

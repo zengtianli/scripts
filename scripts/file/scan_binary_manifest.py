@@ -8,12 +8,31 @@ from pathlib import Path
 
 # 二进制文件扩展名
 BINARY_EXTENSIONS = {
-    ".docx", ".doc", ".pdf", ".xlsx", ".xls", ".pptx",
-    ".dwg", ".gdb",
-    ".m4v", ".mp4", ".avi",
-    ".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp",
-    ".zip", ".rar", ".7z",
-    ".shp", ".dbf", ".shx", ".prj", ".cpg",
+    ".docx",
+    ".doc",
+    ".pdf",
+    ".xlsx",
+    ".xls",
+    ".pptx",
+    ".dwg",
+    ".gdb",
+    ".m4v",
+    ".mp4",
+    ".avi",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".tif",
+    ".tiff",
+    ".bmp",
+    ".zip",
+    ".rar",
+    ".7z",
+    ".shp",
+    ".dbf",
+    ".shx",
+    ".prj",
+    ".cpg",
 }
 
 # 分类规则

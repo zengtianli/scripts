@@ -17,14 +17,14 @@ import os
 import re
 import sys
 import time
-import urllib.request
 import urllib.error
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 
 # 会话质量阈值
-MIN_MESSAGE_COUNT = 6       # 至少 6 条消息
-MIN_FILE_SIZE_KB = 10       # 至少 10KB
+MIN_MESSAGE_COUNT = 6  # 至少 6 条消息
+MIN_FILE_SIZE_KB = 10  # 至少 10KB
 
 
 def count_lines_fast(filepath: str) -> int:
@@ -47,7 +47,7 @@ def read_head_tail(filepath: str, head: int = 10, tail: int = 5) -> list[str]:
     lines_head = []
     lines_tail = []
 
-    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+    with open(filepath, encoding="utf-8", errors="replace") as f:
         for i, line in enumerate(f):
             if i < head:
                 lines_head.append(line)
@@ -141,7 +141,7 @@ def parse_session(filepath: str) -> dict | None:
         file_size = os.path.getsize(filepath)
         message_count = count_lines_fast(filepath)
         lines = read_head_tail(filepath, head=10, tail=5)
-    except (OSError, IOError):
+    except OSError:
         return None
 
     session_id = Path(filepath).stem
@@ -225,7 +225,7 @@ def read_session_content(filepath: str, max_chars: int = 8000) -> str:
     texts = []
     total = 0
     try:
-        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
+        with open(filepath, encoding="utf-8", errors="replace") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -266,7 +266,7 @@ def read_session_content(filepath: str, max_chars: int = 8000) -> str:
                     break
                 texts.append(chunk)
                 total += len(chunk)
-    except (OSError, IOError):
+    except OSError:
         pass
     return "".join(texts)
 
@@ -289,11 +289,13 @@ def generate_summary(content: str, title: str) -> dict | None:
 会话内容：
 {content[:6000]}"""
 
-    payload = json.dumps({
-        "model": "claude-sonnet-4-6",
-        "max_tokens": 200,
-        "messages": [{"role": "user", "content": prompt}],
-    }).encode("utf-8")
+    payload = json.dumps(
+        {
+            "model": "claude-sonnet-4-6",
+            "max_tokens": 200,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+    ).encode("utf-8")
 
     url = base_url.rstrip("/") + "/v1/messages"
     req = urllib.request.Request(
@@ -336,7 +338,7 @@ def generate_summary(content: str, title: str) -> dict | None:
 def load_cache(cache_path: str) -> dict:
     """Load the mtime cache from disk."""
     try:
-        with open(cache_path, "r", encoding="utf-8") as f:
+        with open(cache_path, encoding="utf-8") as f:
             return json.load(f)
     except (OSError, json.JSONDecodeError, ValueError):
         return {}
@@ -402,11 +404,9 @@ def main():
     # Load existing index for cached entries
     existing_index = {}
     try:
-        with open(output_path, "r", encoding="utf-8") as f:
+        with open(output_path, encoding="utf-8") as f:
             for entry in json.load(f):
-                key = os.path.join(
-                    projects_dir, entry["project"], entry["session_id"] + ".jsonl"
-                )
+                key = os.path.join(projects_dir, entry["project"], entry["session_id"] + ".jsonl")
                 existing_index[key] = entry
     except (OSError, json.JSONDecodeError, ValueError, KeyError):
         pass
@@ -448,10 +448,7 @@ def main():
     # Generate summaries for non-trivial sessions (incremental)
     summary_count = 0
     if do_summarize:
-        need_summary = [
-            e for e in results
-            if not e.get("trivial") and not e.get("summary")
-        ]
+        need_summary = [e for e in results if not e.get("trivial") and not e.get("summary")]
         if need_summary:
             print(
                 f"Generating summaries for {len(need_summary)} sessions...",

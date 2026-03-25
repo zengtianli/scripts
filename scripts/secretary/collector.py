@@ -7,28 +7,42 @@
 - 记忆读取
 """
 
-import os
 import json
-import sys
+import os
 import re
-from datetime import datetime, date, timedelta
-from pathlib import Path
-from typing import Dict, List
+import sys
 from collections import defaultdict
-
+from datetime import date, datetime
+from pathlib import Path
 
 # 监控的关键目录
 WATCH_DIRS = [
-    os.path.expanduser('~/docs'),
-    os.path.expanduser('~/useful_scripts'),
+    os.path.expanduser("~/docs"),
+    os.path.expanduser("~/useful_scripts"),
 ]
 
 # 忽略的目录和文件
 IGNORE_PATTERNS = {
-    '.git', '.next', '__pycache__', '.DS_Store', 'node_modules',
-    '.pnpm', '.cache', '.venv', 'dist', 'build', '.pytest_cache',
-    '.mypy_cache', '.ruff_cache', '.turbo', '.idea', '.vscode',
-    '*.pyc', '*.pyo', '.env', '.env.local'
+    ".git",
+    ".next",
+    "__pycache__",
+    ".DS_Store",
+    "node_modules",
+    ".pnpm",
+    ".cache",
+    ".venv",
+    "dist",
+    "build",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".turbo",
+    ".idea",
+    ".vscode",
+    "*.pyc",
+    "*.pyo",
+    ".env",
+    ".env.local",
 }
 
 
@@ -39,12 +53,12 @@ def should_ignore(path: str) -> bool:
         if part in IGNORE_PATTERNS:
             return True
         # 检查文件扩展名
-        if part.endswith('.pyc') or part.endswith('.pyo'):
+        if part.endswith(".pyc") or part.endswith(".pyo"):
             return True
     return False
 
 
-def get_file_changes_for_date(target_date: date) -> Dict[str, List[str]]:
+def get_file_changes_for_date(target_date: date) -> dict[str, list[str]]:
     """
     检测指定日期的文件变化
 
@@ -59,7 +73,7 @@ def get_file_changes_for_date(target_date: date) -> Dict[str, List[str]]:
         }
     """
     if isinstance(target_date, str):
-        target_date = datetime.strptime(target_date, '%Y-%m-%d').date()
+        target_date = datetime.strptime(target_date, "%Y-%m-%d").date()
 
     modified_files = []
     created_files = []
@@ -110,14 +124,10 @@ def get_file_changes_for_date(target_date: date) -> Dict[str, List[str]]:
     created_files.sort()
     deleted_files.sort()
 
-    return {
-        "modified": modified_files,
-        "created": created_files,
-        "deleted": deleted_files
-    }
+    return {"modified": modified_files, "created": created_files, "deleted": deleted_files}
 
 
-def collect_file_changes(date: str) -> Dict:
+def collect_file_changes(date: str) -> dict:
     """
     检测指定日期的文件变化
 
@@ -132,7 +142,7 @@ def collect_file_changes(date: str) -> Dict:
         }
     """
     try:
-        target_date = datetime.strptime(date, '%Y-%m-%d').date()
+        target_date = datetime.strptime(date, "%Y-%m-%d").date()
     except ValueError:
         raise ValueError(f"日期格式不正确，应为 YYYY-MM-DD，收到: {date}")
 
@@ -150,7 +160,7 @@ def _extract_markdown_section(content: str, section_title: str) -> str:
     Returns:
         章节内容（不包括标题）
     """
-    lines = content.split('\n')
+    lines = content.split("\n")
     start_idx = -1
     end_idx = len(lines)
 
@@ -167,14 +177,14 @@ def _extract_markdown_section(content: str, section_title: str) -> str:
     for i in range(start_idx, len(lines)):
         line = lines[i]
         # 检查是否是同级或更高级的标题
-        if line.startswith('## ') or line.startswith('# '):
+        if line.startswith("## ") or line.startswith("# "):
             end_idx = i
             break
 
-    return '\n'.join(lines[start_idx:end_idx]).strip()
+    return "\n".join(lines[start_idx:end_idx]).strip()
 
 
-def _extract_list_items(content: str, max_items: int = 10) -> List[str]:
+def _extract_list_items(content: str, max_items: int = 10) -> list[str]:
     """
     从 Markdown 内容中提取列表项
 
@@ -186,22 +196,24 @@ def _extract_list_items(content: str, max_items: int = 10) -> List[str]:
         列表项列表
     """
     items = []
-    lines = content.split('\n')
+    lines = content.split("\n")
 
     for line in lines:
         line = line.strip()
         # 匹配 - 或 * 或 数字. 开头的列表项
-        if line.startswith('- ') or line.startswith('* ') or (len(line) > 2 and line[0].isdigit() and line[1:3] == '. '):
+        if (
+            line.startswith("- ")
+            or line.startswith("* ")
+            or (len(line) > 2 and line[0].isdigit() and line[1:3] == ". ")
+        ):
             # 移除列表标记
-            if line.startswith('- '):
-                item = line[2:].strip()
-            elif line.startswith('* '):
+            if line.startswith("- ") or line.startswith("* "):
                 item = line[2:].strip()
             else:
-                item = line.split('. ', 1)[1].strip()
+                item = line.split(". ", 1)[1].strip()
 
             # 移除 Markdown 格式（✅、❌ 等）
-            item = item.lstrip('✅❌📋📊🎉✨🔧📝')
+            item = item.lstrip("✅❌📋📊🎉✨🔧📝")
             item = item.strip()
 
             if item:
@@ -212,7 +224,7 @@ def _extract_list_items(content: str, max_items: int = 10) -> List[str]:
     return items
 
 
-def collect_sessions(date: str) -> List[Dict]:
+def collect_sessions(date: str) -> list[dict]:
     """
     扫描指定日期的工作会话
 
@@ -229,19 +241,19 @@ def collect_sessions(date: str) -> List[Dict]:
         }]
     """
     try:
-        target_date = datetime.strptime(date, '%Y-%m-%d').date()
+        target_date = datetime.strptime(date, "%Y-%m-%d").date()
     except ValueError:
         raise ValueError(f"日期格式不正确，应为 YYYY-MM-DD，收到: {date}")
 
     # 构建 sessions 目录路径
-    year_month = target_date.strftime('%Y-%m')
-    sessions_dir = os.path.expanduser(f'~/docs/sessions/{year_month}')
+    year_month = target_date.strftime("%Y-%m")
+    sessions_dir = os.path.expanduser(f"~/docs/sessions/{year_month}")
 
     if not os.path.exists(sessions_dir):
         return []
 
     results = []
-    day_str = target_date.strftime('%d')
+    day_str = target_date.strftime("%d")
 
     # 扫描目录
     try:
@@ -258,33 +270,33 @@ def collect_sessions(date: str) -> List[Dict]:
 
         # 提取 topic（去掉日期前缀，如 "02-" → "raycast规范化"）
         topic = entry
-        if '-' in topic:
-            parts = topic.split('-', 1)
+        if "-" in topic:
+            parts = topic.split("-", 1)
             if len(parts) > 1:
                 topic = parts[1]
 
         # 读取完成报告
-        report_path = os.path.join(entry_path, '完成报告.md')
+        report_path = os.path.join(entry_path, "完成报告.md")
         summary = ""
         decisions = []
         learnings = []
 
         if os.path.exists(report_path):
             try:
-                with open(report_path, 'r', encoding='utf-8') as f:
+                with open(report_path, encoding="utf-8") as f:
                     report_content = f.read()
 
                 # 提取摘要（从标题到第一个主要章节）
-                lines = report_content.split('\n')
+                lines = report_content.split("\n")
                 summary_lines = []
                 in_header = True
                 for line in lines:
                     # 跳过标题和分隔线
-                    if line.startswith('#') or line.startswith('---') or line.startswith('**'):
+                    if line.startswith("#") or line.startswith("---") or line.startswith("**"):
                         in_header = False
                         continue
                     # 当遇到主要章节时停止
-                    if line.startswith('## '):
+                    if line.startswith("## "):
                         break
                     # 收集非空行
                     if line.strip() and not in_header:
@@ -292,20 +304,20 @@ def collect_sessions(date: str) -> List[Dict]:
                         if len(summary_lines) >= 3:  # 最多 3 行
                             break
 
-                summary = ' '.join(summary_lines)[:200]  # 限制长度
+                summary = " ".join(summary_lines)[:200]  # 限制长度
 
                 # 提取决策（从"执行内容"或"建立的规范体系"章节）
-                decisions_section = _extract_markdown_section(report_content, '## 二、')
+                decisions_section = _extract_markdown_section(report_content, "## 二、")
                 if not decisions_section:
-                    decisions_section = _extract_markdown_section(report_content, '## 三、')
+                    decisions_section = _extract_markdown_section(report_content, "## 三、")
 
                 if decisions_section:
                     decisions = _extract_list_items(decisions_section, max_items=5)
 
                 # 提取学习（从"核心改进"或"后续维护"章节）
-                learnings_section = _extract_markdown_section(report_content, '## 六、')
+                learnings_section = _extract_markdown_section(report_content, "## 六、")
                 if not learnings_section:
-                    learnings_section = _extract_markdown_section(report_content, '## 五、')
+                    learnings_section = _extract_markdown_section(report_content, "## 五、")
 
                 if learnings_section:
                     learnings = _extract_list_items(learnings_section, max_items=5)
@@ -319,7 +331,7 @@ def collect_sessions(date: str) -> List[Dict]:
             "topic": topic,
             "summary": summary,
             "decisions": decisions,
-            "learnings": learnings
+            "learnings": learnings,
         }
 
         results.append(session_data)
@@ -331,7 +343,8 @@ def collect_sessions(date: str) -> List[Dict]:
 # 对话历史采集
 # ============================================================================
 
-def collect_conversations(date: str) -> List[Dict]:
+
+def collect_conversations(date: str) -> list[dict]:
     """
     读取指定日期的 Claude Code 对话历史（增强版）
 
@@ -352,7 +365,7 @@ def collect_conversations(date: str) -> List[Dict]:
         - pitfalls: 踩的坑（如果有）
         - lessons: 经验教训（如果有）
     """
-    target_date = datetime.strptime(date, '%Y-%m-%d').date()
+    target_date = datetime.strptime(date, "%Y-%m-%d").date()
     conversations = _load_conversations_by_date(target_date)
     return _format_conversations_enhanced(conversations, date)
 
@@ -360,7 +373,7 @@ def collect_conversations(date: str) -> List[Dict]:
 def _read_jsonl_incremental(filepath: Path):
     """增量读取 JSONL 文件，逐行解析"""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -375,7 +388,7 @@ def _read_jsonl_incremental(filepath: Path):
         pass
 
 
-def _load_conversations_by_date(target_date: date) -> Dict[str, List[Dict]]:
+def _load_conversations_by_date(target_date: date) -> dict[str, list[dict]]:
     """按日期加载对话，按 sessionId 分组"""
     projects_dir = Path.home() / ".claude" / "projects" / "-Users-tianli"
     conversations = defaultdict(list)
@@ -383,12 +396,12 @@ def _load_conversations_by_date(target_date: date) -> Dict[str, List[Dict]]:
     for jsonl_file in projects_dir.glob("*.jsonl"):
         for entry in _read_jsonl_incremental(jsonl_file):
             # 解析时间戳
-            timestamp_str = entry.get('timestamp')
+            timestamp_str = entry.get("timestamp")
             if not timestamp_str:
                 continue
 
             try:
-                entry_time = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                entry_time = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
                 entry_date = entry_time.date()
             except (ValueError, AttributeError):
                 continue
@@ -398,17 +411,17 @@ def _load_conversations_by_date(target_date: date) -> Dict[str, List[Dict]]:
                 continue
 
             # 只保留 user 和 assistant 类型的消息
-            msg_type = entry.get('type')
-            if msg_type not in ('user', 'assistant'):
+            msg_type = entry.get("type")
+            if msg_type not in ("user", "assistant"):
                 continue
 
-            session_id = entry.get('sessionId', 'unknown')
+            session_id = entry.get("sessionId", "unknown")
             conversations[session_id].append(entry)
 
     return conversations
 
 
-def _format_conversations(conversations: Dict[str, List[Dict]]) -> List[Dict]:
+def _format_conversations(conversations: dict[str, list[dict]]) -> list[dict]:
     """格式化对话数据（简化版，保留向后兼容）"""
     results = []
 
@@ -417,7 +430,7 @@ def _format_conversations(conversations: Dict[str, List[Dict]]) -> List[Dict]:
             continue
 
         # 按时间排序
-        entries.sort(key=lambda x: x.get('timestamp', ''))
+        entries.sort(key=lambda x: x.get("timestamp", ""))
 
         # 提取信息
         user_messages = []
@@ -426,13 +439,13 @@ def _format_conversations(conversations: Dict[str, List[Dict]]) -> List[Dict]:
         files_modified = set()
 
         for entry in entries:
-            msg_type = entry.get('type')
-            message = entry.get('message', {})
-            content = message.get('content', '')
+            msg_type = entry.get("type")
+            message = entry.get("message", {})
+            content = message.get("content", "")
 
-            if msg_type == 'user':
+            if msg_type == "user":
                 user_messages.append(_clean_message(content))
-            elif msg_type == 'assistant':
+            elif msg_type == "assistant":
                 assistant_messages.append(_clean_message(content))
                 # 提取工具使用
                 tools = _extract_tools_from_message(message)
@@ -445,23 +458,25 @@ def _format_conversations(conversations: Dict[str, List[Dict]]) -> List[Dict]:
         topic = _extract_topic(entries)
 
         # 获取开始时间
-        timestamp = entries[0].get('timestamp', '')
+        timestamp = entries[0].get("timestamp", "")
 
-        results.append({
-            'timestamp': timestamp,
-            'topic': topic,
-            'user_messages': user_messages,
-            'assistant_messages': assistant_messages,
-            'tools_used': sorted(list(tools_used)),
-            'files_modified': sorted(list(files_modified))
-        })
+        results.append(
+            {
+                "timestamp": timestamp,
+                "topic": topic,
+                "user_messages": user_messages,
+                "assistant_messages": assistant_messages,
+                "tools_used": sorted(list(tools_used)),
+                "files_modified": sorted(list(files_modified)),
+            }
+        )
 
     # 按时间排序
-    results.sort(key=lambda x: x['timestamp'])
+    results.sort(key=lambda x: x["timestamp"])
     return results
 
 
-def _format_conversations_enhanced(conversations: Dict[str, List[Dict]], date: str = None) -> List[Dict]:
+def _format_conversations_enhanced(conversations: dict[str, list[dict]], date: str = None) -> list[dict]:
     """格式化对话数据（增强版）"""
     results = []
 
@@ -470,18 +485,18 @@ def _format_conversations_enhanced(conversations: Dict[str, List[Dict]], date: s
             continue
 
         # 按时间排序
-        entries.sort(key=lambda x: x.get('timestamp', ''))
+        entries.sort(key=lambda x: x.get("timestamp", ""))
 
         # 分析 session 详情（传递日期参数）
         session_details = analyze_session_details(session_id, entries, date)
         results.append(session_details)
 
     # 按时间排序
-    results.sort(key=lambda x: x['time_range']['start'])
+    results.sort(key=lambda x: x["time_range"]["start"])
     return results
 
 
-def collect_session_docs(date: str, topic: str) -> Dict:
+def collect_session_docs(date: str, topic: str) -> dict:
     """
     从 sessions 目录读取完成报告
 
@@ -499,19 +514,19 @@ def collect_session_docs(date: str, topic: str) -> Dict:
         }
     """
     try:
-        target_date = datetime.strptime(date, '%Y-%m-%d').date()
+        target_date = datetime.strptime(date, "%Y-%m-%d").date()
     except ValueError:
         return {}
 
     # 构建 sessions 目录路径
-    year_month = target_date.strftime('%Y-%m')
-    sessions_dir = os.path.expanduser(f'~/docs/sessions/{year_month}')
+    year_month = target_date.strftime("%Y-%m")
+    sessions_dir = os.path.expanduser(f"~/docs/sessions/{year_month}")
 
     if not os.path.exists(sessions_dir):
         return {}
 
     # 查找匹配的 session 目录
-    day_str = target_date.strftime('%d')
+    day_str = target_date.strftime("%d")
     matching_dirs = []
 
     try:
@@ -534,18 +549,18 @@ def collect_session_docs(date: str, topic: str) -> Dict:
 
     # 读取第一个匹配的完成报告
     for session_dir in matching_dirs:
-        report_path = os.path.join(session_dir, '完成报告.md')
+        report_path = os.path.join(session_dir, "完成报告.md")
         if os.path.exists(report_path):
             try:
-                with open(report_path, 'r', encoding='utf-8') as f:
+                with open(report_path, encoding="utf-8") as f:
                     content = f.read()
 
                 return {
-                    'doc_path': report_path,
-                    'content': content,
-                    'context': _extract_context_from_doc(content),
-                    'pitfalls': _extract_pitfalls_from_doc(content),
-                    'lessons': _extract_lessons_from_doc(content)
+                    "doc_path": report_path,
+                    "content": content,
+                    "context": _extract_context_from_doc(content),
+                    "pitfalls": _extract_pitfalls_from_doc(content),
+                    "lessons": _extract_lessons_from_doc(content),
                 }
             except (OSError, UnicodeDecodeError):
                 continue
@@ -553,7 +568,7 @@ def collect_session_docs(date: str, topic: str) -> Dict:
     return {}
 
 
-def _extract_context_from_doc(content: str) -> Dict:
+def _extract_context_from_doc(content: str) -> dict:
     """
     从完成报告中提取 context（出发点、问题、为什么）
 
@@ -567,19 +582,15 @@ def _extract_context_from_doc(content: str) -> Dict:
             'why': '为什么要做'
         }
     """
-    context = {
-        'trigger': '',
-        'problem': '',
-        'why': ''
-    }
+    context = {"trigger": "", "problem": "", "why": ""}
 
     # 提取"任务概述"章节
-    overview_section = _extract_markdown_section(content, '## 一、任务概述')
+    overview_section = _extract_markdown_section(content, "## 一、任务概述")
     if not overview_section:
-        overview_section = _extract_markdown_section(content, '## 任务概述')
+        overview_section = _extract_markdown_section(content, "## 任务概述")
 
     if overview_section:
-        lines = overview_section.split('\n')
+        lines = overview_section.split("\n")
         # 第一段通常是触发原因和问题描述
         paragraphs = []
         current_para = []
@@ -588,42 +599,42 @@ def _extract_context_from_doc(content: str) -> Dict:
             line = line.strip()
             if not line:
                 if current_para:
-                    paragraphs.append(' '.join(current_para))
+                    paragraphs.append(" ".join(current_para))
                     current_para = []
-            elif not line.startswith('#') and not line.startswith('-') and not line.startswith('*'):
+            elif not line.startswith("#") and not line.startswith("-") and not line.startswith("*"):
                 current_para.append(line)
 
         if current_para:
-            paragraphs.append(' '.join(current_para))
+            paragraphs.append(" ".join(current_para))
 
         # 第一段作为 trigger
         if paragraphs:
-            context['trigger'] = paragraphs[0][:200]
+            context["trigger"] = paragraphs[0][:200]
 
     # 提取"以前的问题"或"问题"章节
-    problems_section = _extract_markdown_section(content, '**以前的问题**')
+    problems_section = _extract_markdown_section(content, "**以前的问题**")
     if not problems_section:
-        problems_section = _extract_markdown_section(content, '### 问题')
+        problems_section = _extract_markdown_section(content, "### 问题")
 
     if problems_section:
         items = _extract_list_items(problems_section, max_items=3)
         if items:
-            context['problem'] = '; '.join(items)
+            context["problem"] = "; ".join(items)
 
     # 提取"核心目标"或"为什么"
-    goals_section = _extract_markdown_section(content, '### 核心目标')
+    goals_section = _extract_markdown_section(content, "### 核心目标")
     if not goals_section:
-        goals_section = _extract_markdown_section(content, '### 为什么')
+        goals_section = _extract_markdown_section(content, "### 为什么")
 
     if goals_section:
         items = _extract_list_items(goals_section, max_items=3)
         if items:
-            context['why'] = '; '.join(items)
+            context["why"] = "; ".join(items)
 
     return context
 
 
-def _extract_pitfalls_from_doc(content: str) -> List[str]:
+def _extract_pitfalls_from_doc(content: str) -> list[str]:
     """
     从完成报告中提取 pitfalls（踩的坑）
 
@@ -636,22 +647,22 @@ def _extract_pitfalls_from_doc(content: str) -> List[str]:
     pitfalls = []
 
     # 查找"以前的问题"章节（只提取到下一个 ** 标记）
-    if '**以前的问题**' in content:
-        start_idx = content.index('**以前的问题**')
+    if "**以前的问题**" in content:
+        start_idx = content.index("**以前的问题**")
         # 查找下一个 ** 标记
-        next_section_idx = content.find('**', start_idx + len('**以前的问题**'))
+        next_section_idx = content.find("**", start_idx + len("**以前的问题**"))
         if next_section_idx > start_idx:
             problems_text = content[start_idx:next_section_idx]
         else:
-            problems_text = content[start_idx:start_idx+500]  # 最多500字符
+            problems_text = content[start_idx : start_idx + 500]  # 最多500字符
 
         items = _extract_list_items(problems_text, max_items=10)
         pitfalls.extend(items)
 
     # 查找"踩坑记录"章节
-    pitfalls_section = _extract_markdown_section(content, '### 踩坑记录')
+    pitfalls_section = _extract_markdown_section(content, "### 踩坑记录")
     if not pitfalls_section:
-        pitfalls_section = _extract_markdown_section(content, '## 踩坑')
+        pitfalls_section = _extract_markdown_section(content, "## 踩坑")
 
     if pitfalls_section:
         items = _extract_list_items(pitfalls_section, max_items=10)
@@ -669,7 +680,7 @@ def _extract_pitfalls_from_doc(content: str) -> List[str]:
     return unique_pitfalls[:10]  # 最多返回10个
 
 
-def _extract_lessons_from_doc(content: str) -> List[str]:
+def _extract_lessons_from_doc(content: str) -> list[str]:
     """
     从完成报告中提取 lessons（经验教训）
 
@@ -682,12 +693,12 @@ def _extract_lessons_from_doc(content: str) -> List[str]:
     lessons = []
 
     # 查找"现在的解决方案"章节（只提取到下一个 ** 或 ## 标记）
-    if '**现在的解决方案**' in content:
-        start_idx = content.index('**现在的解决方案**')
+    if "**现在的解决方案**" in content:
+        start_idx = content.index("**现在的解决方案**")
         # 查找下一个 ** 或 ## 标记
         next_section_idx = len(content)
-        for marker in ['**', '\n##']:
-            idx = content.find(marker, start_idx + len('**现在的解决方案**'))
+        for marker in ["**", "\n##"]:
+            idx = content.find(marker, start_idx + len("**现在的解决方案**"))
             if idx > start_idx and idx < next_section_idx:
                 next_section_idx = idx
 
@@ -696,9 +707,9 @@ def _extract_lessons_from_doc(content: str) -> List[str]:
         lessons.extend(items)
 
     # 查找"经验教训"章节
-    lessons_section = _extract_markdown_section(content, '### 经验教训')
+    lessons_section = _extract_markdown_section(content, "### 经验教训")
     if not lessons_section:
-        lessons_section = _extract_markdown_section(content, '## 经验教训')
+        lessons_section = _extract_markdown_section(content, "## 经验教训")
 
     if lessons_section:
         items = _extract_list_items(lessons_section, max_items=10)
@@ -716,7 +727,7 @@ def _extract_lessons_from_doc(content: str) -> List[str]:
     return unique_lessons[:10]  # 最多返回10个
 
 
-def _extract_pitfalls_from_conversation(entries: List[Dict]) -> List[str]:
+def _extract_pitfalls_from_conversation(entries: list[dict]) -> list[str]:
     """
     从对话历史中识别错误和纠正
 
@@ -729,16 +740,16 @@ def _extract_pitfalls_from_conversation(entries: List[Dict]) -> List[str]:
     pitfalls = []
 
     # 识别关键词
-    error_keywords = ['错了', '不对', '有问题', '怎么回事', '不应该', '不是', '别', '不要']
-    correction_keywords = ['抱歉', '对不起', '我错了', '修正', '更正', '重新']
+    error_keywords = ["错了", "不对", "有问题", "怎么回事", "不应该", "不是", "别", "不要"]
+    correction_keywords = ["抱歉", "对不起", "我错了", "修正", "更正", "重新"]
 
     for i, entry in enumerate(entries):
-        msg_type = entry.get('type')
-        message = entry.get('message', {})
-        content = _extract_text_content(message.get('content', ''))
+        msg_type = entry.get("type")
+        message = entry.get("message", {})
+        content = _extract_text_content(message.get("content", ""))
 
         # 检查用户的批评/纠正
-        if msg_type == 'user':
+        if msg_type == "user":
             for keyword in error_keywords:
                 if keyword in content:
                     # 提取这条消息作为 pitfall
@@ -748,14 +759,14 @@ def _extract_pitfalls_from_conversation(entries: List[Dict]) -> List[str]:
                     break
 
         # 检查助手的错误承认
-        elif msg_type == 'assistant':
+        elif msg_type == "assistant":
             for keyword in correction_keywords:
                 if keyword in content:
                     # 查找前一条用户消息
                     if i > 0:
-                        prev_entry = entries[i-1]
-                        if prev_entry.get('type') == 'user':
-                            prev_content = _extract_text_content(prev_entry.get('message', {}).get('content', ''))
+                        prev_entry = entries[i - 1]
+                        if prev_entry.get("type") == "user":
+                            prev_content = _extract_text_content(prev_entry.get("message", {}).get("content", ""))
                             pitfall = prev_content[:100]
                             if pitfall and pitfall not in pitfalls:
                                 pitfalls.append(pitfall)
@@ -764,7 +775,7 @@ def _extract_pitfalls_from_conversation(entries: List[Dict]) -> List[str]:
     return pitfalls[:5]  # 最多返回5个
 
 
-def analyze_session_details(session_id: str, entries: List[Dict], date: str = None) -> Dict:
+def analyze_session_details(session_id: str, entries: list[dict], date: str = None) -> dict:
     """
     分析单个 session 的详细信息
 
@@ -780,7 +791,7 @@ def analyze_session_details(session_id: str, entries: List[Dict], date: str = No
         return {}
 
     # 1. 提取时间范围
-    timestamps = [e.get('timestamp') for e in entries if e.get('timestamp')]
+    timestamps = [e.get("timestamp") for e in entries if e.get("timestamp")]
     time_range = _extract_time_range(timestamps)
 
     # 2. 提取完整对话
@@ -810,105 +821,89 @@ def analyze_session_details(session_id: str, entries: List[Dict], date: str = No
     conversation_pitfalls = _extract_pitfalls_from_conversation(entries)
 
     # 10. 合并 context/pitfalls/lessons
-    context = session_doc.get('context', {})
-    pitfalls = session_doc.get('pitfalls', []) + conversation_pitfalls
-    lessons = session_doc.get('lessons', [])
+    context = session_doc.get("context", {})
+    pitfalls = session_doc.get("pitfalls", []) + conversation_pitfalls
+    lessons = session_doc.get("lessons", [])
 
     # 去重
     pitfalls = list(dict.fromkeys(pitfalls))[:10]
     lessons = list(dict.fromkeys(lessons))[:10]
 
     result = {
-        'session_id': session_id,
-        'time_range': time_range,
-        'topic': topic,
-        'conversation': conversation,
-        'iterations': iterations,
-        'file_operations': file_operations,
-        'file_changes_by_dir': file_changes_by_dir,
-        'summary': summary
+        "session_id": session_id,
+        "time_range": time_range,
+        "topic": topic,
+        "conversation": conversation,
+        "iterations": iterations,
+        "file_operations": file_operations,
+        "file_changes_by_dir": file_changes_by_dir,
+        "summary": summary,
     }
 
     # 只在有内容时添加这些字段
     if context and any(context.values()):
-        result['context'] = context
+        result["context"] = context
 
     if pitfalls:
-        result['pitfalls'] = pitfalls
+        result["pitfalls"] = pitfalls
 
     if lessons:
-        result['lessons'] = lessons
+        result["lessons"] = lessons
 
     return result
 
 
-def _extract_time_range(timestamps: List[str]) -> Dict:
+def _extract_time_range(timestamps: list[str]) -> dict:
     """提取时间范围"""
     if not timestamps:
-        return {
-            'start': None,
-            'end': None,
-            'duration_minutes': 0
-        }
+        return {"start": None, "end": None, "duration_minutes": 0}
 
     # 解析时间戳
     parsed_times = []
     for ts in timestamps:
         try:
-            dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
             parsed_times.append(dt)
         except (ValueError, AttributeError):
             continue
 
     if not parsed_times:
-        return {
-            'start': None,
-            'end': None,
-            'duration_minutes': 0
-        }
+        return {"start": None, "end": None, "duration_minutes": 0}
 
     start_time = min(parsed_times)
     end_time = max(parsed_times)
     duration = (end_time - start_time).total_seconds() / 60
 
-    return {
-        'start': start_time.isoformat(),
-        'end': end_time.isoformat(),
-        'duration_minutes': round(duration, 1)
-    }
+    return {"start": start_time.isoformat(), "end": end_time.isoformat(), "duration_minutes": round(duration, 1)}
 
 
-def _extract_full_conversation(entries: List[Dict]) -> List[Dict]:
+def _extract_full_conversation(entries: list[dict]) -> list[dict]:
     """提取完整对话记录 - 优化版（过滤空消息）"""
     conversation = []
 
     for entry in entries:
-        msg_type = entry.get('type')
-        if msg_type not in ('user', 'assistant'):
+        msg_type = entry.get("type")
+        if msg_type not in ("user", "assistant"):
             continue
 
-        message = entry.get('message', {})
-        content = message.get('content', '')
-        timestamp = entry.get('timestamp', '')
-        message_id = entry.get('uuid', '')
+        message = entry.get("message", {})
+        content = message.get("content", "")
+        timestamp = entry.get("timestamp", "")
+        message_id = entry.get("uuid", "")
 
         # 提取文本内容
         content_text = _extract_text_content(content)
 
         # 构建消息记录
-        msg_record = {
-            'timestamp': timestamp,
-            'role': msg_type,
-            'message_id': message_id
-        }
+        msg_record = {"timestamp": timestamp, "role": msg_type, "message_id": message_id}
 
-        if msg_type == 'user':
+        if msg_type == "user":
             # 用户消息：只保留有内容的
             if not content_text:
                 continue
-            msg_record['content'] = content_text
+            msg_record["content"] = content_text
 
-        elif msg_type == 'assistant':
+        elif msg_type == "assistant":
             # 助手消息：提取文本、工具使用、文件操作
             tools_used = _extract_tools_from_message(message)
             files_affected = _extract_files_from_message(message)
@@ -917,9 +912,9 @@ def _extract_full_conversation(entries: List[Dict]) -> List[Dict]:
             if not content_text and not tools_used:
                 continue
 
-            msg_record['content'] = content_text
-            msg_record['tools_used'] = tools_used
-            msg_record['files_affected'] = files_affected
+            msg_record["content"] = content_text
+            msg_record["tools_used"] = tools_used
+            msg_record["files_affected"] = files_affected
 
         conversation.append(msg_record)
 
@@ -935,126 +930,122 @@ def _extract_text_content(content) -> str:
         text_parts = []
         for block in content:
             if isinstance(block, dict):
-                if block.get('type') == 'text':
-                    text_parts.append(block.get('text', ''))
-                elif block.get('type') == 'thinking':
+                if block.get("type") == "text":
+                    text_parts.append(block.get("text", ""))
+                elif block.get("type") == "thinking":
                     # 可选：包含思考内容
                     pass
             elif isinstance(block, str):
                 text_parts.append(block)
-        return ' '.join(text_parts).strip()
+        return " ".join(text_parts).strip()
 
     return str(content).strip()
 
 
-def _identify_iterations(entries: List[Dict]) -> List[Dict]:
+def _identify_iterations(entries: list[dict]) -> list[dict]:
     """识别迭代过程（问题-解决循环）- 优化版"""
     iterations = []
     current_iteration = None
     iteration_count = 0
 
     for entry in entries:
-        msg_type = entry.get('type')
-        message = entry.get('message', {})
-        content_text = _extract_text_content(message.get('content', ''))
+        msg_type = entry.get("type")
+        message = entry.get("message", {})
+        content_text = _extract_text_content(message.get("content", ""))
 
-        if msg_type == 'user':
+        if msg_type == "user":
             # 只有当用户消息有实际内容时，才开始新的迭代
             if not content_text:
                 continue
 
             # 保存上一个迭代（如果有内容）
-            if current_iteration and (current_iteration['user_request'] or
-                                     current_iteration['assistant_response'] or
-                                     current_iteration['tools_used']):
+            if current_iteration and (
+                current_iteration["user_request"]
+                or current_iteration["assistant_response"]
+                or current_iteration["tools_used"]
+            ):
                 iterations.append(current_iteration)
 
             iteration_count += 1
             current_iteration = {
-                'round': iteration_count,
-                'user_request': content_text,
-                'assistant_response': '',
-                'tools_used': [],
-                'files_affected': []
+                "round": iteration_count,
+                "user_request": content_text,
+                "assistant_response": "",
+                "tools_used": [],
+                "files_affected": [],
             }
 
-        elif msg_type == 'assistant' and current_iteration:
+        elif msg_type == "assistant" and current_iteration:
             # 收集助手的响应内容
-            if content_text and not current_iteration['assistant_response']:
-                current_iteration['assistant_response'] = content_text
+            if content_text and not current_iteration["assistant_response"]:
+                current_iteration["assistant_response"] = content_text
 
             # 收集工具使用
             tools = _extract_tools_from_message(message)
             for tool in tools:
-                if tool not in current_iteration['tools_used']:
-                    current_iteration['tools_used'].append(tool)
+                if tool not in current_iteration["tools_used"]:
+                    current_iteration["tools_used"].append(tool)
 
             # 收集受影响的文件
             files = _extract_files_from_message(message)
             for file in files:
-                if file not in current_iteration['files_affected']:
-                    current_iteration['files_affected'].append(file)
+                if file not in current_iteration["files_affected"]:
+                    current_iteration["files_affected"].append(file)
 
     # 添加最后一个迭代（如果有内容）
-    if current_iteration and (current_iteration['user_request'] or
-                             current_iteration['assistant_response'] or
-                             current_iteration['tools_used']):
+    if current_iteration and (
+        current_iteration["user_request"] or current_iteration["assistant_response"] or current_iteration["tools_used"]
+    ):
         iterations.append(current_iteration)
 
     return iterations
 
 
-def _extract_file_operations(entries: List[Dict]) -> Dict:
+def _extract_file_operations(entries: list[dict]) -> dict:
     """提取文件操作统计"""
-    operations = {
-        'read': [],
-        'write': [],
-        'edit': [],
-        'glob': [],
-        'grep': []
-    }
+    operations = {"read": [], "write": [], "edit": [], "glob": [], "grep": []}
 
     for entry in entries:
-        if entry.get('type') != 'assistant':
+        if entry.get("type") != "assistant":
             continue
 
-        message = entry.get('message', {})
-        content = message.get('content', [])
+        message = entry.get("message", {})
+        content = message.get("content", [])
 
         if not isinstance(content, list):
             continue
 
         for block in content:
-            if not isinstance(block, dict) or block.get('type') != 'tool_use':
+            if not isinstance(block, dict) or block.get("type") != "tool_use":
                 continue
 
-            tool_name = block.get('name', '')
-            input_data = block.get('input', {})
+            tool_name = block.get("name", "")
+            input_data = block.get("input", {})
 
-            if tool_name == 'Read':
-                file_path = input_data.get('file_path')
+            if tool_name == "Read":
+                file_path = input_data.get("file_path")
                 if file_path:
-                    operations['read'].append(file_path)
+                    operations["read"].append(file_path)
 
-            elif tool_name == 'Write':
-                file_path = input_data.get('file_path')
+            elif tool_name == "Write":
+                file_path = input_data.get("file_path")
                 if file_path:
-                    operations['write'].append(file_path)
+                    operations["write"].append(file_path)
 
-            elif tool_name == 'Edit':
-                file_path = input_data.get('file_path')
+            elif tool_name == "Edit":
+                file_path = input_data.get("file_path")
                 if file_path:
-                    operations['edit'].append(file_path)
+                    operations["edit"].append(file_path)
 
-            elif tool_name == 'Glob':
-                pattern = input_data.get('pattern')
+            elif tool_name == "Glob":
+                pattern = input_data.get("pattern")
                 if pattern:
-                    operations['glob'].append(pattern)
+                    operations["glob"].append(pattern)
 
-            elif tool_name == 'Grep':
-                pattern = input_data.get('pattern')
+            elif tool_name == "Grep":
+                pattern = input_data.get("pattern")
                 if pattern:
-                    operations['grep'].append(pattern)
+                    operations["grep"].append(pattern)
 
     # 去重并排序
     for key in operations:
@@ -1063,7 +1054,7 @@ def _extract_file_operations(entries: List[Dict]) -> Dict:
     return operations
 
 
-def _group_files_by_directory(file_operations: Dict) -> Dict:
+def _group_files_by_directory(file_operations: dict) -> dict:
     """
     按目录分组文件变更
 
@@ -1085,7 +1076,7 @@ def _group_files_by_directory(file_operations: Dict) -> Dict:
     dir_groups = {}
 
     # 处理 write（新建文件）
-    for file_path in file_operations.get('write', []):
+    for file_path in file_operations.get("write", []):
         if not file_path:
             continue
 
@@ -1111,18 +1102,14 @@ def _group_files_by_directory(file_operations: Dict) -> Dict:
 
         # 初始化目录组
         if dir_path not in dir_groups:
-            dir_groups[dir_path] = {
-                'created': [],
-                'modified': [],
-                'deleted': []
-            }
+            dir_groups[dir_path] = {"created": [], "modified": [], "deleted": []}
 
         # 添加到 created 列表
-        if file_name not in dir_groups[dir_path]['created']:
-            dir_groups[dir_path]['created'].append(file_name)
+        if file_name not in dir_groups[dir_path]["created"]:
+            dir_groups[dir_path]["created"].append(file_name)
 
     # 处理 edit（修改文件）
-    for file_path in file_operations.get('edit', []):
+    for file_path in file_operations.get("edit", []):
         if not file_path:
             continue
 
@@ -1142,37 +1129,33 @@ def _group_files_by_directory(file_operations: Dict) -> Dict:
             file_name = path_obj.name
 
         if dir_path not in dir_groups:
-            dir_groups[dir_path] = {
-                'created': [],
-                'modified': [],
-                'deleted': []
-            }
+            dir_groups[dir_path] = {"created": [], "modified": [], "deleted": []}
 
         # 添加到 modified 列表（如果不在 created 中）
-        if file_name not in dir_groups[dir_path]['created'] and file_name not in dir_groups[dir_path]['modified']:
-            dir_groups[dir_path]['modified'].append(file_name)
+        if file_name not in dir_groups[dir_path]["created"] and file_name not in dir_groups[dir_path]["modified"]:
+            dir_groups[dir_path]["modified"].append(file_name)
 
     # 排序每个目录的文件列表
     for dir_path in dir_groups:
-        dir_groups[dir_path]['created'].sort()
-        dir_groups[dir_path]['modified'].sort()
-        dir_groups[dir_path]['deleted'].sort()
+        dir_groups[dir_path]["created"].sort()
+        dir_groups[dir_path]["modified"].sort()
+        dir_groups[dir_path]["deleted"].sort()
 
     # 按目录路径排序
     return dict(sorted(dir_groups.items()))
 
 
-def _generate_session_summary(entries: List[Dict], conversation: List[Dict], file_operations: Dict) -> Dict:
+def _generate_session_summary(entries: list[dict], conversation: list[dict], file_operations: dict) -> dict:
     """生成会话摘要统计"""
-    user_count = sum(1 for e in entries if e.get('type') == 'user')
-    assistant_count = sum(1 for e in entries if e.get('type') == 'assistant')
+    user_count = sum(1 for e in entries if e.get("type") == "user")
+    assistant_count = sum(1 for e in entries if e.get("type") == "assistant")
 
     # 统计工具使用
     tools_used = {}
     for entry in entries:
-        if entry.get('type') != 'assistant':
+        if entry.get("type") != "assistant":
             continue
-        message = entry.get('message', {})
+        message = entry.get("message", {})
         for tool in _extract_tools_from_message(message):
             tools_used[tool] = tools_used.get(tool, 0) + 1
 
@@ -1182,12 +1165,12 @@ def _generate_session_summary(entries: List[Dict], conversation: List[Dict], fil
         all_files.update(op_list)
 
     return {
-        'total_messages': len(entries),
-        'user_messages': user_count,
-        'assistant_messages': assistant_count,
-        'tools_used': tools_used,
-        'files_affected_count': len(all_files),
-        'files_affected': sorted(list(all_files))
+        "total_messages": len(entries),
+        "user_messages": user_count,
+        "assistant_messages": assistant_count,
+        "tools_used": tools_used,
+        "files_affected_count": len(all_files),
+        "files_affected": sorted(list(all_files)),
     }
 
 
@@ -1201,11 +1184,11 @@ def _clean_message(content: str) -> str:
         text_parts = []
         for block in content:
             if isinstance(block, dict):
-                if block.get('type') == 'text':
-                    text_parts.append(block.get('text', ''))
+                if block.get("type") == "text":
+                    text_parts.append(block.get("text", ""))
             elif isinstance(block, str):
                 text_parts.append(block)
-        content = ' '.join(text_parts)
+        content = " ".join(text_parts)
 
     # 如果不是字符串，转换为字符串
     if not isinstance(content, str):
@@ -1219,18 +1202,18 @@ def _clean_message(content: str) -> str:
     return content.strip()
 
 
-def _extract_topic(entries: List[Dict]) -> str:
+def _extract_topic(entries: list[dict]) -> str:
     """从对话中提取主题"""
     # 从第一条 user 消息提取
     for entry in entries:
-        if entry.get('type') == 'user':
-            message = entry.get('message', {})
-            content = message.get('content', '')
+        if entry.get("type") == "user":
+            message = entry.get("message", {})
+            content = message.get("content", "")
 
             # 移除 teammate-message 标签
-            if '<teammate-message' in content:
+            if "<teammate-message" in content:
                 # 提取标签内的内容
-                match = re.search(r'<teammate-message[^>]*>(.*?)</teammate-message>', content, re.DOTALL)
+                match = re.search(r"<teammate-message[^>]*>(.*?)</teammate-message>", content, re.DOTALL)
                 if match:
                     content = match.group(1)
 
@@ -1243,46 +1226,46 @@ def _extract_topic(entries: List[Dict]) -> str:
     return "未知主题"
 
 
-def _extract_tools_from_message(message: Dict) -> List[str]:
+def _extract_tools_from_message(message: dict) -> list[str]:
     """从 assistant 消息中提取使用的工具"""
     tools = []
-    content = message.get('content', '')
+    content = message.get("content", "")
 
     if not isinstance(content, list):
         return tools
 
     # content 可能是列表，包含 tool_use 块
     for block in content:
-        if isinstance(block, dict) and block.get('type') == 'tool_use':
-            tool_name = block.get('name')
+        if isinstance(block, dict) and block.get("type") == "tool_use":
+            tool_name = block.get("name")
             if tool_name:
                 tools.append(tool_name)
 
     return tools
 
 
-def _extract_files_from_message(message: Dict) -> List[str]:
+def _extract_files_from_message(message: dict) -> list[str]:
     """从 assistant 消息中提取修改的文件"""
     files = []
-    content = message.get('content', '')
+    content = message.get("content", "")
 
     if not isinstance(content, list):
         return files
 
     # 查找 Edit, Write 工具的 file_path 参数
     for block in content:
-        if isinstance(block, dict) and block.get('type') == 'tool_use':
-            tool_name = block.get('name')
-            if tool_name in ('Edit', 'Write', 'NotebookEdit'):
-                input_data = block.get('input', {})
-                file_path = input_data.get('file_path') or input_data.get('notebook_path')
+        if isinstance(block, dict) and block.get("type") == "tool_use":
+            tool_name = block.get("name")
+            if tool_name in ("Edit", "Write", "NotebookEdit"):
+                input_data = block.get("input", {})
+                file_path = input_data.get("file_path") or input_data.get("notebook_path")
                 if file_path:
                     files.append(file_path)
 
     return files
 
 
-def collect_memory() -> Dict:
+def collect_memory() -> dict:
     """
     读取 Claude Code 记忆
 
@@ -1295,77 +1278,83 @@ def collect_memory() -> Dict:
             "related_topics": [...]
         }
     """
-    memory_path = os.path.expanduser('~/.claude/projects/-Users-tianli/memory/MEMORY.md')
+    memory_path = os.path.expanduser("~/.claude/projects/-Users-tianli/memory/MEMORY.md")
 
     if not os.path.exists(memory_path):
         return {
-            'core_memory': [],
-            'user_preferences': [],
-            'project_status': {},
-            'system_status': {},
-            'related_topics': [],
+            "core_memory": [],
+            "user_preferences": [],
+            "project_status": {},
+            "system_status": {},
+            "related_topics": [],
         }
 
     try:
-        with open(memory_path, 'r', encoding='utf-8') as f:
+        with open(memory_path, encoding="utf-8") as f:
             content = f.read()
     except (OSError, UnicodeDecodeError):
         return {
-            'core_memory': [],
-            'user_preferences': [],
-            'project_status': {},
-            'system_status': {},
-            'related_topics': [],
+            "core_memory": [],
+            "user_preferences": [],
+            "project_status": {},
+            "system_status": {},
+            "related_topics": [],
         }
 
     result = {
-        'core_memory': [],
-        'user_preferences': [],
-        'project_status': {},
-        'system_status': {},
-        'related_topics': [],
+        "core_memory": [],
+        "user_preferences": [],
+        "project_status": {},
+        "system_status": {},
+        "related_topics": [],
     }
 
     # 解析 Markdown 结构
-    lines = content.split('\n')
+    lines = content.split("\n")
     current_section = None
     current_subsection = None
     current_content = []
 
     for line in lines:
         # 一级标题
-        if line.startswith('# '):
+        if line.startswith("# "):
             if current_section and current_content:
-                section_text = '\n'.join(current_content).strip()
-                if current_section == '核心记忆':
-                    result['core_memory'].append({
-                        'title': current_subsection or '核心记忆',
-                        'content': section_text,
-                        'items': _extract_list_items(section_text),
-                    })
-                elif current_section == '用户偏好':
-                    result['user_preferences'].append({
-                        'title': current_subsection or '用户偏好',
-                        'content': section_text,
-                        'items': _extract_list_items(section_text),
-                    })
-                elif current_section == '项目状态':
-                    if current_subsection:
-                        result['project_status'][current_subsection] = {
-                            'content': section_text,
-                            'items': _extract_list_items(section_text),
+                section_text = "\n".join(current_content).strip()
+                if current_section == "核心记忆":
+                    result["core_memory"].append(
+                        {
+                            "title": current_subsection or "核心记忆",
+                            "content": section_text,
+                            "items": _extract_list_items(section_text),
                         }
-                elif current_section == '系统状态':
-                    if current_subsection:
-                        result['system_status'][current_subsection] = {
-                            'content': section_text,
-                            'items': _extract_list_items(section_text),
+                    )
+                elif current_section == "用户偏好":
+                    result["user_preferences"].append(
+                        {
+                            "title": current_subsection or "用户偏好",
+                            "content": section_text,
+                            "items": _extract_list_items(section_text),
                         }
-                elif current_section == '相关主题文件':
-                    result['related_topics'].append({
-                        'title': current_subsection or '相关主题文件',
-                        'items': _extract_list_items(section_text),
-                    })
+                    )
+                elif current_section == "项目状态":
+                    if current_subsection:
+                        result["project_status"][current_subsection] = {
+                            "content": section_text,
+                            "items": _extract_list_items(section_text),
+                        }
+                elif current_section == "系统状态":
+                    if current_subsection:
+                        result["system_status"][current_subsection] = {
+                            "content": section_text,
+                            "items": _extract_list_items(section_text),
+                        }
+                elif current_section == "相关主题文件":
+                    result["related_topics"].append(
+                        {
+                            "title": current_subsection or "相关主题文件",
+                            "items": _extract_list_items(section_text),
+                        }
+                    )
 
                 current_content = []
 
@@ -1373,36 +1362,42 @@ def collect_memory() -> Dict:
             current_subsection = None
 
         # 二级标题
-        elif line.startswith('## '):
+        elif line.startswith("## "):
             if current_subsection and current_content:
-                section_text = '\n'.join(current_content).strip()
-                if current_section == '核心记忆':
-                    result['core_memory'].append({
-                        'title': current_subsection,
-                        'content': section_text,
-                        'items': _extract_list_items(section_text),
-                    })
-                elif current_section == '用户偏好':
-                    result['user_preferences'].append({
-                        'title': current_subsection,
-                        'content': section_text,
-                        'items': _extract_list_items(section_text),
-                    })
-                elif current_section == '项目状态':
-                    result['project_status'][current_subsection] = {
-                        'content': section_text,
-                        'items': _extract_list_items(section_text),
+                section_text = "\n".join(current_content).strip()
+                if current_section == "核心记忆":
+                    result["core_memory"].append(
+                        {
+                            "title": current_subsection,
+                            "content": section_text,
+                            "items": _extract_list_items(section_text),
+                        }
+                    )
+                elif current_section == "用户偏好":
+                    result["user_preferences"].append(
+                        {
+                            "title": current_subsection,
+                            "content": section_text,
+                            "items": _extract_list_items(section_text),
+                        }
+                    )
+                elif current_section == "项目状态":
+                    result["project_status"][current_subsection] = {
+                        "content": section_text,
+                        "items": _extract_list_items(section_text),
                     }
-                elif current_section == '系统状态':
-                    result['system_status'][current_subsection] = {
-                        'content': section_text,
-                        'items': _extract_list_items(section_text),
+                elif current_section == "系统状态":
+                    result["system_status"][current_subsection] = {
+                        "content": section_text,
+                        "items": _extract_list_items(section_text),
                     }
-                elif current_section == '相关主题文件':
-                    result['related_topics'].append({
-                        'title': current_subsection,
-                        'items': _extract_list_items(section_text),
-                    })
+                elif current_section == "相关主题文件":
+                    result["related_topics"].append(
+                        {
+                            "title": current_subsection,
+                            "items": _extract_list_items(section_text),
+                        }
+                    )
 
                 current_content = []
 
@@ -1414,41 +1409,47 @@ def collect_memory() -> Dict:
 
     # 处理最后一个部分
     if current_section and current_content:
-        section_text = '\n'.join(current_content).strip()
-        if current_section == '核心记忆':
-            result['core_memory'].append({
-                'title': current_subsection or '核心记忆',
-                'content': section_text,
-                'items': _extract_list_items(section_text),
-            })
-        elif current_section == '用户偏好':
-            result['user_preferences'].append({
-                'title': current_subsection or '用户偏好',
-                'content': section_text,
-                'items': _extract_list_items(section_text),
-            })
-        elif current_section == '项目状态':
-            if current_subsection:
-                result['project_status'][current_subsection] = {
-                    'content': section_text,
-                    'items': _extract_list_items(section_text),
+        section_text = "\n".join(current_content).strip()
+        if current_section == "核心记忆":
+            result["core_memory"].append(
+                {
+                    "title": current_subsection or "核心记忆",
+                    "content": section_text,
+                    "items": _extract_list_items(section_text),
                 }
-        elif current_section == '系统状态':
-            if current_subsection:
-                result['system_status'][current_subsection] = {
-                    'content': section_text,
-                    'items': _extract_list_items(section_text),
+            )
+        elif current_section == "用户偏好":
+            result["user_preferences"].append(
+                {
+                    "title": current_subsection or "用户偏好",
+                    "content": section_text,
+                    "items": _extract_list_items(section_text),
                 }
-        elif current_section == '相关主题文件':
-            result['related_topics'].append({
-                'title': current_subsection or '相关主题文件',
-                'items': _extract_list_items(section_text),
-            })
+            )
+        elif current_section == "项目状态":
+            if current_subsection:
+                result["project_status"][current_subsection] = {
+                    "content": section_text,
+                    "items": _extract_list_items(section_text),
+                }
+        elif current_section == "系统状态":
+            if current_subsection:
+                result["system_status"][current_subsection] = {
+                    "content": section_text,
+                    "items": _extract_list_items(section_text),
+                }
+        elif current_section == "相关主题文件":
+            result["related_topics"].append(
+                {
+                    "title": current_subsection or "相关主题文件",
+                    "items": _extract_list_items(section_text),
+                }
+            )
 
     return result
 
 
-def analyze_daily_data(collected_data: Dict) -> Dict:
+def analyze_daily_data(collected_data: dict) -> dict:
     """
     智能分析今天的数据
 
@@ -1458,60 +1459,55 @@ def analyze_daily_data(collected_data: Dict) -> Dict:
     Returns:
         分析结果，包含 overview, works, decisions, learnings
     """
-    conversations = collected_data.get('conversations', [])
-    sessions = collected_data.get('sessions', [])
-    file_changes = collected_data.get('file_changes', {})
+    conversations = collected_data.get("conversations", [])
+    sessions = collected_data.get("sessions", [])
+    file_changes = collected_data.get("file_changes", {})
 
     # 计算统计信息
     total_files_changed = (
-        len(file_changes.get('modified', [])) +
-        len(file_changes.get('created', [])) +
-        len(file_changes.get('deleted', []))
+        len(file_changes.get("modified", []))
+        + len(file_changes.get("created", []))
+        + len(file_changes.get("deleted", []))
     )
 
     # 估算工作时长（基于对话和会话）
     estimated_hours = len(conversations) * 0.5 + len(sessions) * 1.0
 
     overview = {
-        'work_hours': round(estimated_hours, 1),
-        'tasks_count': len(sessions),
-        'files_changed': total_files_changed,
-        'conversations': len(conversations)
+        "work_hours": round(estimated_hours, 1),
+        "tasks_count": len(sessions),
+        "files_changed": total_files_changed,
+        "conversations": len(conversations),
     }
 
     # 提取工作内容（按项目分类）
     works = []
     for session in sessions:
         work_item = {
-            'project': session.get('topic', '未知项目'),
-            'tasks': session.get('decisions', [])[:3],  # 取前3个决策作为任务
-            'time': f"{len(session.get('decisions', [])) + len(session.get('learnings', []))}h"
+            "project": session.get("topic", "未知项目"),
+            "tasks": session.get("decisions", [])[:3],  # 取前3个决策作为任务
+            "time": f"{len(session.get('decisions', [])) + len(session.get('learnings', []))}h",
         }
         works.append(work_item)
 
     # 提取决策
     decisions = []
     for session in sessions:
-        for decision in session.get('decisions', []):
+        for decision in session.get("decisions", []):
             decisions.append(decision)
 
     # 提取学习
     learnings = []
     for session in sessions:
-        for learning in session.get('learnings', []):
+        for learning in session.get("learnings", []):
             learnings.append(learning)
 
-    return {
-        'overview': overview,
-        'works': works,
-        'decisions': decisions,
-        'learnings': learnings
-    }
+    return {"overview": overview, "works": works, "decisions": decisions, "learnings": learnings}
 
 
 def main():
     """主函数"""
-    date = sys.argv[1] if len(sys.argv) > 1 else datetime.now().strftime('%Y-%m-%d')
+    date = sys.argv[1] if len(sys.argv) > 1 else datetime.now().strftime("%Y-%m-%d")
 
     try:
         # 采集增强版对话数据（包含 context/pitfalls/lessons）
@@ -1522,41 +1518,36 @@ def main():
 
         # 计算统计信息
         total_files_changed = (
-            len(file_changes.get('modified', [])) +
-            len(file_changes.get('created', [])) +
-            len(file_changes.get('deleted', []))
+            len(file_changes.get("modified", []))
+            + len(file_changes.get("created", []))
+            + len(file_changes.get("deleted", []))
         )
 
         # 计算工作时长（基于 sessions 的实际时间）
-        total_minutes = sum(s.get('time_range', {}).get('duration_minutes', 0) for s in sessions)
+        total_minutes = sum(s.get("time_range", {}).get("duration_minutes", 0) for s in sessions)
         work_hours = round(total_minutes / 60, 1)
 
         # 构建概览
         overview = {
-            'work_hours': work_hours,
-            'tasks_count': len(sessions),
-            'files_changed': total_files_changed,
-            'conversations': len(sessions)
+            "work_hours": work_hours,
+            "tasks_count": len(sessions),
+            "files_changed": total_files_changed,
+            "conversations": len(sessions),
         }
 
         # 构建最终结果
-        result = {
-            "date": date,
-            "overview": overview,
-            "sessions": sessions
-        }
+        result = {"date": date, "overview": overview, "sessions": sessions}
 
         # 输出 JSON
         print(json.dumps(result, ensure_ascii=False, indent=2))
 
     except ValueError as e:
-        print(f'错误: {e}', file=sys.stderr)
+        print(f"错误: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f'未知错误: {e}', file=sys.stderr)
+        print(f"未知错误: {e}", file=sys.stderr)
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-

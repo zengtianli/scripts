@@ -13,7 +13,6 @@ export_cc_sessions.py - 将 Claude Code JSONL 对话历史导出为可读的 Mar
 
 import argparse
 import json
-import os
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -102,11 +101,7 @@ def _summarize_tool_call(tool_name: str, tool_input: dict) -> str:
         return ""
 
     # 根据常见工具类型提取关键信息
-    if tool_name in ("Read", "ReadFile"):
-        return tool_input.get("file_path", "")
-    elif tool_name in ("Write", "WriteFile"):
-        return tool_input.get("file_path", "")
-    elif tool_name in ("Edit", "EditFile"):
+    if tool_name in ("Read", "ReadFile") or tool_name in ("Write", "WriteFile") or tool_name in ("Edit", "EditFile"):
         return tool_input.get("file_path", "")
     elif tool_name in ("Bash", "BashCommand"):
         cmd = tool_input.get("command", "")
@@ -123,9 +118,7 @@ def _summarize_tool_call(tool_name: str, tool_input: dict) -> str:
         return tool_input.get("pattern", "")
     elif tool_name in ("WebFetch",):
         return tool_input.get("url", "")
-    elif tool_name in ("WebSearch",):
-        return tool_input.get("query", "")
-    elif tool_name in ("ToolSearch",):
+    elif tool_name in ("WebSearch",) or tool_name in ("ToolSearch",):
         return tool_input.get("query", "")
     elif tool_name in ("TaskUpdate",):
         status = tool_input.get("status", "")
@@ -160,7 +153,7 @@ def is_meta_or_system_message(entry: dict) -> bool:
 def parse_jsonl_file(filepath: Path) -> list[dict]:
     """解析 JSONL 文件，返回消息列表。"""
     messages = []
-    with open(filepath, "r", encoding="utf-8") as f:
+    with open(filepath, encoding="utf-8") as f:
         for line_num, line in enumerate(f, 1):
             line = line.strip()
             if not line:
@@ -207,9 +200,7 @@ def parse_jsonl_file(filepath: Path) -> list[dict]:
     return messages
 
 
-def generate_markdown(
-    filepath: Path, project_name: str, messages: list[dict]
-) -> str:
+def generate_markdown(filepath: Path, project_name: str, messages: list[dict]) -> str:
     """将解析后的消息列表转换为 Markdown 字符串。"""
     stat = filepath.stat()
     file_size = format_file_size(stat.st_size)
@@ -219,9 +210,7 @@ def generate_markdown(
     first_ts = ""
     if messages and messages[0].get("timestamp"):
         try:
-            dt = datetime.fromisoformat(
-                messages[0]["timestamp"].replace("Z", "+00:00")
-            ).astimezone(LOCAL_TZ)
+            dt = datetime.fromisoformat(messages[0]["timestamp"].replace("Z", "+00:00")).astimezone(LOCAL_TZ)
             first_ts = dt.strftime("%Y-%m-%d %H:%M")
         except (ValueError, AttributeError):
             first_ts = ""
@@ -247,17 +236,15 @@ def generate_markdown(
         ts = ""
         if msg.get("timestamp"):
             try:
-                dt = datetime.fromisoformat(
-                    msg["timestamp"].replace("Z", "+00:00")
-                ).astimezone(LOCAL_TZ)
+                dt = datetime.fromisoformat(msg["timestamp"].replace("Z", "+00:00")).astimezone(LOCAL_TZ)
                 ts = dt.strftime("%H:%M:%S")
             except (ValueError, AttributeError):
                 ts = ""
 
         if role == "user":
-            header = f"## 用户"
+            header = "## 用户"
         else:
-            header = f"## 助手"
+            header = "## 助手"
 
         if ts:
             header += f" ({ts})"
@@ -292,10 +279,7 @@ def collect_jsonl_files(
         # 按项目名筛选
         if project_filter:
             filter_lower = project_filter.lower()
-            if (
-                filter_lower not in project_name.lower()
-                and filter_lower not in project_dir.name.lower()
-            ):
+            if filter_lower not in project_name.lower() and filter_lower not in project_dir.name.lower():
                 continue
 
         # 只扫描项目目录下的直接 .jsonl 文件（排除 subagents 等子目录）
@@ -323,14 +307,12 @@ def filter_by_date(
     return filtered
 
 
-def generate_index(
-    exported_files: list[dict], output_dir: Path
-) -> Path:
+def generate_index(exported_files: list[dict], output_dir: Path) -> Path:
     """生成 index.md 汇总文件。"""
     index_path = output_dir / "index.md"
     lines = []
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    lines.append(f"# Claude Code 会话导出索引")
+    lines.append("# Claude Code 会话导出索引")
     lines.append("")
     lines.append(f"- 生成时间：{now}")
     lines.append(f"- 导出目录：`{output_dir}`")
@@ -364,9 +346,7 @@ def generate_index(
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="将 Claude Code JSONL 对话历史导出为 Markdown"
-    )
+    parser = argparse.ArgumentParser(description="将 Claude Code JSONL 对话历史导出为 Markdown")
     parser.add_argument(
         "--date-from",
         type=str,
@@ -434,7 +414,7 @@ def main():
 
         messages = parse_jsonl_file(filepath)
         if not messages:
-            print(f"  -> 跳过（无有效消息）")
+            print("  -> 跳过（无有效消息）")
             continue
 
         markdown = generate_markdown(filepath, project_name, messages)
@@ -455,16 +435,14 @@ def main():
                 "md_filename": md_filename,
                 "message_count": len(messages),
                 "size": format_file_size(stat.st_size),
-                "mtime": datetime.fromtimestamp(stat.st_mtime).strftime(
-                    "%Y-%m-%d %H:%M"
-                ),
+                "mtime": datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M"),
             }
         )
 
     # 生成索引
     if exported_files:
         index_path = generate_index(exported_files, output_dir)
-        print(f"\n导出完成！")
+        print("\n导出完成！")
         print(f"  导出目录: {output_dir}")
         print(f"  导出文件: {len(exported_files)} 个")
         print(f"  索引文件: {index_path}")

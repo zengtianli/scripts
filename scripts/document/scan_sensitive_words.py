@@ -22,7 +22,6 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Optional
 
 # === 路径设置 ===
 SCRIPTS_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -39,6 +38,7 @@ CHUNK_SIZE = 8000  # 按字符数分块
 
 
 # === API 调用 ===
+
 
 def create_client():
     """创建 Anthropic 客户端，优先使用环境变量"""
@@ -104,7 +104,7 @@ def build_prompt(content: str, existing_words: list[str], filename: str) -> str:
 注意：JSON 中的字符串值如果包含引号，请用反斜杠转义。直接输出 JSON，不要包裹在 ```json ``` 中。"""
 
 
-def _parse_json_response(text: str) -> Optional[list[dict]]:
+def _parse_json_response(text: str) -> list[dict] | None:
     """尝试从 AI 返回的文本中解析 JSON 数组，带多层容错"""
     # 第 1 步：strip markdown 代码块
     cleaned = text.strip()
@@ -135,7 +135,7 @@ def _parse_json_response(text: str) -> Optional[list[dict]]:
     return None
 
 
-def call_api(client, prompt: str, max_retries: int = 2) -> Optional[list[dict]]:
+def call_api(client, prompt: str, max_retries: int = 2) -> list[dict] | None:
     """调用 Claude API 分析内容，带 retry 和容错解析"""
     for attempt in range(1, max_retries + 1):
         try:
@@ -169,7 +169,8 @@ def call_api(client, prompt: str, max_retries: int = 2) -> Optional[list[dict]]:
 
 # === 配置文件操作 ===
 
-def find_config(scan_dir: str) -> Optional[str]:
+
+def find_config(scan_dir: str) -> str | None:
     """从扫描目录向上查找 sensitive_words.json"""
     current = Path(scan_dir).resolve()
     while current != current.parent:
@@ -183,7 +184,7 @@ def find_config(scan_dir: str) -> Optional[str]:
 def load_config(config_path: str) -> dict:
     """加载 sensitive_words.json"""
     try:
-        with open(config_path, "r", encoding="utf-8") as f:
+        with open(config_path, encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError) as e:
         show_error(f"无法读取配置文件 {config_path}: {e}")
@@ -214,6 +215,7 @@ def save_config(config: dict, config_path: str):
 
 # === 文件处理 ===
 
+
 def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
     """按字符数分块，尽量在段落边界切割"""
     if len(text) <= chunk_size:
@@ -240,17 +242,32 @@ def chunk_text(text: str, chunk_size: int = CHUNK_SIZE) -> list[str]:
 
 # 标书正式术语白名单：这些词不应被报告为敏感词
 FORMAL_TERMS_WHITELIST = {
-    "采购人", "投标人", "招标人", "中标人", "投标方", "招标方",
-    "本项目", "本项目团队", "本单位", "本公司",
-    "评标委员会", "采购代理机构", "监理单位", "建设单位",
-    "项目负责人", "项目经理", "技术负责人",
-    "根据", "按照", "依据", "鉴于", "为此",
+    "采购人",
+    "投标人",
+    "招标人",
+    "中标人",
+    "投标方",
+    "招标方",
+    "本项目",
+    "本项目团队",
+    "本单位",
+    "本公司",
+    "评标委员会",
+    "采购代理机构",
+    "监理单位",
+    "建设单位",
+    "项目负责人",
+    "项目经理",
+    "技术负责人",
+    "根据",
+    "按照",
+    "依据",
+    "鉴于",
+    "为此",
 }
 
 
-def verify_findings(
-    findings: list[dict], content: str, whitelist: set[str] | None = None
-) -> list[dict]:
+def verify_findings(findings: list[dict], content: str, whitelist: set[str] | None = None) -> list[dict]:
     """验证 AI 返回的词是否真的出现在文件内容中，过滤幻觉和白名单/正式术语"""
     # 合并内置正式术语白名单和配置白名单
     combined_whitelist = FORMAL_TERMS_WHITELIST.copy()
@@ -271,9 +288,7 @@ def verify_findings(
     return verified
 
 
-def scan_file(
-    client, filepath: Path, existing_words: list[str], whitelist: set[str] | None = None
-) -> list[dict]:
+def scan_file(client, filepath: Path, existing_words: list[str], whitelist: set[str] | None = None) -> list[dict]:
     """扫描单个文件"""
     try:
         content = filepath.read_text(encoding="utf-8")
@@ -289,7 +304,7 @@ def scan_file(
 
     for i, chunk in enumerate(chunks):
         if len(chunks) > 1:
-            show_processing(f"  分块 {i+1}/{len(chunks)}")
+            show_processing(f"  分块 {i + 1}/{len(chunks)}")
 
         prompt = build_prompt(chunk, existing_words, filepath.name)
         findings = call_api(client, prompt)
@@ -309,6 +324,7 @@ def scan_file(
 
 
 # === 去重与过滤 ===
+
 
 def deduplicate_findings(
     findings: list[dict], existing_words: list[str], whitelist: set[str] | None = None
@@ -357,9 +373,9 @@ def print_table(findings: list[dict]):
         show_success("未发现新的可疑敏感词。")
         return
 
-    print(f"\n{'='*80}")
+    print(f"\n{'=' * 80}")
     print(f"  发现 {len(findings)} 个可疑敏感词")
-    print(f"{'='*80}\n")
+    print(f"{'=' * 80}\n")
 
     for i, f in enumerate(findings, 1):
         cat = CATEGORY_LABELS.get(f.get("category", ""), f.get("category", "未知"))
@@ -381,7 +397,7 @@ def print_table(findings: list[dict]):
             print(f"       文件: {Path(filepath).name}")
         print()
 
-    print(f"{'='*80}")
+    print(f"{'=' * 80}")
 
 
 def print_json(findings: list[dict]):
@@ -391,6 +407,7 @@ def print_json(findings: list[dict]):
 
 # === 更新模式 ===
 
+
 def interactive_update(findings: list[dict], config: dict, config_path: str):
     """交互式确认并更新 sensitive_words.json"""
     if not findings:
@@ -398,7 +415,7 @@ def interactive_update(findings: list[dict], config: dict, config_path: str):
         return
 
     added_count = 0
-    print(f"\n逐条确认是否加入敏感词表（y=加入 / n=跳过 / q=退出）：\n")
+    print("\n逐条确认是否加入敏感词表（y=加入 / n=跳过 / q=退出）：\n")
 
     for f in findings:
         word = f.get("word", "")
@@ -422,10 +439,12 @@ def interactive_update(findings: list[dict], config: dict, config_path: str):
         elif choice == "y":
             category = f.get("category", "")
             if category == "cross_project":
-                config.setdefault("project_isolation", []).append({
-                    "word": word,
-                    "reason": reason,
-                })
+                config.setdefault("project_isolation", []).append(
+                    {
+                        "word": word,
+                        "reason": reason,
+                    }
+                )
             else:
                 entry = {"word": word, "reason": reason}
                 if suggest:
@@ -444,6 +463,7 @@ def interactive_update(findings: list[dict], config: dict, config_path: str):
 
 # === 主流程 ===
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="AI 敏感词扫描器 - 调用 Claude API 扫描标书文档识别敏感词",
@@ -457,15 +477,9 @@ def main():
         """,
     )
     parser.add_argument("directory", help="要扫描的目录路径")
-    parser.add_argument(
-        "--config", help="sensitive_words.json 路径（默认自动向上查找）"
-    )
-    parser.add_argument(
-        "--update", action="store_true", help="交互式确认后更新敏感词表"
-    )
-    parser.add_argument(
-        "--json", action="store_true", help="以 JSON 格式输出（面向 CC）"
-    )
+    parser.add_argument("--config", help="sensitive_words.json 路径（默认自动向上查找）")
+    parser.add_argument("--update", action="store_true", help="交互式确认后更新敏感词表")
+    parser.add_argument("--json", action="store_true", help="以 JSON 格式输出（面向 CC）")
 
     args = parser.parse_args()
 

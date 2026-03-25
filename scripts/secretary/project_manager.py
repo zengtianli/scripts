@@ -4,11 +4,11 @@
 用于管理工作和个人项目的元数据
 """
 
-import sqlite3
 import json
+import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 
 class ProjectManager:
@@ -78,13 +78,13 @@ class ProjectManager:
         name: str,
         project_type: str,
         status: str = "todo",
-        priority: Optional[str] = None,
-        current_task: Optional[str] = None,
-        blocked_reason: Optional[str] = None,
-        next_steps: Optional[str] = None,
-        md_file: Optional[str] = None,
-        tags: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        priority: str | None = None,
+        current_task: str | None = None,
+        blocked_reason: str | None = None,
+        next_steps: str | None = None,
+        md_file: str | None = None,
+        tags: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         创建新项目
 
@@ -109,27 +109,37 @@ class ProjectManager:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO projects (
                     id, name, type, status, priority, created_at, updated_at,
                     current_task, blocked_reason, next_steps, md_file, tags
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                project_id, name, project_type, status, priority, now, now,
-                current_task, blocked_reason, next_steps, md_file, tags_json
-            ))
+            """,
+                (
+                    project_id,
+                    name,
+                    project_type,
+                    status,
+                    priority,
+                    now,
+                    now,
+                    current_task,
+                    blocked_reason,
+                    next_steps,
+                    md_file,
+                    tags_json,
+                ),
+            )
 
             # 添加历史记录
-            self._add_history(
-                cursor, project_id, "created", None, status,
-                f"创建项目: {name}"
-            )
+            self._add_history(cursor, project_id, "created", None, status, f"创建项目: {name}")
 
             conn.commit()
 
         return self.get_project(project_id)
 
-    def get_project(self, project_id: str) -> Optional[Dict[str, Any]]:
+    def get_project(self, project_id: str) -> dict[str, Any] | None:
         """获取项目详情"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -140,15 +150,11 @@ class ProjectManager:
 
             if row:
                 project = dict(row)
-                project['tags'] = json.loads(project['tags'])
+                project["tags"] = json.loads(project["tags"])
                 return project
             return None
 
-    def update_project(
-        self,
-        project_id: str,
-        **kwargs
-    ) -> Optional[Dict[str, Any]]:
+    def update_project(self, project_id: str, **kwargs) -> dict[str, Any] | None:
         """
         更新项目
 
@@ -166,8 +172,15 @@ class ProjectManager:
 
         # 准备更新字段
         allowed_fields = {
-            'name', 'type', 'status', 'priority', 'current_task',
-            'blocked_reason', 'next_steps', 'md_file', 'tags'
+            "name",
+            "type",
+            "status",
+            "priority",
+            "current_task",
+            "blocked_reason",
+            "next_steps",
+            "md_file",
+            "tags",
         }
         update_fields = {k: v for k, v in kwargs.items() if k in allowed_fields}
 
@@ -175,23 +188,20 @@ class ProjectManager:
             return old_project
 
         # 处理 tags
-        if 'tags' in update_fields:
-            update_fields['tags'] = json.dumps(update_fields['tags'])
+        if "tags" in update_fields:
+            update_fields["tags"] = json.dumps(update_fields["tags"])
 
         # 更新 updated_at
-        update_fields['updated_at'] = datetime.now().isoformat()
+        update_fields["updated_at"] = datetime.now().isoformat()
 
         # 构建 SQL
-        set_clause = ', '.join(f"{k} = ?" for k in update_fields.keys())
+        set_clause = ", ".join(f"{k} = ?" for k in update_fields)
         values = list(update_fields.values()) + [project_id]
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
 
-            cursor.execute(
-                f"UPDATE projects SET {set_clause} WHERE id = ?",
-                values
-            )
+            cursor.execute(f"UPDATE projects SET {set_clause} WHERE id = ?", values)
 
             # 添加历史记录
             for field, new_value in kwargs.items():
@@ -200,9 +210,12 @@ class ProjectManager:
                     if old_value != new_value:
                         action = "status_changed" if field == "status" else "updated"
                         self._add_history(
-                            cursor, project_id, action,
-                            str(old_value), str(new_value),
-                            f"更新 {field}: {old_value} -> {new_value}"
+                            cursor,
+                            project_id,
+                            action,
+                            str(old_value),
+                            str(new_value),
+                            f"更新 {field}: {old_value} -> {new_value}",
                         )
 
             conn.commit()
@@ -215,10 +228,7 @@ class ProjectManager:
             cursor = conn.cursor()
 
             # 删除历史记录
-            cursor.execute(
-                "DELETE FROM project_history WHERE project_id = ?",
-                (project_id,)
-            )
+            cursor.execute("DELETE FROM project_history WHERE project_id = ?", (project_id,))
 
             # 删除项目
             cursor.execute("DELETE FROM projects WHERE id = ?", (project_id,))
@@ -227,11 +237,8 @@ class ProjectManager:
             return cursor.rowcount > 0
 
     def list_projects(
-        self,
-        project_type: Optional[str] = None,
-        status: Optional[str] = None,
-        priority: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        self, project_type: str | None = None, status: str | None = None, priority: str | None = None
+    ) -> list[dict[str, Any]]:
         """
         列出项目
 
@@ -270,16 +277,12 @@ class ProjectManager:
             projects = []
             for row in rows:
                 project = dict(row)
-                project['tags'] = json.loads(project['tags'])
+                project["tags"] = json.loads(project["tags"])
                 projects.append(project)
 
             return projects
 
-    def get_history(
-        self,
-        project_id: str,
-        limit: Optional[int] = None
-    ) -> List[Dict[str, Any]]:
+    def get_history(self, project_id: str, limit: int | None = None) -> list[dict[str, Any]]:
         """获取项目历史记录"""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -304,17 +307,20 @@ class ProjectManager:
         cursor: sqlite3.Cursor,
         project_id: str,
         action: str,
-        old_value: Optional[str],
-        new_value: Optional[str],
-        notes: Optional[str]
+        old_value: str | None,
+        new_value: str | None,
+        notes: str | None,
     ):
         """添加历史记录（内部方法）"""
         timestamp = datetime.now().isoformat()
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO project_history (
                 project_id, timestamp, action, old_value, new_value, notes
             ) VALUES (?, ?, ?, ?, ?, ?)
-        """, (project_id, timestamp, action, old_value, new_value, notes))
+        """,
+            (project_id, timestamp, action, old_value, new_value, notes),
+        )
 
 
 def main():
@@ -333,7 +339,7 @@ def main():
         priority="high",
         current_task="完成需求文档",
         next_steps="等待产品经理确认",
-        tags=["系统重构", "需求分析"]
+        tags=["系统重构", "需求分析"],
     )
     print(f"   ✓ 创建成功: {work_project['name']}")
 
@@ -346,17 +352,13 @@ def main():
         status="in_progress",
         priority="medium",
         current_task="学习 LangChain",
-        tags=["学习", "AI"]
+        tags=["学习", "AI"],
     )
     print(f"   ✓ 创建成功: {personal_project['name']}")
 
     # 测试 3: 更新项目状态
     print("\n3. 更新项目状态...")
-    updated = pm.update_project(
-        "work-system-refactor",
-        status="blocked",
-        blocked_reason="等待产品经理确认需求"
-    )
+    updated = pm.update_project("work-system-refactor", status="blocked", blocked_reason="等待产品经理确认需求")
     print(f"   ✓ 状态更新: {updated['status']}")
 
     # 测试 4: 列出所有项目

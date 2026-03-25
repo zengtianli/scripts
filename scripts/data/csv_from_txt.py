@@ -6,17 +6,15 @@ TXT转CSV转换工具 - 将文本文件转换为CSV格式
 更新: 2024-01-01
 """
 
-import sys
+import argparse
 import csv
 import re
-import argparse
+import sys
 from pathlib import Path
-from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_success, show_error, show_warning, show_info, show_processing
-from file_ops import (validate_input_file, check_file_extension, fatal_error,
-                      show_version_info, find_files_by_extension)
+from display import show_error, show_info, show_processing, show_success, show_warning
+from file_ops import check_file_extension, fatal_error, find_files_by_extension, show_version_info, validate_input_file
 from finder import get_input_files
 from progress import ProgressTracker
 
@@ -24,64 +22,68 @@ SCRIPT_VERSION = "2.0.0"
 SCRIPT_AUTHOR = "tianli"
 SCRIPT_UPDATED = "2024-01-01"
 
-def convert_txt_to_csv_single(input_file: Path, output_file: Optional[Path] = None) -> bool:
+
+def convert_txt_to_csv_single(input_file: Path, output_file: Path | None = None) -> bool:
     try:
         if not validate_input_file(input_file):
             return False
-        
-        if not check_file_extension(input_file, 'txt'):
+
+        if not check_file_extension(input_file, "txt"):
             show_warning(f"跳过不支持的文件: {input_file.name}")
             return False
-        
+
         if output_file is None:
-            output_file = input_file.with_suffix('.csv')
-        
+            output_file = input_file.with_suffix(".csv")
+
         show_processing(f"转换: {input_file.name} -> {output_file.name}")
-        
-        with open(input_file, 'r', encoding='utf-8') as f:
+
+        with open(input_file, encoding="utf-8") as f:
             content = f.readlines()
-        
+
         processed_lines = []
         for line in content:
             line = line.strip()
             if not line:
                 continue
-            line = re.sub(r'\s+', ',', line)
-            processed_lines.append(line.split(','))
-        
-        with open(output_file, 'w', encoding='utf-8', newline='') as f:
+            line = re.sub(r"\s+", ",", line)
+            processed_lines.append(line.split(","))
+
+        with open(output_file, "w", encoding="utf-8", newline="") as f:
             writer = csv.writer(f)
             writer.writerows(processed_lines)
-        
+
         show_success(f"转换完成: {output_file.name}")
         return True
-        
+
     except Exception as e:
         show_error(f"转换失败: {input_file.name} - {e}")
         return False
 
+
 def batch_process(directory: Path, recursive: bool = False) -> None:
     show_info(f"处理目录: {directory}")
-    files = find_files_by_extension(directory, 'txt', recursive)
-    
+    files = find_files_by_extension(directory, "txt", recursive)
+
     if not files:
         show_warning("未找到TXT文件")
         return
-    
+
     show_info(f"找到 {len(files)} 个TXT文件")
     tracker = ProgressTracker()
-    
+
     for i, file in enumerate(files, 1):
         show_processing(f"进度 ({i}/{len(files)}): {file.name}")
         if convert_txt_to_csv_single(file):
             tracker.add_success()
         else:
             tracker.add_failure()
-    
+
     tracker.show_summary("文件转换")
+
 
 def show_version() -> None:
     show_version_info(SCRIPT_VERSION, SCRIPT_AUTHOR, SCRIPT_UPDATED)
+
 
 def show_help() -> None:
     print(f"""
@@ -97,11 +99,12 @@ def show_help() -> None:
   --version        显示版本信息
     """)
 
+
 def main():
-    parser = argparse.ArgumentParser(description='TXT转CSV转换工具', add_help=False)
-    parser.add_argument('-r', '--recursive', action='store_true', help='递归处理子目录')
-    parser.add_argument('-h', '--help', action='store_true', help='显示帮助信息')
-    parser.add_argument('--version', action='store_true', help='显示版本信息')
+    parser = argparse.ArgumentParser(description="TXT转CSV转换工具", add_help=False)
+    parser.add_argument("-r", "--recursive", action="store_true", help="递归处理子目录")
+    parser.add_argument("-h", "--help", action="store_true", help="显示帮助信息")
+    parser.add_argument("--version", action="store_true", help="显示版本信息")
     args, unknown = parser.parse_known_args()
 
     if args.help:
@@ -113,7 +116,7 @@ def main():
         return
 
     # 获取输入文件列表
-    input_files = [Path(f) for f in get_input_files(unknown, expected_ext='txt')]
+    input_files = [Path(f) for f in get_input_files(unknown, expected_ext="txt")]
 
     if not input_files:
         show_warning("未找到TXT文件")
@@ -132,6 +135,7 @@ def main():
 
     tracker.show_summary("文件转换")
 
+
 if __name__ == "__main__":
     try:
         main()
@@ -139,4 +143,4 @@ if __name__ == "__main__":
         show_warning("用户中断操作")
         sys.exit(1)
     except Exception as e:
-        fatal_error(f"程序执行失败: {e}") 
+        fatal_error(f"程序执行失败: {e}")

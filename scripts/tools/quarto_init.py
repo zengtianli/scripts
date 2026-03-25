@@ -19,14 +19,13 @@ Quarto 项目初始化工具
 
 import argparse
 import os
-import sys
 from pathlib import Path
 
 # ============================================
 # 模板内容
 # ============================================
 
-DATA_YML_TEMPLATE = '''# ============================================
+DATA_YML_TEMPLATE = """# ============================================
 # 项目数据文件
 # 只存原始数据，派生数据由 build.py 计算
 # ============================================
@@ -38,7 +37,7 @@ DATA_YML_TEMPLATE = '''# ============================================
 
 # ====== 数据区 ======
 # 在此添加项目特定数据
-'''
+"""
 
 BUILD_PY_TEMPLATE = '''#!/usr/bin/env python3
 """
@@ -120,7 +119,7 @@ if __name__ == "__main__":
     main()
 '''
 
-QUARTO_YML_TEMPLATE = '''project:
+QUARTO_YML_TEMPLATE = """project:
   type: default
   output-dir: .
 
@@ -130,9 +129,9 @@ format:
 
 metadata-files:
   - _variables.yml
-'''
+"""
 
-RENDER_SH_TEMPLATE = '''#!/bin/bash
+RENDER_SH_TEMPLATE = """#!/bin/bash
 # Quarto 渲染脚本
 # 用法: ./render.sh
 
@@ -161,9 +160,9 @@ echo ""
 echo "=========================================="
 echo "✅ 渲染完成！"
 echo "=========================================="
-'''
+"""
 
-GITIGNORE_TEMPLATE = '''# Quarto 生成的文件
+GITIGNORE_TEMPLATE = """# Quarto 生成的文件
 _variables.yml
 *.md
 !README.md
@@ -172,17 +171,17 @@ _variables.yml
 # 产物
 *.docx
 *.pdf
-'''
+"""
 
 
 def init_project(project_dir: Path):
     """初始化 Quarto 项目"""
-    
+
     # 创建目录
     project_dir.mkdir(parents=True, exist_ok=True)
     src_dir = project_dir / "src"
     src_dir.mkdir(exist_ok=True)
-    
+
     # 写入文件（不覆盖已存在的）
     files = {
         "data.yml": DATA_YML_TEMPLATE,
@@ -191,10 +190,10 @@ def init_project(project_dir: Path):
         "render.sh": RENDER_SH_TEMPLATE,
         ".gitignore": GITIGNORE_TEMPLATE,
     }
-    
+
     created = []
     skipped = []
-    
+
     for filename, content in files.items():
         filepath = project_dir / filename
         if filepath.exists():
@@ -202,44 +201,37 @@ def init_project(project_dir: Path):
         else:
             filepath.write_text(content, encoding="utf-8")
             created.append(filename)
-    
+
     # 设置 render.sh 可执行
     render_sh = project_dir / "render.sh"
     if render_sh.exists():
         os.chmod(render_sh, 0o755)
-    
+
     return created, skipped
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="初始化 Quarto 数据驱动报告项目"
-    )
-    parser.add_argument(
-        "project_dir",
-        nargs="?",
-        default=".",
-        help="项目目录路径（默认当前目录）"
-    )
+    parser = argparse.ArgumentParser(description="初始化 Quarto 数据驱动报告项目")
+    parser.add_argument("project_dir", nargs="?", default=".", help="项目目录路径（默认当前目录）")
     args = parser.parse_args()
-    
+
     project_dir = Path(args.project_dir).resolve()
-    
+
     print(f"📁 初始化 Quarto 项目: {project_dir}")
     print()
-    
+
     created, skipped = init_project(project_dir)
-    
+
     if created:
         print("✅ 已创建:")
         for f in created:
             print(f"   - {f}")
-    
+
     if skipped:
         print("⏭️  已跳过（文件已存在）:")
         for f in skipped:
             print(f"   - {f}")
-    
+
     print()
     print("下一步:")
     print("  1. 编辑 data.yml 填写数据")

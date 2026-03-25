@@ -13,19 +13,15 @@ LOG_FILE = Path.home() / "Library" / "Logs" / "secretary" / "learning_log.jsonl"
 
 # 分类选项
 CATEGORIES = {
-    "1": "reading",      # 阅读
-    "2": "course",       # 课程
-    "3": "practice",     # 实践
-    "4": "insight",      # 灵感
-    "5": "paper"         # 论文
+    "1": "reading",  # 阅读
+    "2": "course",  # 课程
+    "3": "practice",  # 实践
+    "4": "insight",  # 灵感
+    "5": "paper",  # 论文
 }
 
 # 优先级选项
-PRIORITIES = {
-    "1": "high",
-    "2": "medium",
-    "3": "low"
-}
+PRIORITIES = {"1": "high", "2": "medium", "3": "low"}
 
 
 def ensure_log_dir():
@@ -106,7 +102,7 @@ def main():
         "content": content,
         "tags": tags,
         "priority": priority,
-        "metadata": metadata
+        "metadata": metadata,
     }
 
     # 写入日志文件

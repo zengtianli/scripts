@@ -24,9 +24,9 @@ LOG_TYPES = {
             "5": "documentation",
             "6": "bug_fix",
             "7": "deployment",
-            "8": "planning"
+            "8": "planning",
         },
-        "extra_fields": ["project_id", "files"]
+        "extra_fields": ["project_id", "files"],
     },
     "2": {
         "name": "个人发展",
@@ -41,38 +41,25 @@ LOG_TYPES = {
             "5": "family",
             "6": "hobby",
             "7": "reading",
-            "8": "other"
+            "8": "other",
         },
-        "extra_fields": []
+        "extra_fields": [],
     },
     "3": {
         "name": "投资记录",
         "icon": "💰",
         "file": "investment_log.jsonl",
         "secretary": "investment",
-        "categories": {
-            "1": "watch",
-            "2": "buy",
-            "3": "sell",
-            "4": "hold",
-            "5": "analysis"
-        },
-        "extra_fields": ["ticker", "price", "quantity"]
+        "categories": {"1": "watch", "2": "buy", "3": "sell", "4": "hold", "5": "analysis"},
+        "extra_fields": ["ticker", "price", "quantity"],
     },
     "4": {
         "name": "学习记录",
         "icon": "📚",
         "file": "learning_log.jsonl",
         "secretary": "learning",
-        "categories": {
-            "1": "course",
-            "2": "book",
-            "3": "article",
-            "4": "video",
-            "5": "practice",
-            "6": "project"
-        },
-        "extra_fields": ["topic", "progress", "source"]
+        "categories": {"1": "course", "2": "book", "3": "article", "4": "video", "5": "practice", "6": "project"},
+        "extra_fields": ["topic", "progress", "source"],
     },
     "5": {
         "name": "生活记录",
@@ -87,17 +74,13 @@ LOG_TYPES = {
             "5": "mood",
             "6": "event",
             "7": "shopping",
-            "8": "other"
+            "8": "other",
         },
-        "extra_fields": ["location", "duration", "cost"]
-    }
+        "extra_fields": ["location", "duration", "cost"],
+    },
 }
 
-PRIORITIES = {
-    "1": "high",
-    "2": "medium",
-    "3": "low"
-}
+PRIORITIES = {"1": "high", "2": "medium", "3": "low"}
 
 
 def get_input(prompt, default=None):
@@ -131,10 +114,10 @@ def record_log(log_config):
 
     # 获取分类
     print("\n分类选择：")
-    for key, value in log_config['categories'].items():
+    for key, value in log_config["categories"].items():
         print(f"  {key}. {value}")
     category_key = get_input("选择分类", "1")
-    category = log_config['categories'].get(category_key, list(log_config['categories'].values())[0])
+    category = log_config["categories"].get(category_key, list(log_config["categories"].values())[0])
 
     # 获取标签
     tags_input = get_input("标签（逗号分隔）", "")
@@ -151,7 +134,7 @@ def record_log(log_config):
     metadata = {}
 
     # 根据日志类型获取特定字段
-    if log_config['secretary'] == 'work':
+    if log_config["secretary"] == "work":
         project_id = get_input("项目 ID（可选）", "")
         if project_id:
             metadata["project_id"] = project_id
@@ -160,7 +143,7 @@ def record_log(log_config):
             files = [f.strip() for f in files_input.split(",") if f.strip()]
             metadata["files"] = files
 
-    elif log_config['secretary'] == 'investment':
+    elif log_config["secretary"] == "investment":
         ticker = get_input("股票代码/币种（可选）", "")
         if ticker:
             metadata["ticker"] = ticker
@@ -171,7 +154,7 @@ def record_log(log_config):
         if quantity:
             metadata["quantity"] = quantity
 
-    elif log_config['secretary'] == 'learning':
+    elif log_config["secretary"] == "learning":
         topic = get_input("学习主题（可选）", "")
         if topic:
             metadata["topic"] = topic
@@ -182,7 +165,7 @@ def record_log(log_config):
         if source:
             metadata["source"] = source
 
-    elif log_config['secretary'] == 'life':
+    elif log_config["secretary"] == "life":
         location = get_input("地点（可选）", "")
         if location:
             metadata["location"] = location
@@ -196,16 +179,16 @@ def record_log(log_config):
     # 构建日志条目
     log_entry = {
         "timestamp": datetime.now().astimezone().isoformat(),
-        "secretary": log_config['secretary'],
+        "secretary": log_config["secretary"],
         "category": category,
         "content": content,
         "tags": tags,
         "priority": priority,
-        "metadata": metadata
+        "metadata": metadata,
     }
 
     # 确保日志目录存在
-    log_file = LOG_DIR / log_config['file']
+    log_file = LOG_DIR / log_config["file"]
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
     # 追加到日志文件

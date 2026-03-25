@@ -3,9 +3,9 @@
 
 import json
 import sys
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import defaultdict
 
 # 添加 lib 路径
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
@@ -29,8 +29,8 @@ REPORT_TYPES = {
             "documentation": "文档",
             "bug_fix": "Bug 修复",
             "deployment": "部署",
-            "planning": "规划"
-        }
+            "planning": "规划",
+        },
     },
     "2": {
         "name": "个人报告",
@@ -45,21 +45,15 @@ REPORT_TYPES = {
             "family": "家庭",
             "hobby": "爱好",
             "reading": "阅读",
-            "other": "其他"
-        }
+            "other": "其他",
+        },
     },
     "3": {
         "name": "投资报告",
         "icon": "💰",
         "file": "investment_log.jsonl",
         "secretary": "investment",
-        "category_names": {
-            "watch": "观察",
-            "buy": "买入",
-            "sell": "卖出",
-            "hold": "持有",
-            "analysis": "分析"
-        }
+        "category_names": {"watch": "观察", "buy": "买入", "sell": "卖出", "hold": "持有", "analysis": "分析"},
     },
     "4": {
         "name": "学习报告",
@@ -72,8 +66,8 @@ REPORT_TYPES = {
             "article": "文章",
             "video": "视频",
             "practice": "实践",
-            "project": "项目"
-        }
+            "project": "项目",
+        },
     },
     "5": {
         "name": "生活报告",
@@ -88,16 +82,10 @@ REPORT_TYPES = {
             "mood": "心情",
             "event": "事件",
             "shopping": "购物",
-            "other": "其他"
-        }
+            "other": "其他",
+        },
     },
-    "6": {
-        "name": "每日报告",
-        "icon": "📊",
-        "file": "all",
-        "secretary": "daily",
-        "category_names": {}
-    }
+    "6": {"name": "每日报告", "icon": "📊", "file": "all", "secretary": "daily", "category_names": {}},
 }
 
 # 时间范围配置
@@ -158,7 +146,7 @@ def load_logs(log_file, days):
         end_date = None
 
     logs = []
-    with open(log_file, "r", encoding="utf-8") as f:
+    with open(log_file, encoding="utf-8") as f:
         for line in f:
             try:
                 entry = json.loads(line.strip())
@@ -167,9 +155,9 @@ def load_logs(log_file, days):
                 # 处理 ISO 8601 格式的时间戳
                 if isinstance(timestamp_str, str):
                     # 移除时区信息以进行比较
-                    if '+' in timestamp_str:
-                        timestamp_str = timestamp_str.split('+')[0]
-                    elif timestamp_str.endswith('Z'):
+                    if "+" in timestamp_str:
+                        timestamp_str = timestamp_str.split("+")[0]
+                    elif timestamp_str.endswith("Z"):
                         timestamp_str = timestamp_str[:-1]
                     timestamp = datetime.fromisoformat(timestamp_str)
                 else:
@@ -216,8 +204,8 @@ def generate_report(report_config, time_range):
     print(f"\n{report_config['icon']} {report_config['name']} - {time_range['name']}\n")
 
     # 加载日志
-    log_file = LOG_DIR / report_config['file']
-    logs = load_logs(log_file, time_range['days'])
+    log_file = LOG_DIR / report_config["file"]
+    logs = load_logs(log_file, time_range["days"])
 
     if not logs:
         print(f"📭 {time_range['name']}没有记录")
@@ -243,7 +231,7 @@ def generate_report(report_config, time_range):
 
     # 生成报告
     print(f"生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-    print(f"## 📈 概览\n")
+    print("## 📈 概览\n")
     print(f"- 总记录数：{len(logs)}")
     print(f"- 高优先级：{len(by_priority['high'])}")
     print(f"- 中优先级：{len(by_priority['medium'])}")
@@ -264,7 +252,7 @@ def generate_report(report_config, time_range):
     # 按分类展示
     print("## 📂 按分类\n")
     for category, entries in sorted(by_category.items()):
-        category_name = report_config['category_names'].get(category, category)
+        category_name = report_config["category_names"].get(category, category)
         print(f"### {category_name} ({len(entries)})\n")
         for entry in sorted(entries, key=lambda x: x["timestamp"], reverse=True):
             print(format_entry(entry))
@@ -288,6 +276,7 @@ def generate_daily_report(time_range):
     # 导入每日报告模块
     try:
         from daily_report import generate_report as gen_daily
+
         # 调用原有的每日报告功能
         gen_daily()
     except ImportError:
@@ -297,9 +286,10 @@ def generate_daily_report(time_range):
 def main():
     # 支持命令行参数
     import argparse
-    parser = argparse.ArgumentParser(description='秘书系统 - 统一报告')
-    parser.add_argument('--type', help='报告类型 (1-6)', default=None)
-    parser.add_argument('--range', help='时间范围 (1-5)', default=None)
+
+    parser = argparse.ArgumentParser(description="秘书系统 - 统一报告")
+    parser.add_argument("--type", help="报告类型 (1-6)", default=None)
+    parser.add_argument("--range", help="时间范围 (1-5)", default=None)
     args = parser.parse_args()
 
     # 选择报告类型
@@ -315,7 +305,7 @@ def main():
         time_range = select_time_range()
 
     # 每日报告使用特殊逻辑
-    if report_config['secretary'] == 'daily':
+    if report_config["secretary"] == "daily":
         generate_daily_report(time_range)
     else:
         generate_report(report_config, time_range)

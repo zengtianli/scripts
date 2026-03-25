@@ -16,7 +16,6 @@ import argparse
 import hashlib
 import json
 import re
-import sys
 import zipfile
 from collections import Counter
 
@@ -25,9 +24,11 @@ from lxml import etree
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 VML_NS = "urn:schemas-microsoft-com:vml"
 
+
 # ── 半角 twips → cm 转换 ──
 def twips_to_cm(val: str) -> float:
     return round(int(val) / 567, 2) if val else 0
+
 
 def half_pt(val: str) -> float:
     """Word XML 字号是半磅，转为磅"""
@@ -37,6 +38,7 @@ def half_pt(val: str) -> float:
 # ══════════════════════════════════════════════════════════
 #  A 层：ZIP 条目级 hash
 # ══════════════════════════════════════════════════════════
+
 
 def zip_hashes(docx_path: str) -> dict[str, str]:
     """计算 docx 内每个文件的 MD5"""
@@ -52,16 +54,17 @@ def zip_hashes(docx_path: str) -> dict[str, str]:
 # 分为"必需"和"安全副作用"两类
 EXPECTED_CHANGES = {"word/document.xml", "word/comments.xml"}
 SAFE_SIDE_EFFECTS = {
-    "[Content_Types].xml",          # 新增 comments 内容类型声明
-    "word/_rels/document.xml.rels", # 新增 comments 关系
-    "docProps/core.xml",            # 修订号+1，修改时间更新
-    "docProps/app.xml",             # 行数/段落数统计更新
-    "word/settings.xml",            # rsid 修订标识更新
-    "word/endnotes.xml",            # rsid 变化
-    "word/footnotes.xml",           # rsid 变化
-    "word/commentsExtended.xml",    # 批注扩展元数据（新增）
-    "word/commentsIds.xml",         # 批注 ID 映射（新增）
+    "[Content_Types].xml",  # 新增 comments 内容类型声明
+    "word/_rels/document.xml.rels",  # 新增 comments 关系
+    "docProps/core.xml",  # 修订号+1，修改时间更新
+    "docProps/app.xml",  # 行数/段落数统计更新
+    "word/settings.xml",  # rsid 修订标识更新
+    "word/endnotes.xml",  # rsid 变化
+    "word/footnotes.xml",  # rsid 变化
+    "word/commentsExtended.xml",  # 批注扩展元数据（新增）
+    "word/commentsIds.xml",  # 批注 ID 映射（新增）
 }
+
 
 def compare_zip_integrity(hashes_before: dict, hashes_after: dict) -> list[dict]:
     """对比两份 hash，返回差异列表"""
@@ -92,6 +95,7 @@ def compare_zip_integrity(hashes_before: dict, hashes_after: dict) -> list[dict]
 #  B 层：格式语义提取
 # ══════════════════════════════════════════════════════════
 
+
 def _extract_hf_text(tree) -> str:
     """从页眉/页脚 XML 中提取文本，正确处理 PAGE 域和 Tab 分隔"""
     parts = []
@@ -111,7 +115,7 @@ def _extract_hf_text(tree) -> str:
                         run_texts.append("{页码}")
                     in_field = False
             elif tag == "instrText" and in_field:
-                field_instr += (elem.text or "")
+                field_instr += elem.text or ""
             elif tag == "t" and not in_field:
                 run_texts.append(elem.text or "")
             elif tag == "tab":
@@ -160,7 +164,7 @@ def extract_format_snapshot(docx_path: str) -> dict:
 
         # ── 预提取所有 header/footer 文件的文本 ──
         hf_text_cache = {}  # "word/header1.xml" → text
-        hf_watermark = {}   # "word/header1.xml" → watermark text
+        hf_watermark = {}  # "word/header1.xml" → watermark text
         for name in names:
             if ("header" in name.lower() or "footer" in name.lower()) and name.endswith(".xml"):
                 xml = zf.read(name)
@@ -207,13 +211,13 @@ def extract_format_snapshot(docx_path: str) -> dict:
             for ref in sectPr.findall(f"{{{W}}}headerReference"):
                 htype = ref.get(f"{{{W}}}type", "")
                 if htype == "default":
-                    rid = ref.get(f"{{http://schemas.openxmlformats.org/officeDocument/2006/relationships}}id", "")
+                    rid = ref.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id", "")
                     fname = rid_map.get(rid, "")
                     header_text = hf_text_cache.get(fname, "(空)")
             for ref in sectPr.findall(f"{{{W}}}footerReference"):
                 ftype = ref.get(f"{{{W}}}type", "")
                 if ftype == "default":
-                    rid = ref.get(f"{{http://schemas.openxmlformats.org/officeDocument/2006/relationships}}id", "")
+                    rid = ref.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id", "")
                     fname = rid_map.get(rid, "")
                     footer_text = hf_text_cache.get(fname, "(空)")
 
@@ -331,6 +335,7 @@ def extract_format_snapshot(docx_path: str) -> dict:
 
 ALIGN_MAP = {"both": "两端对齐", "center": "居中", "left": "左对齐", "right": "右对齐"}
 
+
 def _format_style_row(st: dict) -> str:
     """格式化一行样式定义"""
     name = st["name"]
@@ -351,19 +356,21 @@ def _format_style_row(st: dict) -> str:
 def format_report(snap: dict) -> str:
     """生成人可读的格式报告"""
     lines = []
-    lines.append(f"# 文档格式报告\n")
+    lines.append("# 文档格式报告\n")
     lines.append(f"文件：`{snap['file']}`\n")
 
     # ── 1. 页面设置 ──
     lines.append("## 1. 页面设置\n")
     orientations = Counter(s.get("orientation", "portrait") for s in snap["page_setup"])
-    lines.append(f"共 {len(snap['page_setup'])} 个分节符"
-                 f"（纵向 {orientations.get('portrait', 0)} 个"
-                 f"，横向 {orientations.get('landscape', 0)} 个）\n")
+    lines.append(
+        f"共 {len(snap['page_setup'])} 个分节符"
+        f"（纵向 {orientations.get('portrait', 0)} 个"
+        f"，横向 {orientations.get('landscape', 0)} 个）\n"
+    )
     if snap["page_setup"]:
         s0 = snap["page_setup"][0]
-        lines.append(f"| 项目 | 值 |")
-        lines.append(f"|------|------|")
+        lines.append("| 项目 | 值 |")
+        lines.append("|------|------|")
         lines.append(f"| 纸张 | {s0.get('paper_w_cm', 0)}cm × {s0.get('paper_h_cm', 0)}cm (A4) |")
         lines.append(f"| 上边距 | {s0.get('margin_top_cm', 0)}cm |")
         lines.append(f"| 下边距 | {s0.get('margin_bottom_cm', 0)}cm |")
@@ -437,7 +444,9 @@ def format_report(snap: dict) -> str:
         else:
             line_sp = "-"
         indent = f"{st['indent_first_chars']}字符" if st.get("indent_first_chars") else "-"
-        lines.append(f"| {name} | {count} | {font_cn or '-'} | {font_en or '-'} | {size} | {bold} | {align} | {line_sp} | {indent} |")
+        lines.append(
+            f"| {name} | {count} | {font_cn or '-'} | {font_en or '-'} | {size} | {bold} | {align} | {line_sp} | {indent} |"
+        )
     lines.append("")
 
     # ── 4. 未使用的样式（仅列名称） ──
@@ -453,8 +462,8 @@ def format_report(snap: dict) -> str:
 
     # ── 5. 格式指纹 ──
     lines.append("## 5. 格式指纹\n")
-    lines.append(f"| 项目 | 值 |")
-    lines.append(f"|------|------|")
+    lines.append("| 项目 | 值 |")
+    lines.append("|------|------|")
     lines.append(f"| 直接格式覆盖（run 级） | {snap['direct_overrides_count']} 个 |")
     lines.append(f"| 嵌入图片 | {snap['images_count']} 张 |")
     lines.append(f"| 段落样式定义总数 | {len(snap['styles'])} 个 |")
@@ -514,26 +523,26 @@ def compare_report(snap1: dict, snap2: dict) -> str:
         lines.append(f"✅ 页面设置：未变化（{len(ps1)} 个分节符）")
     else:
         all_ok = False
-        lines.append(f"❌ 页面设置：有变化！")
+        lines.append("❌ 页面设置：有变化！")
         lines.append(f"  原始 {len(ps1)} 个分节符 → 修改后 {len(ps2)} 个")
 
     # 页眉页脚
     hf1 = [(h.get("section"), h.get("header"), h.get("footer")) for h in snap1["headers_footers"]]
     hf2 = [(h.get("section"), h.get("header"), h.get("footer")) for h in snap2["headers_footers"]]
     if hf1 == hf2:
-        lines.append(f"✅ 页眉页脚：未变化" + (f"（{len(hf1)} 节）" if hf1 else "（无）"))
+        lines.append("✅ 页眉页脚：未变化" + (f"（{len(hf1)} 节）" if hf1 else "（无）"))
     else:
         all_ok = False
-        lines.append(f"❌ 页眉页脚：有变化！")
+        lines.append("❌ 页眉页脚：有变化！")
 
     # 水印
     wm1 = snap1["watermark"]
     wm2 = snap2["watermark"]
     if wm1 == wm2:
-        lines.append(f"✅ 水印：未变化" + (f"（\"{wm1}\"）" if wm1 else "（无）"))
+        lines.append("✅ 水印：未变化" + (f'（"{wm1}"）' if wm1 else "（无）"))
     else:
         all_ok = False
-        lines.append(f"❌ 水印：\"{wm1}\" → \"{wm2}\"")
+        lines.append(f'❌ 水印："{wm1}" → "{wm2}"')
 
     # 样式数量
     s1 = len(snap1["styles"])
@@ -554,7 +563,7 @@ def compare_report(snap1: dict, snap2: dict) -> str:
         if v1 != v2:
             usage_diff[k] = (v1, v2)
     if not usage_diff:
-        lines.append(f"✅ 样式使用：段落分布完全一致")
+        lines.append("✅ 样式使用：段落分布完全一致")
     else:
         # 样式使用变化可能是正常的（比如删除了一段），标为 info
         lines.append(f"ℹ️  样式使用：{len(usage_diff)} 个样式的段落数有变化")
@@ -595,6 +604,7 @@ def compare_report(snap1: dict, snap2: dict) -> str:
 #  CLI
 # ══════════════════════════════════════════════════════════
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Word 文档格式检查工具",
@@ -606,15 +616,13 @@ def main():
     sp = sub.add_parser("snapshot", help="提取格式快照")
     sp.add_argument("input", help="输入 .docx 文件")
     sp.add_argument("-o", "--output", help="输出文件（.md 或 .json）")
-    sp.add_argument("--md", action="store_true",
-                    help="自动输出为同名 .md 文件（等价于 -o input_格式报告.md）")
+    sp.add_argument("--md", action="store_true", help="自动输出为同名 .md 文件（等价于 -o input_格式报告.md）")
 
     cp = sub.add_parser("compare", help="对比两个 .docx 文件的格式")
     cp.add_argument("before", help="原始 .docx 文件")
     cp.add_argument("after", help="修改后 .docx 文件")
     cp.add_argument("-o", "--output", help="输出报告文件")
-    cp.add_argument("--md", action="store_true",
-                    help="自动输出为 .md 文件")
+    cp.add_argument("--md", action="store_true", help="自动输出为 .md 文件")
 
     args = parser.parse_args()
 
@@ -628,6 +636,7 @@ def main():
             output = args.output
         elif args.md:
             import os
+
             output = os.path.splitext(args.input)[0] + "_格式报告.md"
         else:
             output = None
@@ -652,6 +661,7 @@ def main():
             output = args.output
         elif args.md:
             import os
+
             output = os.path.splitext(args.before)[0] + "_格式对比.md"
         else:
             output = None

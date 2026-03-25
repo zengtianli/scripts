@@ -87,9 +87,7 @@ def process_repo(repo: Path, use_ai: bool) -> bool:
         msg = simple_message()
 
     run(["git", "commit", "-m", msg], repo)
-    result = subprocess.run(
-        ["git", "push"], cwd=repo, capture_output=True, text=True, timeout=60
-    )
+    result = subprocess.run(["git", "push"], cwd=repo, capture_output=True, text=True, timeout=60)
     if result.returncode == 0:
         print(f"✅ {name}: {msg}")
         return True

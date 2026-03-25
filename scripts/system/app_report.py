@@ -18,7 +18,7 @@ def load_data(log_file, start_time, end_time):
     if not log_file.exists():
         return records
 
-    with open(log_file, "r") as f:
+    with open(log_file) as f:
         for line in f:
             try:
                 record = json.loads(line.strip())

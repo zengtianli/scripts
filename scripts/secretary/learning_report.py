@@ -5,9 +5,9 @@
 
 import json
 import sys
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import defaultdict
 
 # 日志文件路径
 LOG_FILE = Path.home() / "Library" / "Logs" / "secretary" / "learning_log.jsonl"
@@ -18,15 +18,11 @@ CATEGORY_NAMES = {
     "course": "🎓 课程",
     "practice": "💻 实践",
     "insight": "💡 灵感",
-    "paper": "📄 论文"
+    "paper": "📄 论文",
 }
 
 # 优先级中文名称
-PRIORITY_NAMES = {
-    "high": "🔴 高",
-    "medium": "🟡 中",
-    "low": "🟢 低"
-}
+PRIORITY_NAMES = {"high": "🔴 高", "medium": "🟡 中", "low": "🟢 低"}
 
 
 def load_logs(days=7):
@@ -37,7 +33,7 @@ def load_logs(days=7):
     cutoff_date = datetime.now().astimezone() - timedelta(days=days)
     logs = []
 
-    with open(LOG_FILE, "r", encoding="utf-8") as f:
+    with open(LOG_FILE, encoding="utf-8") as f:
         for line in f:
             try:
                 entry = json.loads(line.strip())

@@ -5,11 +5,9 @@
 """
 
 import json
-import sys
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from collections import defaultdict
-from typing import List, Dict
 
 LOG_FILE = Path.home() / "Library" / "Logs" / "secretary" / "life_log.jsonl"
 
@@ -19,11 +17,11 @@ CATEGORIES = {
     "family": "👨‍👩‍👧‍👦 家庭",
     "hobby": "🎨 爱好",
     "todo": "✅ 待办",
-    "event": "📅 事件"
+    "event": "📅 事件",
 }
 
 
-def load_logs(days: int = 7) -> List[Dict]:
+def load_logs(days: int = 7) -> list[dict]:
     """加载指定天数内的日志"""
     if not LOG_FILE.exists():
         return []
@@ -31,7 +29,7 @@ def load_logs(days: int = 7) -> List[Dict]:
     cutoff_date = datetime.now().astimezone() - timedelta(days=days)
     logs = []
 
-    with open(LOG_FILE, "r", encoding="utf-8") as f:
+    with open(LOG_FILE, encoding="utf-8") as f:
         for line in f:
             if line.strip():
                 entry = json.loads(line)
@@ -48,7 +46,7 @@ def format_timestamp(iso_timestamp: str) -> str:
     return dt.strftime("%m-%d %H:%M")
 
 
-def generate_report_by_time(logs: List[Dict]) -> str:
+def generate_report_by_time(logs: list[dict]) -> str:
     """按时间顺序生成报告"""
     if not logs:
         return "📭 暂无生活记录\n"
@@ -66,15 +64,12 @@ def generate_report_by_time(logs: List[Dict]) -> str:
 
     for date in sorted(logs_by_date.keys(), reverse=True):
         report.append(f"## {date}\n")
-        day_logs = sorted(logs_by_date[date],
-                         key=lambda x: x["timestamp"], reverse=True)
+        day_logs = sorted(logs_by_date[date], key=lambda x: x["timestamp"], reverse=True)
 
         for log in day_logs:
             time_str = format_timestamp(log["timestamp"])
             category_icon = CATEGORIES.get(log["category"], "📝")
-            priority_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(
-                log["priority"], "⚪"
-            )
+            priority_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(log["priority"], "⚪")
 
             report.append(f"### [{time_str}] {category_icon} {log['content']}")
 
@@ -87,7 +82,7 @@ def generate_report_by_time(logs: List[Dict]) -> str:
     return "\n".join(report)
 
 
-def generate_report_by_category(logs: List[Dict]) -> str:
+def generate_report_by_category(logs: list[dict]) -> str:
     """按类别生成报告"""
     if not logs:
         return "📭 暂无生活记录\n"
@@ -114,14 +109,11 @@ def generate_report_by_category(logs: List[Dict]) -> str:
         category_name = CATEGORIES.get(category, category)
         report.append(f"## {category_name}\n")
 
-        category_logs = sorted(logs_by_category[category],
-                              key=lambda x: x["timestamp"], reverse=True)
+        category_logs = sorted(logs_by_category[category], key=lambda x: x["timestamp"], reverse=True)
 
         for log in category_logs:
             time_str = format_timestamp(log["timestamp"])
-            priority_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(
-                log["priority"], "⚪"
-            )
+            priority_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(log["priority"], "⚪")
 
             report.append(f"### [{time_str}] {log['content']}")
 
@@ -134,7 +126,7 @@ def generate_report_by_category(logs: List[Dict]) -> str:
     return "\n".join(report)
 
 
-def generate_summary(logs: List[Dict]) -> str:
+def generate_summary(logs: list[dict]) -> str:
     """生成简要统计"""
     if not logs:
         return "📭 暂无生活记录"
@@ -171,10 +163,10 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="生活秘书 - 生成生活报告")
-    parser.add_argument("-d", "--days", type=int, default=7,
-                       help="查看最近几天的记录（默认：7）")
-    parser.add_argument("-m", "--mode", choices=["time", "category", "summary"],
-                       default="time", help="报告模式（默认：time）")
+    parser.add_argument("-d", "--days", type=int, default=7, help="查看最近几天的记录（默认：7）")
+    parser.add_argument(
+        "-m", "--mode", choices=["time", "category", "summary"], default="time", help="报告模式（默认：time）"
+    )
 
     args = parser.parse_args()
 

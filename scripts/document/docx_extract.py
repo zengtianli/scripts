@@ -23,7 +23,6 @@ import argparse
 import json
 import os
 import re
-import sys
 import zipfile
 
 from lxml import etree
@@ -91,12 +90,14 @@ def extract_paragraphs(docx_path: str) -> list[dict]:
             text = "".join(texts).strip()
 
             if text:
-                paragraphs.append({
-                    "style": style_name,
-                    "style_id": style_id,
-                    "text": text,
-                    "level": level,
-                })
+                paragraphs.append(
+                    {
+                        "style": style_name,
+                        "style_id": style_id,
+                        "text": text,
+                        "level": level,
+                    }
+                )
 
     return paragraphs
 
@@ -148,7 +149,7 @@ def document_info(paragraphs: list[dict]) -> str:
     total_chars = sum(len(p["text"]) for p in paragraphs)
     lines.append(f"- 总段落数：{len(paragraphs)}")
     lines.append(f"- 总字符数：{total_chars}")
-    lines.append(f"- 样式统计：")
+    lines.append("- 样式统计：")
 
     style_counts = {}
     for p in paragraphs:
@@ -157,7 +158,7 @@ def document_info(paragraphs: list[dict]) -> str:
     for s, c in sorted(style_counts.items(), key=lambda x: -x[1]):
         lines.append(f"  - {s}: {c}")
 
-    lines.append(f"\n## 章节目录\n")
+    lines.append("\n## 章节目录\n")
     for p in paragraphs:
         if p["level"] >= 1:
             indent = "  " * (p["level"] - 1)
@@ -173,12 +174,9 @@ def main():
     )
     parser.add_argument("input", help="输入 .docx 文件")
     parser.add_argument("-o", "--output", help="输出文件/目录路径")
-    parser.add_argument("--split-chapters", action="store_true",
-                        help="按一级标题拆分输出")
-    parser.add_argument("--info", action="store_true",
-                        help="仅输出文档结构信息")
-    parser.add_argument("--json", action="store_true",
-                        help="输出 JSON 格式（段落列表）")
+    parser.add_argument("--split-chapters", action="store_true", help="按一级标题拆分输出")
+    parser.add_argument("--info", action="store_true", help="仅输出文档结构信息")
+    parser.add_argument("--json", action="store_true", help="输出 JSON 格式（段落列表）")
 
     args = parser.parse_args()
 
@@ -203,7 +201,7 @@ def main():
         if args.output:
             os.makedirs(args.output, exist_ok=True)
             for i, ch in enumerate(chapters):
-                safe_title = re.sub(r'[^\w\u4e00-\u9fff]+', '_', ch["title"])[:30]
+                safe_title = re.sub(r"[^\w\u4e00-\u9fff]+", "_", ch["title"])[:30]
                 filename = f"{i:02d}_{safe_title}.md"
                 filepath = os.path.join(args.output, filename)
                 with open(filepath, "w", encoding="utf-8") as f:
@@ -211,9 +209,9 @@ def main():
                 print(f"  {filepath} ({len(ch['paragraphs'])} 段)")
         else:
             for ch in chapters:
-                print(f"\n{'='*60}")
+                print(f"\n{'=' * 60}")
                 print(f"## {ch['title']}")
-                print(f"{'='*60}")
+                print(f"{'=' * 60}")
                 print(ch["markdown"])
         return
 

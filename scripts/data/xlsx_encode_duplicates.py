@@ -4,8 +4,9 @@
 """
 
 import sys
-from pathlib import Path
 from collections import Counter
+from pathlib import Path
+
 from openpyxl import load_workbook
 
 

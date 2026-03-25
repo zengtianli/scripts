@@ -24,7 +24,7 @@ import os
 import sys
 import time
 from pathlib import Path
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 import yaml
@@ -62,12 +62,8 @@ def _call_anthropic(
     max_tokens: int | None = None,
 ) -> str:
     """Call Anthropic Messages API."""
-    base_url = provider_cfg.get("base_url") or os.environ.get(
-        provider_cfg.get("base_url_env", ""), ""
-    )
-    api_key = provider_cfg.get("api_key") or os.environ.get(
-        provider_cfg.get("api_key_env", ""), ""
-    )
+    base_url = provider_cfg.get("base_url") or os.environ.get(provider_cfg.get("base_url_env", ""), "")
+    api_key = provider_cfg.get("api_key") or os.environ.get(provider_cfg.get("api_key_env", ""), "")
     if not base_url or not api_key:
         raise ConnectionError(
             f"Missing base_url or api_key for anthropic provider "
@@ -123,14 +119,10 @@ def _call_openai(
     max_tokens: int | None = None,
 ) -> str:
     """Call OpenAI Chat Completions API."""
-    base_url = provider_cfg.get("base_url") or os.environ.get(
-        provider_cfg.get("base_url_env", ""), ""
-    )
-    api_key = provider_cfg.get("api_key") or os.environ.get(
-        provider_cfg.get("api_key_env", ""), ""
-    )
+    base_url = provider_cfg.get("base_url") or os.environ.get(provider_cfg.get("base_url_env", ""), "")
+    api_key = provider_cfg.get("api_key") or os.environ.get(provider_cfg.get("api_key_env", ""), "")
     if not base_url or not api_key:
-        raise ConnectionError(f"Missing base_url or api_key for openai provider")
+        raise ConnectionError("Missing base_url or api_key for openai provider")
 
     url = f"{base_url.rstrip('/')}/chat/completions"
     payload = {
@@ -221,9 +213,7 @@ def chat(
             print(f"  [{pname}] 调用失败: {e}，尝试下一个 provider...")
             continue
 
-    raise ConnectionError(
-        f"所有 provider 均失败。最后错误: {last_error}"
-    )
+    raise ConnectionError(f"所有 provider 均失败。最后错误: {last_error}")
 
 
 # ---------------------------------------------------------------------------

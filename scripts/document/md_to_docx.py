@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 md_to_docx.py - Markdown 转 Docx（Pandoc 版）
 
@@ -13,10 +12,10 @@ md_to_docx.py - Markdown 转 Docx（Pandoc 版）
   python md_to_docx.py input.md -t template.docx
 """
 
-import os
-import sys
-import subprocess
 import argparse
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 # 默认模板路径
@@ -25,15 +24,15 @@ DEFAULT_TEMPLATE = "/Users/tianli/Downloads/归档/其他文档/template.docx"
 
 def get_finder_selection():
     """获取 Finder 选中的文件"""
-    script = '''
+    script = """
     tell application "Finder"
         set sel to selection
         if (count of sel) > 0 then
             return POSIX path of (item 1 of sel as alias)
         end if
     end tell
-    '''
-    result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+    """
+    result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
     return result.stdout.strip()
 
 
@@ -46,23 +45,26 @@ def convert(md_path, output_path=None, template_path=None):
         sys.exit(1)
 
     if output_path is None:
-        output_path = md_path.with_suffix('.docx')
+        output_path = md_path.with_suffix(".docx")
     else:
         output_path = Path(output_path).resolve()
 
     # 构建 Pandoc 命令
     cmd = [
-        'pandoc',
+        "pandoc",
         str(md_path),
-        '-o', str(output_path),
-        '--from', 'markdown',
-        '--to', 'docx',
+        "-o",
+        str(output_path),
+        "--from",
+        "markdown",
+        "--to",
+        "docx",
     ]
 
     # 使用模板（reference-doc）
     tpl = template_path or DEFAULT_TEMPLATE
     if tpl and Path(tpl).exists():
-        cmd += ['--reference-doc', str(tpl)]
+        cmd += ["--reference-doc", str(tpl)]
         print(f"📋 模板: {Path(tpl).name}")
 
     print(f"📖 输入: {md_path.name}")
@@ -79,11 +81,11 @@ def convert(md_path, output_path=None, template_path=None):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Markdown 转 Docx（Pandoc 版）',
+        description="Markdown 转 Docx（Pandoc 版）",
     )
-    parser.add_argument('input', nargs='?', help='Markdown 文件路径')
-    parser.add_argument('-o', '--output', help='输出 docx 文件路径')
-    parser.add_argument('-t', '--template', help='参考模板 docx（Pandoc --reference-doc）')
+    parser.add_argument("input", nargs="?", help="Markdown 文件路径")
+    parser.add_argument("-o", "--output", help="输出 docx 文件路径")
+    parser.add_argument("-t", "--template", help="参考模板 docx（Pandoc --reference-doc）")
 
     args = parser.parse_args()
 
@@ -91,7 +93,7 @@ def main():
     md_path = args.input
     if not md_path:
         finder_file = get_finder_selection()
-        if finder_file and finder_file.endswith('.md'):
+        if finder_file and finder_file.endswith(".md"):
             md_path = finder_file
             print(f"📄 从 Finder 获取: {os.path.basename(finder_file)}")
         else:
@@ -101,5 +103,5 @@ def main():
     convert(md_path, args.output, args.template)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

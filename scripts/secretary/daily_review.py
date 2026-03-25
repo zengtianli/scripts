@@ -8,7 +8,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 # 导入项目管理器
 sys.path.insert(0, str(Path(__file__).parent))
@@ -27,7 +27,7 @@ WORK_CATEGORIES = {
     "5": "documentation",
     "6": "bug_fix",
     "7": "deployment",
-    "8": "planning"
+    "8": "planning",
 }
 
 PERSONAL_CATEGORIES = {
@@ -38,25 +38,22 @@ PERSONAL_CATEGORIES = {
     "5": "family",
     "6": "hobby",
     "7": "reading",
-    "8": "other"
+    "8": "other",
 }
 
-PRIORITIES = {
-    "1": "high",
-    "2": "medium",
-    "3": "low"
-}
+PRIORITIES = {"1": "high", "2": "medium", "3": "low"}
 
 
 class ReviewSuggestion:
     """回顾建议"""
+
     def __init__(
         self,
         content: str,
         category_type: str,  # 'work' or 'personal'
         confidence: float = 1.0,
         source: str = "project_db",
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: dict[str, Any] | None = None,
     ):
         self.content = content
         self.category_type = category_type
@@ -65,7 +62,7 @@ class ReviewSuggestion:
         self.metadata = metadata or {}
 
 
-def get_suggestions_from_projects() -> List[ReviewSuggestion]:
+def get_suggestions_from_projects() -> list[ReviewSuggestion]:
     """从项目数据库获取建议"""
     suggestions = []
 
@@ -76,27 +73,25 @@ def get_suggestions_from_projects() -> List[ReviewSuggestion]:
         for project in in_progress_projects:
             # 构建回顾内容
             content = f"{project['name']}"
-            if project.get('current_task'):
+            if project.get("current_task"):
                 content += f" - {project['current_task']}"
 
             # 确定分类类型
-            category_type = project['type']  # 'work' or 'personal'
+            category_type = project["type"]  # 'work' or 'personal'
 
             # 构建元数据
             metadata = {
-                'project_id': project['id'],
-                'project_name': project['name'],
-                'priority': project.get('priority', 'medium'),
-                'tags': project.get('tags', [])
+                "project_id": project["id"],
+                "project_name": project["name"],
+                "priority": project.get("priority", "medium"),
+                "tags": project.get("tags", []),
             }
 
-            suggestions.append(ReviewSuggestion(
-                content=content,
-                category_type=category_type,
-                confidence=1.0,
-                source="project_db",
-                metadata=metadata
-            ))
+            suggestions.append(
+                ReviewSuggestion(
+                    content=content, category_type=category_type, confidence=1.0, source="project_db", metadata=metadata
+                )
+            )
 
     except Exception as e:
         print(f"⚠️  获取项目数据失败: {e}")
@@ -104,7 +99,7 @@ def get_suggestions_from_projects() -> List[ReviewSuggestion]:
     return suggestions
 
 
-def get_suggestions_from_conversations() -> List[ReviewSuggestion]:
+def get_suggestions_from_conversations() -> list[ReviewSuggestion]:
     """从对话记录分析获取建议"""
     import subprocess
 
@@ -114,10 +109,7 @@ def get_suggestions_from_conversations() -> List[ReviewSuggestion]:
         # 调用 conversation_analyzer.py
         script_path = Path(__file__).parent / "conversation_analyzer.py"
         result = subprocess.run(
-            [sys.executable, str(script_path), "--compact"],
-            capture_output=True,
-            text=True,
-            timeout=30
+            [sys.executable, str(script_path), "--compact"], capture_output=True, text=True, timeout=30
         )
 
         if result.returncode != 0:
@@ -136,13 +128,15 @@ def get_suggestions_from_conversations() -> List[ReviewSuggestion]:
             # 根据类型判断分类
             category_type = "work"  # 对话记录主要是工作相关
 
-            suggestions.append(ReviewSuggestion(
-                content=content,
-                category_type=category_type,
-                confidence=confidence,
-                source="conversation",
-                metadata={"suggestion_type": suggestion_type}
-            ))
+            suggestions.append(
+                ReviewSuggestion(
+                    content=content,
+                    category_type=category_type,
+                    confidence=confidence,
+                    source="conversation",
+                    metadata={"suggestion_type": suggestion_type},
+                )
+            )
 
     except subprocess.TimeoutExpired:
         print("⚠️  对话分析超时")
@@ -154,7 +148,7 @@ def get_suggestions_from_conversations() -> List[ReviewSuggestion]:
     return suggestions
 
 
-def get_suggestions_from_files() -> List[ReviewSuggestion]:
+def get_suggestions_from_files() -> list[ReviewSuggestion]:
     """从文件系统变化获取建议"""
     import subprocess
 
@@ -163,12 +157,7 @@ def get_suggestions_from_files() -> List[ReviewSuggestion]:
     try:
         # 调用 file_tracker.py
         script_path = Path(__file__).parent / "file_tracker.py"
-        result = subprocess.run(
-            [sys.executable, str(script_path)],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
+        result = subprocess.run([sys.executable, str(script_path)], capture_output=True, text=True, timeout=30)
 
         if result.returncode != 0:
             print(f"⚠️  文件追踪失败: {result.stderr}")
@@ -194,13 +183,15 @@ def get_suggestions_from_files() -> List[ReviewSuggestion]:
                 file_count = len(files)
                 content = f"修改了 {dir_name} 目录下的 {file_count} 个文件"
 
-                suggestions.append(ReviewSuggestion(
-                    content=content,
-                    category_type="work",
-                    confidence=0.6,
-                    source="file_system",
-                    metadata={"dir": dir_name, "file_count": file_count}
-                ))
+                suggestions.append(
+                    ReviewSuggestion(
+                        content=content,
+                        category_type="work",
+                        confidence=0.6,
+                        source="file_system",
+                        metadata={"dir": dir_name, "file_count": file_count},
+                    )
+                )
 
         # 从个人文件生成建议
         personal_files = data.get("personal_files", [])
@@ -217,13 +208,15 @@ def get_suggestions_from_files() -> List[ReviewSuggestion]:
                 file_count = len(files)
                 content = f"更新了 {dir_name} 相关内容（{file_count} 个文件）"
 
-                suggestions.append(ReviewSuggestion(
-                    content=content,
-                    category_type="personal",
-                    confidence=0.6,
-                    source="file_system",
-                    metadata={"dir": dir_name, "file_count": file_count}
-                ))
+                suggestions.append(
+                    ReviewSuggestion(
+                        content=content,
+                        category_type="personal",
+                        confidence=0.6,
+                        source="file_system",
+                        metadata={"dir": dir_name, "file_count": file_count},
+                    )
+                )
 
     except subprocess.TimeoutExpired:
         print("⚠️  文件追踪超时")
@@ -235,7 +228,7 @@ def get_suggestions_from_files() -> List[ReviewSuggestion]:
     return suggestions
 
 
-def get_all_suggestions() -> List[ReviewSuggestion]:
+def get_all_suggestions() -> list[ReviewSuggestion]:
     """整合所有数据源的建议"""
     suggestions = []
 
@@ -254,7 +247,7 @@ def get_all_suggestions() -> List[ReviewSuggestion]:
     return suggestions
 
 
-def get_input(prompt: str, default: Optional[str] = None) -> str:
+def get_input(prompt: str, default: str | None = None) -> str:
     """获取用户输入"""
     if default:
         prompt = f"{prompt} [{default}]"
@@ -262,7 +255,7 @@ def get_input(prompt: str, default: Optional[str] = None) -> str:
     return value if value else (default or "")
 
 
-def display_suggestions(suggestions: List[ReviewSuggestion]):
+def display_suggestions(suggestions: list[ReviewSuggestion]):
     """显示建议列表"""
     print("\n📋 建议的回顾内容：")
     for i, suggestion in enumerate(suggestions, 1):
@@ -271,7 +264,7 @@ def display_suggestions(suggestions: List[ReviewSuggestion]):
     print(f"  {len(suggestions) + 1}. [添加新内容]")
 
 
-def select_suggestions(suggestions: List[ReviewSuggestion]) -> List[ReviewSuggestion]:
+def select_suggestions(suggestions: list[ReviewSuggestion]) -> list[ReviewSuggestion]:
     """让用户选择要记录的建议"""
     selection = get_input("\n请选择要记录的内容（输入序号，逗号分隔）", "")
 
@@ -295,7 +288,7 @@ def select_suggestions(suggestions: List[ReviewSuggestion]) -> List[ReviewSugges
     return selected
 
 
-def process_suggestion(suggestion: Optional[ReviewSuggestion], index: int) -> Optional[Dict[str, Any]]:
+def process_suggestion(suggestion: ReviewSuggestion | None, index: int) -> dict[str, Any] | None:
     """处理单个建议，返回日志条目"""
     print(f"\n--- 内容 {index} ---")
 
@@ -336,24 +329,24 @@ def process_suggestion(suggestion: Optional[ReviewSuggestion], index: int) -> Op
         print(f"  {key}. {value}")
 
     default_priority = "2"
-    if 'priority' in metadata:
+    if "priority" in metadata:
         priority_map = {"high": "1", "medium": "2", "low": "3"}
-        default_priority = priority_map.get(metadata['priority'], "2")
+        default_priority = priority_map.get(metadata["priority"], "2")
 
     priority_key = get_input("选择优先级", default_priority)
     priority = PRIORITIES.get(priority_key, "medium")
 
     # 获取标签
-    default_tags = ", ".join(metadata.get('tags', []))
+    default_tags = ", ".join(metadata.get("tags", []))
     tags_input = get_input("标签（逗号分隔）", default_tags)
     tags = [tag.strip() for tag in tags_input.split(",") if tag.strip()]
 
     # 获取项目 ID（如果是工作类型）
-    project_id = metadata.get('project_id', '')
+    project_id = metadata.get("project_id", "")
     if category_type == "work":
         project_id = get_input("项目 ID（可选）", project_id)
         if project_id:
-            metadata['project_id'] = project_id
+            metadata["project_id"] = project_id
 
     # 构建日志条目
     log_entry = {
@@ -363,13 +356,13 @@ def process_suggestion(suggestion: Optional[ReviewSuggestion], index: int) -> Op
         "content": content,
         "tags": tags,
         "priority": priority,
-        "metadata": metadata
+        "metadata": metadata,
     }
 
     return log_entry, category_type
 
 
-def save_log_entry(log_entry: Dict[str, Any], category_type: str):
+def save_log_entry(log_entry: dict[str, Any], category_type: str):
     """保存日志条目"""
     log_file = WORK_LOG if category_type == "work" else PERSONAL_LOG
 

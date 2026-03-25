@@ -3,8 +3,8 @@
 
 # 默认使用顺序（第一个可用的）
 default_order:
-  - mmkg
   - zhipu
+  - mmkg
 
 providers:
   mmkg:

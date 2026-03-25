@@ -58,7 +58,7 @@ def get_diff_summary(repo: Path) -> str:
 
 def generate_message(diff: str) -> str:
     try:
-        msg = llm_chat(SYSTEM_PROMPT, diff, provider="zhipu", max_tokens=100)
+        msg = llm_chat(SYSTEM_PROMPT, diff, provider="zhipu")
         return msg.strip().strip('"').strip("'").split("\n")[0][:80]
     except Exception as e:
         print(f"  AI 生成失败: {e}，使用 fallback")

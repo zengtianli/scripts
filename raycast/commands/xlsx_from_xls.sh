@@ -5,4 +5,4 @@
 # @raycast.mode fullOutput
 # @raycast.icon 📊
 # @raycast.packageName Scripts
-source "$(dirname "$0")/../lib/run_python.sh" && run_python "data/xlsx_from_xls.py" "$@"
+source "$(dirname "$0")/../lib/run_python.sh" && run_python "data/convert.py" xlsx-from-xls "$@"

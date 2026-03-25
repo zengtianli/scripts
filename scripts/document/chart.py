@@ -104,7 +104,7 @@ def draw_horizontal_bar(config: dict, output_path: str):
     bars = ax.barh(y_pos, values, height=0.55, color=colors, edgecolor="#333333", linewidth=0.8, alpha=0.9)
 
     max_val = max(values)
-    for i, (bar, val) in enumerate(zip(bars, values)):
+    for i, (_bar, val) in enumerate(zip(bars, values)):
         pct = percents[i]
         label_text = f"{val} {unit}（{pct}%）" if pct is not None else f"{val} {unit}"
         if val > max_val * 0.3:

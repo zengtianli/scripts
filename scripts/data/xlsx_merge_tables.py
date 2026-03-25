@@ -37,7 +37,7 @@ SCRIPTS_LIB = Path(__file__).parent.parent.parent / "lib" / "tools"
 sys.path.insert(0, str(SCRIPTS_LIB))
 
 try:
-    from ai_name_matcher import ai_batch_match, clean_name, fuzzy_match, get_api_client, normalize_name
+    from ai_name_matcher import ai_batch_match, clean_name, fuzzy_match, get_api_client, normalize_name  # noqa: F401
 
     HAS_AI_MATCHER = True
 except ImportError:
@@ -202,7 +202,7 @@ def apply_converter(value, converter_name):
         return value
     try:
         return CONVERTERS[converter_name](value)
-    except:
+    except Exception:
         return value
 
 

@@ -39,9 +39,9 @@ from text_format_rules import fix_punctuation, fix_quotes, fix_units
 try:
     from lxml import etree
     from pptx import Presentation
-    from pptx.dml.color import RGBColor
+    from pptx.dml.color import RGBColor  # noqa: F401
     from pptx.oxml.ns import qn
-    from pptx.util import Pt
+    from pptx.util import Pt  # noqa: F401
 except ImportError:
     print("❌ 错误: 缺少 python-pptx 或 lxml 库")
     print("💡 请运行: pip install python-pptx lxml")
@@ -476,7 +476,7 @@ def format_process_presentation(input_path, do_backup=True):
 
         # 处理所有幻灯片
         show_message("processing", "正在处理幻灯片...")
-        for i, slide in enumerate(prs.slides, 1):
+        for _i, slide in enumerate(prs.slides, 1):
             for shape in slide.shapes:
                 format_process_shape(shape, stats)
 

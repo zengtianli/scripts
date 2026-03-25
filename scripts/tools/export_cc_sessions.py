@@ -154,7 +154,7 @@ def parse_jsonl_file(filepath: Path) -> list[dict]:
     """解析 JSONL 文件，返回消息列表。"""
     messages = []
     with open(filepath, encoding="utf-8") as f:
-        for line_num, line in enumerate(f, 1):
+        for _line_num, line in enumerate(f, 1):
             line = line.strip()
             if not line:
                 continue
@@ -230,7 +230,7 @@ def generate_markdown(filepath: Path, project_name: str, messages: list[dict]) -
     lines.append("---")
     lines.append("")
 
-    for i, msg in enumerate(messages):
+    for _i, msg in enumerate(messages):
         role = msg["role"]
         text = msg["text"]
         ts = ""

@@ -452,7 +452,7 @@ def check_table_intro(lines: list[str], min_chars: int = 80) -> list[dict]:
             continue
         if i + 1 >= len(lines):
             continue
-        next_stripped = lines[i + 1].strip()
+        _ = lines[i + 1].strip()
         if not _is_table_separator(lines[i + 1]):
             continue
 

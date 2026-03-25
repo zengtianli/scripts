@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from display import show_error, show_info, show_success
 from file_ops import show_version_info
+import contextlib
 
 SCRIPT_NAME = "bid_standardize"
 SCRIPT_VERSION = "1.3.0"
@@ -83,7 +84,7 @@ def load_scoring(scoring_path: Path) -> dict:
 
 def match_chapter(filename: str, scoring: dict) -> dict | None:
     """通过文件名匹配 scoring 配置"""
-    for ch_num, config in scoring.items():
+    for _ch_num, config in scoring.items():
         pattern = config.get("file_pattern", "")
         if pattern and pattern in filename:
             return config
@@ -495,10 +496,8 @@ def fix_heading_numbers(text: str) -> str:
                 existing_num = m3.group(1)
                 parts = existing_num.split(".")
                 if len(parts) == 3:
-                    try:
+                    with contextlib.suppress(ValueError):
                         h3_counter = int(parts[2])
-                    except ValueError:
-                        pass
                 result.append(line)
                 continue
 

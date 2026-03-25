@@ -404,7 +404,7 @@ def format_report(snap: dict) -> str:
     lines.append("")
 
     # ── 3. 样式定义（只显示使用中的） ──
-    used_style_ids = set()
+    _ = set()
     style_by_id = {}
     for st in snap["styles"]:
         style_by_id[st["id"]] = st

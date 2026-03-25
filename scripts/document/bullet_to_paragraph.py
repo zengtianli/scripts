@@ -248,11 +248,11 @@ def process_file(client, file_path: Path, output_path: Path, dry_run: bool) -> d
     for block in reversed(blocks):
         converted = convert_bullet_block(client, block)
         # 验证：转换结果不应包含 bullet point 或有序列表
-        new_bullets = [l for l in converted.split("\n") if _is_list_line(l)]
+        new_bullets = [ln for ln in converted.split("\n") if _is_list_line(ln)]
         if new_bullets:
             show_warning(f"L{block['start_line'] + 1}: 转换后仍有 {len(new_bullets)} 个列表项，重试...")
             converted = convert_bullet_block(client, block)
-            new_bullets = [l for l in converted.split("\n") if _is_list_line(l)]
+            new_bullets = [ln for ln in converted.split("\n") if _is_list_line(ln)]
             if new_bullets:
                 show_error(f"L{block['start_line'] + 1}: 重试仍有列表项，保留原文")
                 stats["remaining"] += len(block["lines"])
@@ -264,7 +264,7 @@ def process_file(client, file_path: Path, output_path: Path, dry_run: bool) -> d
     result = "\n".join(lines)
 
     # 最终验证
-    final_bullets = len([l for l in result.split("\n") if _is_list_line(l) and not _in_table_or_code(result, l)])
+    final_bullets = len([ln for ln in result.split("\n") if _is_list_line(ln) and not _in_table_or_code(result, ln)])
     stats["remaining"] = final_bullets
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

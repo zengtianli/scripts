@@ -87,7 +87,7 @@ def find_heading_for_block(lines: list[str], block_start: int) -> str | None:
 def check_insertions(md_dir: Path, config: dict) -> list[dict]:
     """检查哪些 ASCII art 代码块可以替换为图片"""
     mappings = config.get("mappings", [])
-    base_image_dir = config.get("base_image_dir", "charts")
+    _ = config.get("base_image_dir", "charts")
     issues = []
 
     for mapping in mappings:

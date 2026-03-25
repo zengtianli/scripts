@@ -186,7 +186,7 @@ def read_xlsx(input_file: Path, sheet: str | None = None) -> str:
         return f"读取失败: {e}"
 
 
-def xls_to_xlsx(input_path: Path) -> bool:
+def xls_to_xlsx(input_path: Path) -> bool:  # noqa: F811
     """将 xls 转换为 xlsx"""
     try:
         import xlrd
@@ -207,7 +207,7 @@ def xls_to_xlsx(input_path: Path) -> bool:
         print(f"错误: {e}")
         return False
 
-def split_sheets(input_path: Path) -> list:
+def split_sheets(input_path: Path) -> list:  # noqa: F811
     """将工作簿拆分为多个文件"""
     try:
         from openpyxl import Workbook, load_workbook
@@ -231,14 +231,14 @@ def split_sheets(input_path: Path) -> list:
         print(f"错误: {e}")
         return []
 
-def merge_tables(files: list, output_path: Path) -> bool:
+def merge_tables(files: list, output_path: Path) -> bool:  # noqa: F811
     """合并多个 xlsx 文件"""
     try:
         from openpyxl import Workbook, load_workbook
         wb_out = Workbook()
         ws_out = wb_out.active
         row_offset = 0
-        for i, f in enumerate(files):
+        for _i, f in enumerate(files):
             wb = load_workbook(str(f))
             ws = wb.active
             for row in ws.iter_rows():
@@ -251,7 +251,7 @@ def merge_tables(files: list, output_path: Path) -> bool:
         print(f"错误: {e}")
         return False
 
-def read_xlsx(input_path: Path) -> str:
+def read_xlsx(input_path: Path) -> str:  # noqa: F811
     """读取 xlsx 内容为文本"""
     try:
         from openpyxl import load_workbook
@@ -266,7 +266,7 @@ def read_xlsx(input_path: Path) -> str:
     except Exception as e:
         return f"错误: {e}"
 
-def lowercase_headers(input_path: Path) -> bool:
+def lowercase_headers(input_path: Path) -> bool:  # noqa: F811
     """将表头转为小写"""
     try:
         from openpyxl import load_workbook

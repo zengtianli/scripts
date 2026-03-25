@@ -39,7 +39,7 @@ def setup_chinese_fonts():
     )
     try:
         return FontProperties(fname="/System/Library/Fonts/Supplemental/Arial Unicode.ttf")
-    except:
+    except Exception:
         return FontProperties()
 
 
@@ -251,7 +251,7 @@ def plot_complete_gantt(df):
     fig, ax = plt.subplots(figsize=(18, 12))
 
     # 按类型分组绘制
-    for i, (idx, task) in enumerate(df.iterrows()):
+    for i, (_idx, task) in enumerate(df.iterrows()):
         if task["类型"] == "里程碑":
             # 里程碑用菱形标记
             ax.scatter(
@@ -299,7 +299,7 @@ def plot_complete_gantt(df):
     legend1 = ax.legend(
         handles=phase_patches, title="项目阶段", bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=10
     )
-    legend2 = ax.legend(
+    _ = ax.legend(
         handles=type_patches, title="任务类型", bbox_to_anchor=(1.02, 0.7), loc="upper left", fontsize=10
     )
     ax.add_artist(legend1)
@@ -318,7 +318,7 @@ def plot_main_tasks_gantt(df):
 
     fig, ax = plt.subplots(figsize=(14, 8))
 
-    for i, (idx, task) in enumerate(main_tasks_df.iterrows()):
+    for i, (_idx, task) in enumerate(main_tasks_df.iterrows()):
         ax.barh(
             i,
             task["工期"],
@@ -374,7 +374,7 @@ def plot_milestones_timeline(df):
 
     colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A"]
 
-    for i, (idx, milestone) in enumerate(milestones_df.iterrows()):
+    for i, (_idx, milestone) in enumerate(milestones_df.iterrows()):
         # 绘制里程碑点
         ax.scatter(milestone["开始"], y_pos, s=400, c=colors[i], marker="o", edgecolor="black", linewidth=3, zorder=3)
 
@@ -459,7 +459,7 @@ def plot_phase_distribution(df):
     ax2.set_xticklabels(task_count.index, rotation=45, ha="right")
 
     # 在条形图上添加数值
-    for i, bar in enumerate(bars):
+    for _i, bar in enumerate(bars):
         height = bar.get_height()
         ax2.text(
             bar.get_x() + bar.get_width() / 2.0,
@@ -513,7 +513,7 @@ def plot_task_heatmap(df):
     for i in range(len(phases)):
         for j in range(len(months)):
             if heatmap_data[i, j] > 0:
-                text = ax.text(
+                _ = ax.text(
                     j, i, f"{int(heatmap_data[i, j])}", ha="center", va="center", color="black", fontweight="bold"
                 )
 
@@ -540,7 +540,7 @@ def plot_project_dashboard(df):
     # 1. 主甘特图
     ax1 = fig.add_subplot(gs[0:2, 0:3])
     main_tasks = df[df["类型"] == "工作任务"]
-    for i, (idx, task) in enumerate(main_tasks.iterrows()):
+    for i, (_idx, task) in enumerate(main_tasks.iterrows()):
         ax1.barh(i, task["工期"], left=task["开始"], height=0.6, color=task["阶段颜色"], alpha=0.8)
     ax1.set_title("主要任务进度", fontsize=14, weight="bold")
     ax1.set_yticks(range(len(main_tasks)))

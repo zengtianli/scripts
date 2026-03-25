@@ -417,7 +417,7 @@ class DocxReviewer:
 
         output_path = os.path.abspath(output_path)
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            for root, dirs, files in os.walk(self.tmpdir):
+            for root, _dirs, files in os.walk(self.tmpdir):
                 for fn in files:
                     abs_path = os.path.join(root, fn)
                     zf.write(abs_path, os.path.relpath(abs_path, self.tmpdir))

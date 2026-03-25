@@ -446,8 +446,8 @@ class Rule3:
 
         # 处理版本标准化（同一基础名多个日期版本）
         processed_paths: set[Path] = set()
-        for parent, groups in dir_groups.items():
-            for base_name, file_list in groups.items():
+        for _, groups in dir_groups.items():
+            for _, file_list in groups.items():
                 dated = [(fp, ds, mt) for fp, ds, mt in file_list if ds is not None]
                 if len(dated) >= 2:
                     # 多版本：按日期排序，标准化为 v1, v2...
@@ -466,8 +466,8 @@ class Rule3:
                         processed_paths.add(fp)
 
         # 处理单文件日期标准化和不明文件名识别
-        for parent, groups in dir_groups.items():
-            for base_name, file_list in groups.items():
+        for _, groups in dir_groups.items():
+            for _, file_list in groups.items():
                 for fp, date_str, mtime in file_list:
                     if fp in processed_paths:
                         continue
@@ -508,7 +508,7 @@ class Rule3:
                                 content_name = f"{safe_preview}_{stem}{ext}"
                                 # 找到对应的建议并更新
                                 updated = False
-                                for j, (sp, sn, sr) in enumerate(self.suggestions):
+                                for j, (sp, sn, _sr) in enumerate(self.suggestions):
                                     if sp == fp:
                                         # 在已有建议基础上，用内容识别的名字替换
                                         date_prefix = sn.split("_")[0] if "_" in sn else ""

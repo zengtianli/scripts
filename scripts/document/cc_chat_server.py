@@ -30,6 +30,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+import contextlib
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -438,10 +439,8 @@ def call_claude(messages: list[dict], tools: list[dict], system: str) -> dict:
                 continue
             # Read error body for debugging
             error_body = ""
-            try:
+            with contextlib.suppress(Exception):
                 error_body = e.read().decode("utf-8")
-            except Exception:
-                pass
             log(f"Claude API error {e.code}: {error_body[:500]}")
             raise
 
@@ -464,10 +463,10 @@ def run_chat(user_message: str, history: list[dict] | None = None) -> dict:
 
     total_tool_calls = 0
 
-    for round_num in range(MAX_TOOL_ROUNDS):
+    for _ in range(MAX_TOOL_ROUNDS):
         response = call_claude(messages, TOOLS, SYSTEM_PROMPT)
         content_blocks = response.get("content", [])
-        stop_reason = response.get("stop_reason", "")
+        _ = response.get("stop_reason", "")
 
         # Extract tool_use blocks
         tool_uses = [b for b in content_blocks if b["type"] == "tool_use"]
@@ -601,10 +600,8 @@ class ChatHandler(BaseHTTPRequestHandler):
             self._send_json(result)
         except HTTPError as e:
             error_body = ""
-            try:
+            with contextlib.suppress(Exception):
                 error_body = e.read().decode("utf-8")
-            except Exception:
-                pass
             log(f"Claude API error: {e.code} - {error_body[:300]}")
             self._send_json(
                 {"error": f"Claude API error: {e.code}", "detail": error_body[:500]},

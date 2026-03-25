@@ -8,11 +8,12 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+import contextlib
 
 # 尝试导入 python-docx
 try:
     from docx import Document
-    from docx.shared import Pt
+    from docx.shared import Pt  # noqa: F401
     HAS_DOCX = True
 except ImportError:
     HAS_DOCX = False
@@ -241,7 +242,7 @@ def apply_table_style(input_file: Path, style_name: str = "Table Grid",
         return False
 
 
-def format_docx_text(input_path: Path) -> bool:
+def format_docx_text(input_path: Path) -> bool:  # noqa: F811
     """格式化 docx 文本(引号、标点)"""
     try:
         import re
@@ -270,7 +271,7 @@ def format_docx_text(input_path: Path) -> bool:
         print(f"错误: {e}")
         return False
 
-def apply_footer(input_path: Path, text: str) -> bool:
+def apply_footer(input_path: Path, text: str) -> bool:  # noqa: F811
     """添加页脚"""
     try:
         from docx import Document
@@ -286,7 +287,7 @@ def apply_footer(input_path: Path, text: str) -> bool:
         print(f"错误: {e}")
         return False
 
-def apply_header(input_path: Path, text: str) -> bool:
+def apply_header(input_path: Path, text: str) -> bool:  # noqa: F811
     """添加页眉"""
     try:
         from docx import Document
@@ -302,16 +303,14 @@ def apply_header(input_path: Path, text: str) -> bool:
         print(f"错误: {e}")
         return False
 
-def apply_table_style(input_path: Path, style_name: str = "ZDWP表格内容") -> bool:
+def apply_table_style(input_path: Path, style_name: str = "ZDWP表格内容") -> bool:  # noqa: F811
     """应用表格样式"""
     try:
         from docx import Document
         doc = Document(str(input_path))
         for table in doc.tables:
-            try:
+            with contextlib.suppress(Exception):
                 table.style = style_name
-            except:
-                pass
         doc.save(str(input_path))
         return True
     except Exception as e:

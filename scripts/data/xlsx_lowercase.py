@@ -53,7 +53,7 @@ def process_word(input_path, output_path):
         # 处理段落
         for para in doc.paragraphs:
             if para.text:
-                original_text = para.text
+                _ = para.text
                 # 处理段落中的每个run以保持格式
                 for run in para.runs:
                     if run.text:

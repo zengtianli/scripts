@@ -574,7 +574,7 @@ def md_to_html(md_text, add_heading_ids=False):
     code_blocks = []
 
     def save_code(m):
-        lang = m.group(1) or ""
+        _ = m.group(1) or ""
         code = m.group(2).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         code_blocks.append(code)
         return f"__CODE_BLOCK_{len(code_blocks) - 1}__"
@@ -1519,7 +1519,7 @@ def render_detail_page(doc, similar, build_time, docs_by_path):
     sim_list = similar.get(rel, [])
     if sim_list:
         cards = []
-        for other_rel, score in sim_list[:5]:
+        for other_rel, _score in sim_list[:5]:
             other = docs_by_path.get(other_rel)
             if not other:
                 continue

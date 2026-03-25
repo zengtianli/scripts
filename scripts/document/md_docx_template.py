@@ -37,11 +37,11 @@ except ImportError:
 
 try:
     from docx import Document
-    from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
+    from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT  # noqa: F401
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.oxml import OxmlElement
-    from docx.oxml.ns import nsmap, qn
-    from docx.shared import Cm, Pt, Twips
+    from docx.oxml.ns import nsmap, qn  # noqa: F401
+    from docx.shared import Cm, Pt, Twips  # noqa: F401
 except ImportError:
     print("❌ 需要安装 python-docx: pip install python-docx")
     sys.exit(1)
@@ -49,6 +49,7 @@ except ImportError:
 
 # Word XML 命名空间
 from docx_xml import NSMAP
+import contextlib
 
 # 需要提取的样式 ID
 TARGET_STYLES = {
@@ -168,7 +169,7 @@ def extract_styles_xml(docx_path, output_dir=None):
         f.write("=" * 60 + "\n\n")
 
         f.write("提取的样式:\n")
-        for style_id, info in collected_styles.items():
+        for _, info in collected_styles.items():
             f.write(f"  - {info['id']}: {info['name']}\n")
 
         f.write(f"\n正文样式: {found_body_style}\n")
@@ -255,7 +256,7 @@ def create_docx_with_styles(styles_xml_path, output_path):
 
         # 重新打包
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            for root_dir, dirs, files in os.walk(tmpdir):
+            for root_dir, _dirs, files in os.walk(tmpdir):
                 for file in files:
                     file_path = os.path.join(root_dir, file)
                     arcname = os.path.relpath(file_path, tmpdir)
@@ -648,10 +649,8 @@ def convert_md_to_docx(md_path, styles_xml_path, output_path, config=None):
                 para.text = header
                 # 水平居中
                 para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                try:
+                with contextlib.suppress(KeyError):
                     para.style = table_cell_style
-                except KeyError:
-                    pass
 
             # 填充数据行
             for i, row_data in enumerate(rows):
@@ -666,10 +665,8 @@ def convert_md_to_docx(md_path, styles_xml_path, output_path, config=None):
                         para.text = cell_text
                         # 水平居中
                         para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                        try:
+                        with contextlib.suppress(KeyError):
                             para.style = table_cell_style
-                        except KeyError:
-                            pass
 
     # 保存
     doc.save(output_path)

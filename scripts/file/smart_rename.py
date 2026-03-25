@@ -14,18 +14,18 @@ import difflib
 import hashlib
 import json
 import logging
-import os
 import re
 import shutil
 import sys
-import time
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
 
 import yaml
+
+# Add scripts root to path for importing shared modules
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from tools.llm_client import chat as llm_chat
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -253,39 +253,6 @@ def find_similar_names(files: list[dict], threshold: float = 0.7) -> list[list[i
 # ---------------------------------------------------------------------------
 # AI Analysis
 # ---------------------------------------------------------------------------
-def call_api(content: str, base_url: str, token: str, model: str, max_tokens: int) -> str:
-    """Call Claude API with retry on 429."""
-    url = f"{base_url}/v1/messages"
-    payload = {
-        "model": model,
-        "max_tokens": max_tokens,
-        "system": SYSTEM_PROMPT,
-        "messages": [{"role": "user", "content": content}],
-    }
-    data = json.dumps(payload).encode("utf-8")
-    headers = {
-        "x-api-key": token,
-        "content-type": "application/json",
-        "anthropic-version": "2023-06-01",
-        "user-agent": "smart-rename/1.0",
-    }
-
-    max_retries = 3
-    for attempt in range(max_retries + 1):
-        req = Request(url, data=data, headers=headers, method="POST")
-        try:
-            with urlopen(req, timeout=60) as resp:
-                body = json.loads(resp.read().decode("utf-8"))
-                return body["content"][0]["text"]
-        except HTTPError as e:
-            if e.code == 429 and attempt < max_retries:
-                wait = 2 ** attempt
-                print(f"  Rate limited, retrying in {wait}s...")
-                time.sleep(wait)
-                continue
-            raise
-
-
 def build_batch_prompt(files: list[dict], indices: list[int], dup_indices: set[int]) -> str:
     """Build user message for a batch of files."""
     lines = ["文件列表："]
@@ -320,16 +287,8 @@ def analyze_with_ai(
     logger: logging.Logger,
 ) -> list[dict]:
     """Send files in batches to AI for analysis. Returns merged results."""
-    base_url = os.environ.get("MMKG_BASE_URL", "")
-    token = os.environ.get("MMKG_AUTH_TOKEN", "")
-    if not base_url or not token:
-        logger.error("MMKG_BASE_URL 或 MMKG_AUTH_TOKEN 未设置")
-        sys.exit(1)
-
     ai_cfg = config["ai"]
     batch_size = ai_cfg["batch_size"]
-    model = ai_cfg["model"]
-    max_tokens = ai_cfg["max_tokens"]
 
     # Find duplicate indices for annotation
     dups = find_duplicates(files)
@@ -349,7 +308,7 @@ def analyze_with_ai(
 
         prompt = build_batch_prompt(files, batch, dup_indices)
         try:
-            response = call_api(prompt, base_url, token, model, max_tokens)
+            response = llm_chat(system=SYSTEM_PROMPT, message=prompt)
             items = parse_ai_response(response)
             for item in items:
                 idx = item.get("index", 0) - 1  # 1-based to 0-based
@@ -368,8 +327,9 @@ def analyze_with_ai(
                         "reason": f"AI 调用失败: {e}",
                     }
 
-        # Brief pause between batches to avoid rate limiting
+        # Brief pause between batches
         if batch_start + batch_size < len(all_indices):
+            import time
             time.sleep(1)
 
     # Fill any None results

@@ -1,0 +1,31 @@
+# LLM Provider 配置
+# 脚本通过 llm_client.py 调用，自动按顺序 fallback
+
+# 默认使用顺序（第一个可用的）
+default_order:
+  - mmkg
+  - zhipu
+
+providers:
+  mmkg:
+    api_format: anthropic          # Anthropic Messages API 格式
+    base_url_env: MMKG_BASE_URL    # 从环境变量读取
+    api_key_env: MMKG_AUTH_TOKEN   # 从环境变量读取
+    model: claude-haiku-4-5-20251001
+    max_tokens: 4096
+    timeout: 120
+    max_retries: 3
+
+  zhipu:
+    api_format: openai             # OpenAI Chat Completions 格式
+    base_url: "https://aiproxy.xin/cosphere/v1"
+    api_key: "sk-yhZYA9FNbmkhPNXIHwITvh30mIBY2nDm7T0jIzA6siYUVP5C"
+    model: GLM-5-Turbo
+    fallback_models:
+      - glm-5
+      - glm-4.7
+      - glm-4.6
+      - glm-4.5-air
+    max_tokens: 4096
+    timeout: 120
+    max_retries: 2

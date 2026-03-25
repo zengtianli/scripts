@@ -6,7 +6,6 @@
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List, Union
 
 
 def copy_to_clipboard(text: str):
@@ -21,7 +20,7 @@ def get_from_clipboard() -> str:
     return result.stdout
 
 
-def get_clipboard_files() -> List[Path]:
+def get_clipboard_files() -> list[Path]:
     """获取剪贴板中的文件路径"""
     script = '''
     tell application "System Events"
@@ -45,7 +44,7 @@ def get_clipboard_files() -> List[Path]:
     return [Path(p) for p in result.stdout.strip().split('\n') if p and Path(p).exists()]
 
 
-def paste_files(target_dir: Union[str, Path]) -> List[Path]:
+def paste_files(target_dir: str | Path) -> list[Path]:
     """粘贴剪贴板文件到目标目录"""
     files = get_clipboard_files()
     pasted = []

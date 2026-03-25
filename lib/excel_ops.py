@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Excel 操作工具 - 统一的 Excel/CSV 数据读写功能
 

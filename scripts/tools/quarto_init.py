@@ -57,26 +57,26 @@ def load_data():
 def validate_data(data):
     """数据合理性校验"""
     errors = []
-    
+
     # ====== 基本校验 ======
     基本信息 = data.get("基本信息", {})
     if not 基本信息.get("项目名"):
         errors.append("缺少项目名")
-    
+
     # TODO: 添加项目特定校验规则
-    
+
     return errors
 
 
 def build_variables(data):
     """计算派生数据，构建变量字典"""
     variables = {}
-    
+
     # 直接复制基本信息
     variables["基本信息"] = data.get("基本信息", {})
-    
+
     # TODO: 添加派生数据计算
-    
+
     return variables
 
 

@@ -12,62 +12,62 @@
 
 __version__ = "3.0.0"
 
+# === clipboard ===
+from clipboard import (  # noqa: F401
+    copy_to_clipboard,
+    get_clipboard_files,
+    get_from_clipboard,
+    paste_files,
+)
+
 # === display ===
-from display import (
-    show_success,
+from display import (  # noqa: F401
     show_error,
-    show_warning,
     show_info,
     show_processing,
     show_progress,
+    show_success,
+    show_warning,
+)
+
+# === env ===
+from env import PROJECT_ROOT, PYTHON_PATH, USAGE_LOG  # noqa: F401
+
+# === file_ops ===
+from file_ops import (  # noqa: F401
+    add_prefix,
+    check_command_exists,
+    check_file_exists,
+    check_file_extension,
+    check_python_packages,
+    create_folder,
+    ensure_directory,
+    fatal_error,
+    find_files_by_extension,
+    flatten_dir,
+    get_file_basename,
+    move_up,
+    organize_by_type,
+    show_help_footer,
+    show_help_header,
+    show_version_info,
+    validate_input_file,
 )
 
 # === finder ===
-from finder import (
+from finder import (  # noqa: F401
+    get_finder_current_dir,
     get_finder_selection,
     get_finder_selection_single,
-    get_finder_current_dir,
     get_input_files,
     require_single_file,
 )
 
-# === clipboard ===
-from clipboard import (
-    copy_to_clipboard,
-    get_from_clipboard,
-    get_clipboard_files,
-    paste_files,
-)
-
 # === progress ===
-from progress import ProgressTracker
+from progress import ProgressTracker  # noqa: F401
 
 # === usage_log ===
-from usage_log import log_usage
-
-# === file_ops ===
-from file_ops import (
-    check_file_extension,
-    check_file_exists,
-    validate_input_file,
-    find_files_by_extension,
-    ensure_directory,
-    check_command_exists,
-    fatal_error,
-    get_file_basename,
-    check_python_packages,
-    show_version_info,
-    show_help_header,
-    show_help_footer,
-    add_prefix,
-    move_up,
-    flatten_dir,
-    organize_by_type,
-    create_folder,
-)
-
-# === env ===
-from env import PROJECT_ROOT, PYTHON_PATH, USAGE_LOG
+from usage_log import log_usage  # noqa: F401
 
 # === 兼容别名（过渡期）===
 # 允许 `import common_utils` 继续工作（通过 __init__.py re-export）

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 编码工具 - 统一的编码规范化和生成功能
 
@@ -11,9 +10,9 @@ import re
 import pandas as pd
 
 from .config import (
-    RIVER_NAME_TO_CODE,
     BASIN_NAME_TO_CODE,
     BASIN_NAME_TO_CODE_LONG,
+    RIVER_NAME_TO_CODE,
     RIVER_TO_BASIN,
 )
 

@@ -29,7 +29,6 @@ from file_ops import (
     check_file_extension,
     check_python_packages,
     fatal_error,
-    find_files_by_extension,
     show_version_info,
     validate_input_file,
 )

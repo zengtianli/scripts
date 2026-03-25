@@ -8,8 +8,6 @@
     python3 lib/tools/sync_index.py --apply   # 执行同步
 """
 
-import os
-import re
 import sys
 from pathlib import Path
 
@@ -231,7 +229,7 @@ def sync(apply=False):
         link.symlink_to(target)
         print(f"  创建: {link.relative_to(PROJECT_ROOT)}")
 
-    print(f"\n同步完成")
+    print("\n同步完成")
 
 
 if __name__ == "__main__":

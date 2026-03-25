@@ -33,13 +33,11 @@ from pathlib import Path
 
 # ── lib path setup ──────────────────────────────────────────────────
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from display import show_error, show_info, show_success, show_warning, show_processing
+from display import show_error, show_info, show_processing, show_success, show_warning
 from file_ops import (
-    validate_input_file,
     check_file_extension,
     fatal_error,
-    show_version_info,
-    find_files_by_extension,
+    validate_input_file,
 )
 from finder import get_input_files
 from progress import ProgressTracker

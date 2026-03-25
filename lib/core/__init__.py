@@ -5,12 +5,12 @@
 """
 
 from .csv_core import (
-    txt_to_csv,
     csv_to_txt,
     csv_to_xlsx,
+    format_circles,
     merge_txt_files,
     reorder_csv,
-    format_circles,
+    txt_to_csv,
 )
 
 __all__ = [

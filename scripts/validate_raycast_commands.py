@@ -99,7 +99,7 @@ class RaycastValidator:
             sys.exit(1)
 
         # 获取所有 .sh 文件（排除 _archived）
-        sh_files = [f for f in self.commands_dir.glob("*.sh") if f.is_file() and not f.parent.name == "_archived"]
+        sh_files = [f for f in self.commands_dir.glob("*.sh") if f.is_file() and f.parent.name != "_archived"]
 
         if not sh_files:
             print(f"⚠️  未找到任何 .sh 文件在 {self.commands_dir}")

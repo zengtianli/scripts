@@ -24,7 +24,6 @@ PPTX 文档标准化工具集 v3.0.0
 
 import argparse
 import os
-import re
 import shutil
 import sys
 import traceback
@@ -373,9 +372,9 @@ def format_process_text(text, stats):
     if not text:
         return text
 
-    result, quote_count = fix_quotes(text)
-    result, punct_count = format_fix_punctuation(result)
-    result, unit_count = format_fix_units(result)
+    result, quote_count, _ = fix_quotes(text)
+    result, punct_count = fix_punctuation(result)
+    result, unit_count = fix_units(result)
 
     stats["format_quotes"] += quote_count
     stats["format_punctuation"] += punct_count

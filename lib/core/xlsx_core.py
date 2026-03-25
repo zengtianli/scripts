@@ -4,9 +4,7 @@ Excel 核心功能模块
 提供所有 xlsx 相关的转换和处理功能
 """
 
-import csv
 from pathlib import Path
-from typing import Optional, List
 
 try:
     import pandas as pd
@@ -15,15 +13,15 @@ except ImportError:
     HAS_PANDAS = False
 
 
-def xlsx_to_csv(input_file: Path, output_file: Optional[Path] = None, 
-                sheet: Optional[str] = None) -> bool:
+def xlsx_to_csv(input_file: Path, output_file: Path | None = None,
+                sheet: str | None = None) -> bool:
     """Excel 转 CSV"""
     if not HAS_PANDAS:
         return False
-    
+
     if output_file is None:
         output_file = input_file.with_suffix('.csv')
-    
+
     try:
         df = pd.read_excel(input_file, sheet_name=sheet or 0)
         df.to_csv(output_file, index=False, encoding='utf-8')
@@ -32,15 +30,15 @@ def xlsx_to_csv(input_file: Path, output_file: Optional[Path] = None,
         return False
 
 
-def xlsx_to_txt(input_file: Path, output_file: Optional[Path] = None,
+def xlsx_to_txt(input_file: Path, output_file: Path | None = None,
                 delimiter: str = '\t') -> bool:
     """Excel 转 TXT"""
     if not HAS_PANDAS:
         return False
-    
+
     if output_file is None:
         output_file = input_file.with_suffix('.txt')
-    
+
     try:
         df = pd.read_excel(input_file)
         df.to_csv(output_file, sep=delimiter, index=False, encoding='utf-8')
@@ -49,14 +47,14 @@ def xlsx_to_txt(input_file: Path, output_file: Optional[Path] = None,
         return False
 
 
-def csv_to_xlsx(input_file: Path, output_file: Optional[Path] = None) -> bool:
+def csv_to_xlsx(input_file: Path, output_file: Path | None = None) -> bool:
     """CSV 转 Excel"""
     if not HAS_PANDAS:
         return False
-    
+
     if output_file is None:
         output_file = input_file.with_suffix('.xlsx')
-    
+
     try:
         df = pd.read_csv(input_file, encoding='utf-8')
         df.to_excel(output_file, index=False)
@@ -65,15 +63,15 @@ def csv_to_xlsx(input_file: Path, output_file: Optional[Path] = None) -> bool:
         return False
 
 
-def txt_to_xlsx(input_file: Path, output_file: Optional[Path] = None,
+def txt_to_xlsx(input_file: Path, output_file: Path | None = None,
                 delimiter: str = '\t') -> bool:
     """TXT 转 Excel"""
     if not HAS_PANDAS:
         return False
-    
+
     if output_file is None:
         output_file = input_file.with_suffix('.xlsx')
-    
+
     try:
         df = pd.read_csv(input_file, sep=delimiter, encoding='utf-8', engine='python')
         df.to_excel(output_file, index=False)
@@ -82,14 +80,14 @@ def txt_to_xlsx(input_file: Path, output_file: Optional[Path] = None,
         return False
 
 
-def xls_to_xlsx(input_file: Path, output_file: Optional[Path] = None) -> bool:
+def xls_to_xlsx(input_file: Path, output_file: Path | None = None) -> bool:
     """旧版 .xls 转 .xlsx"""
     if not HAS_PANDAS:
         return False
-    
+
     if output_file is None:
         output_file = input_file.with_suffix('.xlsx')
-    
+
     try:
         df = pd.read_excel(input_file, engine='xlrd')
         df.to_excel(output_file, index=False)
@@ -98,40 +96,40 @@ def xls_to_xlsx(input_file: Path, output_file: Optional[Path] = None) -> bool:
         return False
 
 
-def split_sheets(input_file: Path, output_dir: Optional[Path] = None) -> List[Path]:
+def split_sheets(input_file: Path, output_dir: Path | None = None) -> list[Path]:
     """将 Excel 的每个 sheet 拆分为单独文件"""
     if not HAS_PANDAS:
         return []
-    
+
     if output_dir is None:
         output_dir = input_file.parent / f"{input_file.stem}_sheets"
     output_dir.mkdir(exist_ok=True)
-    
+
     try:
         excel = pd.ExcelFile(input_file)
         created_files = []
-        
+
         for sheet_name in excel.sheet_names:
             df = pd.read_excel(excel, sheet_name=sheet_name)
             safe_name = "".join(c if c.isalnum() or c in '._- ' else '_' for c in sheet_name)
             output_file = output_dir / f"{safe_name}.xlsx"
             df.to_excel(output_file, index=False)
             created_files.append(output_file)
-        
+
         return created_files
     except Exception:
         return []
 
 
-def merge_tables(input_files: List[Path], output_file: Path,
-                 key_column: Optional[str] = None) -> bool:
+def merge_tables(input_files: list[Path], output_file: Path,
+                 key_column: str | None = None) -> bool:
     """合并多个 Excel 表格"""
     if not HAS_PANDAS:
         return False
-    
+
     try:
         dfs = [pd.read_excel(f) for f in input_files]
-        
+
         if key_column and all(key_column in df.columns for df in dfs):
             # 按键列合并
             result = dfs[0]
@@ -140,21 +138,21 @@ def merge_tables(input_files: List[Path], output_file: Path,
         else:
             # 简单拼接
             result = pd.concat(dfs, ignore_index=True)
-        
+
         result.to_excel(output_file, index=False)
         return True
     except Exception:
         return False
 
 
-def lowercase_headers(input_file: Path, output_file: Optional[Path] = None) -> bool:
+def lowercase_headers(input_file: Path, output_file: Path | None = None) -> bool:
     """将列名转为小写"""
     if not HAS_PANDAS:
         return False
-    
+
     if output_file is None:
         output_file = input_file.parent / f"{input_file.stem}_lowercase.xlsx"
-    
+
     try:
         df = pd.read_excel(input_file)
         df.columns = [str(c).lower() for c in df.columns]
@@ -164,17 +162,17 @@ def lowercase_headers(input_file: Path, output_file: Optional[Path] = None) -> b
         return False
 
 
-def read_xlsx(input_file: Path, sheet: Optional[str] = None) -> str:
+def read_xlsx(input_file: Path, sheet: str | None = None) -> str:
     """读取 Excel 内容为文本"""
     if not HAS_PANDAS:
         return "需要安装 pandas"
-    
+
     try:
         excel = pd.ExcelFile(input_file)
         content = [f"文件: {input_file.name}", f"共 {len(excel.sheet_names)} 个 sheet", "=" * 60]
-        
+
         sheets_to_read = [sheet] if sheet else excel.sheet_names
-        
+
         for sheet_name in sheets_to_read:
             if sheet_name not in excel.sheet_names:
                 continue
@@ -182,7 +180,7 @@ def read_xlsx(input_file: Path, sheet: Optional[str] = None) -> str:
             content.append(f"\n=== Sheet: {sheet_name} ===")
             content.append(f"维度: {df.shape[0]} 行 × {df.shape[1]} 列")
             content.append(df.to_string(index=True, max_rows=100))
-        
+
         return "\n".join(content)
     except Exception as e:
         return f"读取失败: {e}"
@@ -212,7 +210,7 @@ def xls_to_xlsx(input_path: Path) -> bool:
 def split_sheets(input_path: Path) -> list:
     """将工作簿拆分为多个文件"""
     try:
-        from openpyxl import load_workbook, Workbook
+        from openpyxl import Workbook, load_workbook
         wb = load_workbook(str(input_path))
         created = []
         out_dir = input_path.parent / f"{input_path.stem}_split"
@@ -236,7 +234,7 @@ def split_sheets(input_path: Path) -> list:
 def merge_tables(files: list, output_path: Path) -> bool:
     """合并多个 xlsx 文件"""
     try:
-        from openpyxl import load_workbook, Workbook
+        from openpyxl import Workbook, load_workbook
         wb_out = Workbook()
         ws_out = wb_out.active
         row_offset = 0

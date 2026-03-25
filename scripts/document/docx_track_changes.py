@@ -24,14 +24,11 @@ import sys
 import tempfile
 import zipfile
 from datetime import UTC, datetime
-
-import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
+from docx_xml import R_NS, REL_COMMENTS, W, qn
 from lxml import etree
-
-from docx_xml import NSMAP, W, R_NS, REL_COMMENTS, qn
-
 
 # ═══════════════════════════════════════════════════════════════════
 #  功能1: 读取修订

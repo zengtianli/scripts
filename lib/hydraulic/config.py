@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 水利领域统一配置 - 编码映射表和常量定义
 

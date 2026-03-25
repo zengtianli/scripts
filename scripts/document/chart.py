@@ -30,7 +30,6 @@ from chart_common import (
     BG_COLOR,
     CHART_AUTHOR,
     CHART_UPDATED,
-    CHART_VERSION,
     DEFAULT_DPI,
     GRID_COLOR,
     MILESTONE_COLOR,

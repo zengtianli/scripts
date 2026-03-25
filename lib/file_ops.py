@@ -3,15 +3,14 @@
 文件操作工具模块
 """
 
-import os
-import sys
 import json
+import os
 import shutil
-from pathlib import Path
+import sys
 from datetime import datetime
-from typing import List, Optional, Union
+from pathlib import Path
 
-from display import show_error, show_warning, show_info
+from display import show_error, show_info
 
 
 def check_file_extension(filepath: str, expected_ext: str) -> bool:
@@ -25,7 +24,7 @@ def check_file_exists(filepath: str) -> bool:
     return os.path.isfile(filepath)
 
 
-def validate_input_file(filepath: str, expected_ext: Optional[str] = None) -> bool:
+def validate_input_file(filepath: str, expected_ext: str | None = None) -> bool:
     """验证输入文件"""
     if not check_file_exists(filepath):
         show_error(f"文件不存在: {filepath}")
@@ -37,10 +36,10 @@ def validate_input_file(filepath: str, expected_ext: Optional[str] = None) -> bo
 
 
 def find_files_by_extension(
-    paths: Union[str, Path, List[Union[str, Path]]],
-    extensions: Union[str, List[str]],
+    paths: str | Path | list[str | Path],
+    extensions: str | list[str],
     recursive: bool = False
-) -> List[Path]:
+) -> list[Path]:
     """根据扩展名查找文件"""
     if isinstance(paths, (str, Path)):
         paths = [paths]
@@ -63,7 +62,7 @@ def find_files_by_extension(
     return sorted(set(all_files))
 
 
-def ensure_directory(dir_path: Union[str, Path]) -> bool:
+def ensure_directory(dir_path: str | Path) -> bool:
     """确保目录存在"""
     try:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
@@ -129,7 +128,7 @@ def show_help_footer():
 
 # ===== 文件批量操作 =====
 
-def add_prefix(files: List[Path], prefix: str) -> List[tuple]:
+def add_prefix(files: list[Path], prefix: str) -> list[tuple]:
     """批量添加文件名前缀"""
     results = []
     for f in files:
@@ -144,7 +143,7 @@ def add_prefix(files: List[Path], prefix: str) -> List[tuple]:
     return results
 
 
-def move_up(files: List[Path]) -> List[Path]:
+def move_up(files: list[Path]) -> list[Path]:
     """将文件移动到上级目录"""
     moved = []
     for f in files:
@@ -164,7 +163,7 @@ def move_up(files: List[Path]) -> List[Path]:
     return moved
 
 
-def flatten_dir(dir_path: Union[str, Path]) -> List[Path]:
+def flatten_dir(dir_path: str | Path) -> list[Path]:
     """将子目录中的文件扁平化到当前目录"""
     root = Path(dir_path)
     moved = []
@@ -188,7 +187,7 @@ def flatten_dir(dir_path: Union[str, Path]) -> List[Path]:
     return moved
 
 
-def organize_by_type(files: List[Path], target_dir: Union[str, Path]) -> dict:
+def organize_by_type(files: list[Path], target_dir: str | Path) -> dict:
     """按文件类型整理到子目录"""
     TYPE_MAP = {
         'images': ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico'],
@@ -220,7 +219,7 @@ def organize_by_type(files: List[Path], target_dir: Union[str, Path]) -> dict:
     return results
 
 
-def create_folder(name: str, target_dir: Union[str, Path]) -> Optional[Path]:
+def create_folder(name: str, target_dir: str | Path) -> Path | None:
     """在目标目录创建文件夹"""
     folder = Path(target_dir) / name
     try:
@@ -246,7 +245,7 @@ def read_geojson(geojson_path: str) -> dict:
         SystemExit: 文件不存在或 JSON 解析失败时退出
     """
     try:
-        with open(geojson_path, 'r', encoding='utf-8') as f:
+        with open(geojson_path, encoding='utf-8') as f:
             data = json.load(f)
         show_info(f"成功读取 GeoJSON 文件: {geojson_path}")
         show_info(f"  包含 {len(data.get('features', []))} 条记录")

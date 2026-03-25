@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 QGIS 脚本统一配置
 
@@ -8,15 +7,14 @@ QGIS 脚本统一配置
 """
 
 from .config import (
+    CHINESE_TO_PINYIN,
+    COUNTY_TO_CITY,
     RIVER_CODE_MAPPING,
     RIVER_NAME_TO_CODE,
-    CHINESE_TO_PINYIN,
     RIVER_TO_BASIN,
-    COUNTY_TO_CITY,
-    get_river_name,
     get_city_from_county,
+    get_river_name,
 )
-
 
 # ============ 坐标系配置 ============
 

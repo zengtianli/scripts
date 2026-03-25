@@ -25,12 +25,12 @@ import sys
 import tempfile
 import zipfile
 from copy import deepcopy
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 
 try:
     from lxml import etree
-
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 except ImportError:
     print("❌ 需要安装 lxml: pip install lxml")
     sys.exit(1)
@@ -706,10 +706,10 @@ def main():
 示例:
   # 提取样式
   python md_docx_heading_template.py extract 模板.docx
-  
+
   # 转换（Raycast 调用：选中 .md 文件即可）
   python md_docx_heading_template.py input.md
-  
+
   # 指定模板
   python md_docx_heading_template.py input.md -t 模板.docx -o output.docx
         """,

@@ -254,12 +254,16 @@ def find_similar_names(files: list[dict], threshold: float = 0.7) -> list[list[i
 # AI Analysis
 # ---------------------------------------------------------------------------
 def build_batch_prompt(files: list[dict], indices: list[int], dup_indices: set[int]) -> str:
-    """Build user message for a batch of files."""
+    """Build user message for a batch of files.
+
+    Uses 1-based sequential numbering within the batch (not global indices)
+    to avoid AI renumbering issues.
+    """
     lines = ["文件列表："]
-    for idx in indices:
+    for batch_pos, idx in enumerate(indices, 1):
         f = files[idx]
         size_kb = f["size"] / 1024
-        line = f'{idx + 1}. 文件名: {f["name"]} | 大小: {size_kb:.0f}KB | 修改: {f["mtime"]} | 目录: {f["dir"]}'
+        line = f'{batch_pos}. 文件名: {f["name"]} | 大小: {size_kb:.0f}KB | 修改: {f["mtime"]} | 目录: {f["dir"]}'
         if idx in dup_indices:
             line += " | [MD5重复]"
         if f["content_preview"]:
@@ -311,9 +315,11 @@ def analyze_with_ai(
             response = llm_chat(system=SYSTEM_PROMPT, message=prompt)
             items = parse_ai_response(response)
             for item in items:
-                idx = item.get("index", 0) - 1  # 1-based to 0-based
-                if 0 <= idx < len(files):
-                    results[idx] = item
+                batch_pos = item.get("index", 0) - 1  # 1-based to 0-based within batch
+                if 0 <= batch_pos < len(batch):
+                    global_idx = batch[batch_pos]
+                    item["index"] = global_idx + 1  # Store global 1-based index
+                    results[global_idx] = item
         except Exception as e:
             logger.error("  AI 调用失败: %s", e)
             # Fill failed batch with skip

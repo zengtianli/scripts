@@ -44,7 +44,7 @@ def _setup_paths():
     # 已知的脚本目录路径
     known_paths = [
         Path(__file__).resolve().parent.parent if '__file__' in dir() else None,
-        Path.home() / 'useful_scripts/.assets/projects/qgis',
+        Path.home() / 'Dev/scripts/projects/qgis',
     ]
 
     script_dir = None

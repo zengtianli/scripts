@@ -3,10 +3,11 @@
 配置文件
 请在这里填写您的天眼查API密钥
 """
+import os
 
 # ==================== 天眼查API配置 ====================
 # 请在这里填写您从天眼查开放平台获取的API Token
-TIANYANCHA_API_TOKEN = "8cddcd90-1a90-431b-ba1d-da2b2bef80e7"
+TIANYANCHA_API_TOKEN = os.getenv("TIANYANCHA_API_TOKEN", "")
 
 # 天眼查API基础URL
 TIANYANCHA_BASE_URL = "http://open.api.tianyancha.com/services/open/ic/baseinfo/2.0"

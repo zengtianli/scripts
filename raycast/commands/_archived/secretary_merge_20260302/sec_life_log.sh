@@ -19,7 +19,7 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # 调用 Python 脚本
-PYTHON_BIN="/Users/tianli/miniforge3/bin/python3"
+PYTHON_BIN=$(which python3)
 SCRIPT_PATH="$HOME/useful_scripts/scripts/secretary/life_log.py"
 
 if [ -n "$1" ]; then

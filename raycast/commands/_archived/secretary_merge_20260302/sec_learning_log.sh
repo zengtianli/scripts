@@ -17,7 +17,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Python 路径
-PYTHON="/Users/tianli/miniforge3/bin/python3"
+PYTHON=$(which python3)
 
 # 执行 Python 脚本
 "$PYTHON" "$SCRIPT_DIR/../../scripts/secretary/learning_log.py"

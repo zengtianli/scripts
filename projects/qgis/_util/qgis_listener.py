@@ -7,7 +7,7 @@ QGIS 命令监听器
 使用方法：
 1. 在QGIS中打开你的项目
 2. 在Python Console中运行：
-   exec(open(str(Path.home() / 'useful_scripts/.assets/projects/qgis/_util/qgis_listener.py')).read())
+   exec(open(str(Path.home() / 'Dev/scripts/projects/qgis/_util/qgis_listener.py')).read())
 3. 监听器开始工作（后台运行）
 4. 在Terminal中使用 qgis-run 命令执行脚本
 """
@@ -24,7 +24,7 @@ from qgis.PyQt.QtCore import QTimer
 # ==================== 配置 ====================
 
 # 脚本目录
-SCRIPT_DIR = Path(__file__).resolve().parent.parent / 'pipeline' if '__file__' in dir() else Path.home() / 'useful_scripts/.assets/projects/qgis/pipeline'
+SCRIPT_DIR = Path(__file__).resolve().parent.parent / 'pipeline' if '__file__' in dir() else Path.home() / 'Dev/scripts/projects/qgis/pipeline'
 
 # 通信文件
 COMMAND_FILE = Path.home() / ".qgis_command.txt"

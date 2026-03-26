@@ -396,7 +396,7 @@ def cmd_strip(args):
 # ════════════════════════════════════════════════════════════════════
 
 # 默认模板路径
-DOCX_DEFAULT_TEMPLATE = "/Users/tianli/Downloads/归档/其他文档/template.docx"
+DOCX_DEFAULT_TEMPLATE = str(Path.home() / "Downloads/归档/其他文档/template.docx")
 
 
 def docx_get_finder_selection():

@@ -13,7 +13,7 @@ from pathlib import Path
 try:
     SCRIPT_DIR = Path(__file__).resolve().parent
 except NameError:
-    SCRIPT_DIR = Path.home() / 'useful_scripts/.assets/projects/qgis'
+    SCRIPT_DIR = Path.home() / 'Dev/scripts/projects/qgis'
 
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
@@ -137,7 +137,7 @@ def check_configuration():
     print("=" * 80)
     print("\n💡 下一步:")
     print("   在QGIS Python控制台运行:")
-    print("   exec(open(str(Path.home() / 'useful_scripts/.assets/projects/qgis/tools/extract_points_in_polygons.py')).read())")
+    print("   exec(open(str(Path.home() / 'Dev/scripts/projects/qgis/tools/extract_points_in_polygons.py')).read())")
     print("=" * 80 + "\n")
     
     return True

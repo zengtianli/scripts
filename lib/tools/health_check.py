@@ -94,9 +94,10 @@ class HealthChecker:
     def check_hardcoded_paths(self):
         """检查硬编码路径"""
         count = 0
+        home = str(Path.home())
         patterns = [
-            r'/Users/tianli/miniforge3/bin/python3',
-            r'/Users/tianli/useful_scripts/execute',
+            f'{home}/miniforge3/bin/python3',
+            f'{home}/useful_scripts/execute',
         ]
         for script in sorted(SCRIPTS_DIR.rglob("*")):
             if script.suffix not in ('.py', '.sh'):
@@ -178,9 +179,10 @@ class HealthChecker:
         count = 0
         if not PROJECTS_DIR.exists():
             return count
+        home = str(Path.home())
         patterns = [
-            '/Users/tianli/miniforge3',
-            '/Users/tianli/useful_scripts/execute',
+            f'{home}/miniforge3',
+            f'{home}/useful_scripts/execute',
         ]
         for script in sorted(PROJECTS_DIR.rglob("*")):
             if script.suffix not in ('.py', '.sh'):

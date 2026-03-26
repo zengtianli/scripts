@@ -19,7 +19,7 @@ from pathlib import Path
 def _setup_paths():
     known_paths = [
         Path(__file__).resolve().parent.parent if '__file__' in dir() else None,
-        Path.home() / 'useful_scripts/.assets/projects/qgis',
+        Path.home() / 'Dev/scripts/projects/qgis',
     ]
     script_dir = None
     for p in known_paths:

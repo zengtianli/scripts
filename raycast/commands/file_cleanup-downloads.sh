@@ -10,8 +10,10 @@
 # @raycast.packageName File Utils
 # @raycast.description Auto cleanup: organize by type → AI rename → project sort
 
-PYTHON="/Users/tianli/miniforge3/bin/python3"
-SCRIPTS="/Users/tianli/Dev/scripts/scripts/file"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PYTHON=$(which python3)
+SCRIPTS="$REPO_ROOT/scripts/file"
 
 source ~/.zshrc 2>/dev/null
 

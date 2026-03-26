@@ -10,4 +10,8 @@
 # @raycast.packageName Git
 # @raycast.description AI commit message + push all GitHub repos
 
-/Users/tianli/miniforge3/bin/python3 /Users/tianli/Dev/scripts/scripts/tools/git_smart_push.py
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+PYTHON=$(which python3)
+
+"$PYTHON" "$REPO_ROOT/scripts/tools/git_smart_push.py"

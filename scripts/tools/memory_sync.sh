@@ -5,8 +5,8 @@ f="$CLAUDE_TOOL_INPUT_FILE_PATH"
 
 # 只处理 memory 目录下的文件
 case "$f" in
-  /Users/tianli/.claude/projects/-Users-tianli/memory/*)
-    cp "$f" /Users/tianli/docs/memory/ 2>/dev/null
+  $HOME/.claude/projects/-Users-tianli/memory/*)
+    cp "$f" "$HOME/docs/memory/" 2>/dev/null
     ;;
 esac
 exit 0

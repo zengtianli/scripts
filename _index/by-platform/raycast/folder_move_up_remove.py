@@ -1,0 +1,1 @@
+../../../scripts/file/folder_move_up_remove.py

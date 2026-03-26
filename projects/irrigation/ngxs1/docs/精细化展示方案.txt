@@ -1,0 +1,133 @@
+# 灌溉需水精细化展示方案
+
+## 需求理解
+
+当前展示：
+- 总灌溉需水量（一个数字）
+- 逐日需水量曲线
+
+用户期望：
+- 按作物类型细分展示
+- 水稻：单季稻、双季稻
+- 旱地：蔬菜、瓜果、小麦、油菜、豆类
+
+## 数据来源分析
+
+### 1. 水稻灌溉（水量平衡法）
+- 单季稻：从 static_single_crop.txt 读取灌溉制度
+- 双季稻：从 static_double_crop.txt 读取灌溉制度
+- 各灌区面积：从 static_fenqu.txt 获取
+
+### 2. 旱地作物（定额法）
+- 作物定额：从 static_irrigation_quota.txt 读取
+- 各灌区种植面积：从 in_dry_crop_area.txt 获取
+- 有效作物（7月）：蔬菜、瓜果（其他作物7月定额为0）
+
+## 修改方案
+
+### 后端 API 修改
+
+在 CalculateResponse 中增加分类数据：
+
+```python
+class CropBreakdown(BaseModel):
+    """单个作物的需水详情"""
+    name: str           # 作物名称
+    area: float         # 种植面积 (km²)
+    quota: float        # 月定额 (m³/km²/月)
+    total: float        # 总需水量 (m³)
+    daily_avg: float    # 日均需水量 (m³/日)
+
+class CategorySummary(BaseModel):
+    """分类汇总"""
+    category: str       # 分类名称（水稻/旱地）
+    total: float        # 总需水量
+    crops: List[CropBreakdown]  # 作物明细
+
+class CalculateResponse(BaseModel):
+    success: bool
+    total_irrigation: float
+    total_drainage: float
+    daily_data: List[DailyData]
+    
+    # 新增：分类详情
+    breakdown: List[CategorySummary]
+    
+    parameters: ParameterPreview
+    message: str
+```
+
+返回数据示例：
+```json
+{
+  "breakdown": [
+    {
+      "category": "水稻灌溉",
+      "total": 4068.52,
+      "crops": [
+        {"name": "单季稻", "area": 551.0, "quota": null, "total": 3200.0, "daily_avg": 200.0},
+        {"name": "双季稻", "area": 164.4, "quota": null, "total": 868.5, "daily_avg": 54.3}
+      ]
+    },
+    {
+      "category": "旱地作物",
+      "total": 361238.71,
+      "crops": [
+        {"name": "蔬菜", "area": 84.1, "quota": 1500, "total": 65109.0, "daily_avg": 4069.3},
+        {"name": "瓜果", "area": 42.5, "quota": 13500, "total": 296129.0, "daily_avg": 18508.1}
+      ]
+    }
+  ]
+}
+```
+
+### 前端展示修改
+
+1. **概览卡片**
+   - 总需水量
+   - 水稻需水占比
+   - 旱地需水占比
+
+2. **饼图细分**
+   - 外圈：按作物（单季稻、双季稻、蔬菜、瓜果...）
+   - 内圈：按分类（水稻、旱地）
+
+3. **详情表格**
+   ```
+   ┌────────────────────────────────────────────────────────┐
+   │ 作物类型   │ 种植面积    │ 定额        │ 需水量      │
+   ├────────────────────────────────────────────────────────┤
+   │ 【水稻灌溉】                          小计: 4,069 m³  │
+   │ 单季稻    │ 551.0 km²  │ 水量平衡法   │ 3,200 m³   │
+   │ 双季稻    │ 164.4 km²  │ 水量平衡法   │ 869 m³     │
+   ├────────────────────────────────────────────────────────┤
+   │ 【旱地作物】                        小计: 361,239 m³  │
+   │ 蔬菜      │ 84.1 km²   │ 1,500 m³/km² │ 65,109 m³  │
+   │ 瓜果      │ 42.5 km²   │ 13,500 m³/km²│ 296,129 m³ │
+   │ 小麦      │ 393.9 km²  │ 0（7月无需求）│ 0 m³       │
+   └────────────────────────────────────────────────────────┘
+   ```
+
+4. **逐日曲线**
+   - 按作物类型分色显示
+   - 可切换查看某一类作物
+
+## 实现步骤
+
+1. 修改 Calculator 导出逐作物数据
+2. 修改 api/main.py 返回 breakdown 字段
+3. 修改前端 page.tsx 展示分类数据
+
+## 工作量估计
+
+- 后端：修改 2 个文件
+- 前端：修改 1 个文件
+- 测试：验证数据正确性
+
+## 预期效果
+
+用户能清楚看到：
+1. 总需水量由哪些作物组成
+2. 每种作物的面积、定额、需水量
+3. 水稻和旱地的占比对比
+4. 为什么旱地作物需水量较大（定额高、面积大）

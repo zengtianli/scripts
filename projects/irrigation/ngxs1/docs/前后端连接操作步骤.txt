@@ -1,0 +1,66 @@
+# 前后端连接操作步骤
+
+## 当前状态
+
+✅ 后端 API 已部署：https://web-production-443e.up.railway.app
+   测试结果：{"status":"ok","service":"农田灌溉需水计算API","version":"1.0.0"}
+
+✅ 前端代码已准备好（第 17 行）：
+   const API_BASE = process.env.NEXT_PUBLIC_IRRIGATION_API || 'http://localhost:8001'
+
+
+## 需要你手动操作的步骤
+
+### 步骤 1：在 Vercel 添加环境变量
+
+1. 打开 https://vercel.com/dashboard
+2. 点击 personal_site 项目
+3. 点击顶部 Settings 标签
+4. 左侧菜单点击 Environment Variables
+5. 添加新变量：
+   - Key:   NEXT_PUBLIC_IRRIGATION_API
+   - Value: https://web-production-443e.up.railway.app
+   - 勾选 Production、Preview、Development
+6. 点击 Save
+
+### 步骤 2：重新部署
+
+方法 A（推荐）：在 Vercel 界面操作
+1. 点击顶部 Deployments 标签
+2. 找到最新的部署，点击右侧 "..." 菜单
+3. 点击 Redeploy
+4. 等待部署完成（约 1-2 分钟）
+
+方法 B：推送代码触发
+在终端执行：
+cd ~/Downloads/personal_site
+git add . && git commit --allow-empty -m "trigger deploy" && git push
+
+### 步骤 3：验证
+
+访问：https://tianlizeng.cloud/tools/irrigation
+（或你 Vercel 绑定的域名）
+
+点击"开始计算"，应该能正常返回结果。
+
+
+## 如果遇到 CORS 错误
+
+后端已配置允许 tianlizeng.cloud 跨域访问。
+如果仍报错，告诉我具体错误信息。
+
+
+## 完成后的架构
+
+用户访问 tianlizeng.cloud/tools/irrigation
+       │
+       ▼
+   Vercel (前端 Next.js)
+       │
+       │ API 请求
+       ▼
+   Railway (后端 FastAPI)
+   web-production-443e.up.railway.app
+       │
+       ▼
+   Python 计算模块

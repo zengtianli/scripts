@@ -1,0 +1,9 @@
+name: district_scheduler
+title: 区域调度模型
+description: 区域水资源调度模型，支持 Streamlit 界面进行调度方案配置与分析
+type: hydraulic
+icon: "\U0001F5FA\uFE0F"
+status: dev
+entry:
+  web: webapp/app.py
+tags: [区域调度, 水资源配置, 调度模型]

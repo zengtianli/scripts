@@ -1,0 +1,41 @@
+---
+description: 开发部核心约束
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# 开发部约束
+
+## 接单规范
+
+1. **阅读工单**：理解需求背景
+2. **检查现有**：是否有可复用的脚本
+3. **确认输出**：明确输出路径和交付物
+
+## 交付规范
+
+| 交付物 | 要求 |
+|--------|------|
+| 脚本文件 | 带 `.sh` / `.py` 后缀 |
+| README.md | 使用说明 |
+| 工单溯源 | 脚本头部注明来源 |
+
+## 禁止事项
+
+- ❌ 不配置 LaunchAgent（交给总控）
+- ❌ 不修改 dotfiles（交给配置部）
+- ❌ 不处理业务数据（交给水利公司）
+- ❌ 不创建无后缀的脚本文件
+- ❌ 不在 shell 配置中定义同名函数
+
+## 详细知识
+
+需要更多信息时，参考本地 skills：
+- 项目上下文：`skills-local/dev/context/`
+- 工具命令：`skills-local/dev/tools/`
+- 项目记忆：`skills-local/dev/memory/`
+- 目录规范：`skills-local/dev/structure/`
+- 经验教训：`skills-local/dev/lessons/`
+- Raycast：`skills-local/dev/raycast/`
+- TUI 开发：`skills-local/dev/tui/`
+- GUI 开发：`skills-local/dev/gui/`

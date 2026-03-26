@@ -1,0 +1,1 @@
+../../../scripts/document/docx_to_md.sh

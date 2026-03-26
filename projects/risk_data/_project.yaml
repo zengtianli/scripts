@@ -1,0 +1,9 @@
+name: risk_data
+title: 风险分析表填充
+description: 风险分析相关数据表的自动填充与处理 CLI 工具集
+type: hydraulic
+icon: "\u26A0\uFE0F"
+status: active
+entry:
+  cli: "*.py"
+tags: [风险分析, 数据处理, 表格填充]

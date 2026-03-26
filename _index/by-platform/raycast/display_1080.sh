@@ -1,0 +1,1 @@
+../../../scripts/system/display_1080.sh

@@ -1,0 +1,1 @@
+../../../scripts/network/clashx_mode_rule.sh

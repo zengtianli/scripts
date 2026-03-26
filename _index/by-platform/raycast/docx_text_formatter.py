@@ -1,0 +1,1 @@
+../../../scripts/document/docx_text_formatter.py

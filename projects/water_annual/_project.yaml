@@ -1,0 +1,8 @@
+name: water_annual
+title: 年度水资源数据
+description: 年度水资源统计数据集，供其他模块引用
+type: hydraulic
+icon: "\U0001F4CA"
+status: data
+entry: {}
+tags: [水资源, 年度数据, 统计]

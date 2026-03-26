@@ -33,7 +33,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
 from finder import get_input_files
 from progress import ProgressTracker
-from text_format_rules import fix_punctuation, fix_quotes, fix_units
+from dockit.text import fix_punctuation, fix_quotes, fix_units
 
 # ── 第三方依赖 ────────────────────────────────────────────────────────
 try:

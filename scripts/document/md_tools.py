@@ -41,7 +41,7 @@ from file_ops import (
 )
 from finder import get_input_files
 from progress import ProgressTracker
-from text_format_rules import fix_punctuation, fix_quotes, fix_units
+from dockit.text import fix_punctuation, fix_quotes, fix_units
 
 # ── version info ────────────────────────────────────────────────────
 SCRIPT_VERSION = "3.0.0"

@@ -693,7 +693,7 @@ def get_finder_selection():
 
 
 # 默认模板路径
-DEFAULT_TEMPLATE = str(Path.home() / "Downloads/归档/其他文档/template.docx")
+DEFAULT_TEMPLATE = str(Path(__file__).parent.parent.parent / "templates" / "template.docx")
 
 
 def main():

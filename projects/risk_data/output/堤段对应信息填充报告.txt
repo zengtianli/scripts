@@ -1,0 +1,86 @@
+
+================================================================================
+堤段对应信息填充报告
+================================================================================
+填充时间: 2025-12-29 10:37:16
+数据来源: input/geojson/dd_fix.geojson
+目标文件: output/risk_sx.xlsx
+备份文件: output/risk_sx_backup_20251229_103712.xlsx
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+一、填充统计
+--------------------------------------------------------------------------------
+总记录数: 567 条
+涉及保护片: 11 个
+涉及堤防: 12 个
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+二、岸别分布
+--------------------------------------------------------------------------------
+*岸别（L/R）
+L    295
+R    272
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+三、各保护片的堤段数量（前10个）
+--------------------------------------------------------------------------------
+*保护片编码  堤段数量
+SX0009    96
+SX0001    64
+SX0006    62
+SX0007    54
+SX0002    53
+SX0003    51
+SX0005    44
+SX0008    40
+SX0004    36
+WX0001    36
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+四、各堤防的堤段数量
+--------------------------------------------------------------------------------
+    堤防编码  堤段数量
+SXDF0001    64
+SXDF0006    62
+SXDF0007    54
+SXDF0002    53
+SXDF0003    51
+SXDF0009    49
+WXDF0001    47
+SXDF0005    44
+SXDF0008    40
+SXDF0004    36
+WXDF0002    36
+SXDF0010    31
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+五、字段说明
+--------------------------------------------------------------------------------
+- river_code: 河道编码（大写）
+- river_name: 河道名称
+- dike_code: 堤防编码（大写）
+- dike_name: 堤防名称
+- ds_code: 堤段编码
+- ds_name: 堤段名称
+- zya: 岸别（L=左岸，R=右岸）
+- polder_code: 保护片编码（大写）
+- ddgc: 堤顶高程（米）
+- lc: 里程（米）
+- ds_length: 堤段长度（米）
+- lgtd/lttd: 中心点经纬度
+- region_code: 区域编码
+- drz/grz/wrz: 设计/保证/警戒水位（米）
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+六、数据来源
+--------------------------------------------------------------------------------
+所有字段均从 GeoJSON properties 中提取
+编码字段已自动规范化为大写
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+================================================================================
+注意事项:
+- 每条堤段记录包含完整的堤防、保护片信息
+- 水位信息可能为空（取决于源数据）
+- 里程(LC)和堤段长度已包含
+================================================================================

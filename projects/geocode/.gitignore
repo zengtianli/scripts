@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+data/output/
+data/archived/
+data/input/
+*.tmp
+.DS_Store
+*_temp.csv
+
+

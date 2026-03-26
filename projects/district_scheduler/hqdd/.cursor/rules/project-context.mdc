@@ -1,0 +1,227 @@
+---
+description: 浙东河区调度模型项目上下文规则
+globs: ["**/*.py", "**/*.txt"]
+alwaysApply: true
+---
+
+# 浙东河区调度模型 - 项目上下文
+
+## 📋 项目概述
+
+| 属性 | 值 |
+|-----|-----|
+| 项目名称 | 浙东河区调度模型 (hqdd) |
+| 项目类型 | 水资源调度计算 |
+| 核心功能 | 河区水平衡计算、分水枢纽调度 |
+| 覆盖范围 | 19个河区、6个分水枢纽 |
+| 数据单位 | 万立方米(万m³)、米(m)、立方米每秒(m³/s) |
+
+---
+
+## 🏗️ 项目结构
+
+```text
+hqdd/
+├── main.py                     # 主程序（单文件架构）
+├── data/
+│   ├── 01_inflow/             # 来水数据输出
+│   ├── 02_demand/             # 需水数据输出
+│   ├── 03_calculated/         # 水平衡计算结果
+│   ├── 04_final/              # 最终合并数据
+│   ├── 05_district/           # 分区汇总数据
+│   └── fssn_data/             # 分水枢纽临时数据
+├── static_*.txt               # 静态配置文件
+├── input_*.txt                # 输入数据文件
+└── output_*.txt               # 输出结果文件
+```
+
+---
+
+## 🔧 核心类说明
+
+| 类名 | 功能 |
+|-----|------|
+| `Config` | 全局配置管理，路径、常量、初始化 |
+| `DataLoader` | 数据加载，库容曲线插值 |
+| `ReservoirInflowGenerator` | 水库来水数据生成 |
+| `DistrictDataProcessor` | 分区数据处理 |
+| `WaterBalanceCalculator` | 核心水平衡计算 |
+| `FSSnDataGenerator` | 分水枢纽数据生成 |
+| `DataOutputProcessor` | 数据输出与汇总 |
+| `WaterResourcesManager` | 主流程调度 |
+
+---
+
+## 📊 核心计算公式
+
+### 水平衡计算
+
+```python
+净流量 = 合计来水 - 总需水量
+日中容积 = 日初容积 + 净流量
+日末容积 = 日中容积 + 缺水(浙东需供)
+河区排水 = max(0, 日末容积 - 排水容积)
+排末容积 = 日末容积 - 河区排水
+```
+
+### 缺水评估
+
+```python
+缺水(浙东需供) = max(0, 总需水量 - 合计来水)
+```
+
+### 流量转换
+
+```python
+日均引水流量(m³/s) = 日引水量(万m³) / 8.64
+```
+
+---
+
+## 📁 输入文件说明
+
+### 静态配置文件
+
+| 文件 | 内容 |
+|------|------|
+| `static_HQ_ZQ.txt` | 河区库容曲线（水位-容积关系） |
+| `static_HQ_SK.txt` | 河区-水库配置关系 |
+| `static_SW_PS.txt` | 各河区排水位设定 |
+| `static_FSSN_RULES.txt` | 分水枢纽管辖规则 |
+
+### 时间序列数据
+
+| 文件 | 内容 |
+|------|------|
+| `input_SK.txt` | 水库来水数据 |
+| `input_SW_CS.txt` | 当前水位（初始水位） |
+| `input_SW_MB.txt` | 目标水位 |
+| `input_FQJL.txt` | 河网供水数据 |
+| `input_GPS_GGXS.txt` | 农业需水数据 |
+| `input_GPS_PYCS.txt` | 平原产水数据 |
+| `input_LS_QT.txt` | 其他外供数据 |
+| `input_XS_ST.txt` | 生态需水数据 |
+| `input_XS_FN.txt` | 非农需水数据 |
+
+---
+
+## 📤 输出文件说明
+
+### 河区数据 (`output_hq_*.txt`)
+
+19个河区的完整水平衡计算结果，包含31个核心字段。
+
+### 分水枢纽数据 (`output_sn_*.txt`)
+
+| 文件 | 枢纽 |
+|------|------|
+| `output_sn_SXZ.txt` | 三兴闸 |
+| `output_sn_SYSN.txt` | 上虞枢纽 |
+| `output_sn_STZQTZ.txt` | 四塘闸_七塘闸 |
+| `output_sn_PQZ.txt` | 浦前闸 |
+| `output_sn_MOUSZ.txt` | 牟山闸 |
+| `output_sn_XSSN.txt` | 萧山枢纽 |
+
+### 汇总文件
+
+| 文件 | 内容 |
+|------|------|
+| `output_hq_all.txt` | 所有河区逐日数据汇总 |
+| `output_hq_all_cumulative.txt` | 累积汇总数据 |
+| `output_hq_all_total.txt` | 计算期间总体统计 |
+
+---
+
+## 🎯 19个河区列表
+
+| 河区中文名 | 输出文件代码 |
+|-----------|-------------|
+| 丰惠平原区 | FHPYQ |
+| 余姚平原上河区 | YYPYSHQ |
+| 余姚平原下河区 | YYPYXHQ |
+| 余姚平原姚江上游区 | YYPYYJSYQ |
+| 余姚平原姚江下游区 | YYPYYJXYQ |
+| 余姚平原马渚中河区 | YYPYMZZHQ |
+| 南沙平原区 | NSPYQ |
+| 姚江沿线大工业用水区 | YJYXDGYYSQ |
+| 慈溪平原东河区 | CXPYDHQ |
+| 慈溪平原中河区 | CXPYZHQ |
+| 慈溪平原西河区 | CXPYXHQ |
+| 江北镇海平原区 | JBZHPYQ |
+| 海曙平原区 | HSPYQ |
+| 绍虞平原区 | SYPYQ |
+| 舟山大陆用水区 | ZSDLYSQ |
+| 虞北平原上河区 | YBPYSHQ |
+| 虞北平原中河区 | YBPYZHQ |
+| 蜀山平原区 | SSPYQ |
+| 鄞州调水区 | YZTSQ |
+
+---
+
+## ⚠️ 特殊河区处理
+
+以下河区启用**动态平衡模式**（净流量=0）：
+
+- 南沙平原区
+- 海曙平原区
+- 绍虞平原区
+- 蜀山平原区
+
+这些河区的"其他外供"会被动态计算以确保水量平衡。
+
+---
+
+## 🔀 分水枢纽层级结构
+
+```text
+萧山枢纽
+├── 三兴闸
+│   ├── 虞北平原上河区
+│   ├── 虞北平原中河区
+│   ├── 浦前闸
+│   │   ├── 余姚平原上河区
+│   │   └── 四塘闸_七塘闸
+│   │       ├── 慈溪平原西河区
+│   │       ├── 慈溪平原中河区
+│   │       └── 慈溪平原东河区
+│   └── 牟山闸
+└── 上虞枢纽
+```
+
+---
+
+## 🚀 运行方式
+
+```bash
+# 使用当前目录
+python main.py
+
+# 指定工作目录
+python main.py /path/to/working/directory
+```
+
+---
+
+## 📝 编码规范
+
+- 文件编码：UTF-8
+- 分隔符：制表符 (`\t`)
+- 日期格式：`YYYY-MM-DD`
+
+---
+
+## 🤖 推荐使用的共享 Agent
+
+| Agent | 路径 | 用途 |
+|-------|------|------|
+| District Scheduler | `@~/cursor-shared/agents/L2_water/district_scheduler.md` | 河区调度计算 |
+| Hydrologist | `@~/cursor-shared/agents/L2_water/hydrologist.md` | 水文计算 |
+| Data Processor | `@~/cursor-shared/agents/L2_water/data_processor.md` | 数据处理 |
+
+---
+
+## 🔄 版本记录
+
+| 版本 | 日期 | 更新 |
+|-----|------|------|
+| v1.0 | 2025-12-07 | 初始版本 |

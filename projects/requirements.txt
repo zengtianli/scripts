@@ -1,0 +1,22 @@
+# hydraulic/ 统一 requirements.txt
+# 合并自以下子项目（各子项目的 requirements.txt 保留不动，供 Streamlit Cloud 部署使用）：
+#   - capacity/
+#   - company_query/
+#   - district_scheduler/webapp/
+#   - geocode/
+#   - irrigation/ngxs1/
+#   - irrigation/webapp/
+#   - reservoir_schedule/
+#   - water_annual/
+
+fastapi>=0.109.0
+numpy>=1.21.0
+openpyxl>=3.0.0
+pandas>=1.3.0
+plotly>=5.0.0
+pydantic>=2.6.0
+python-multipart>=0.0.6
+requests>=2.26.0
+scipy>=1.9.0
+streamlit>=1.28.0
+uvicorn>=0.27.0

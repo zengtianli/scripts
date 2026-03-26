@@ -1,0 +1,58 @@
+
+================================================================================
+堤防纵剖面数据填充报告
+================================================================================
+填充时间: 2025-12-29 10:37:34
+数据来源: input/geojson/dd_fix.geojson
+目标文件: output/risk_sx.xlsx
+备份文件: output/risk_sx_backup_20251229_103730.xlsx
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+一、填充统计
+--------------------------------------------------------------------------------
+总记录数: 302 条
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+二、高程统计
+--------------------------------------------------------------------------------
+河底高程:
+  最小值: 65.09 米
+  最大值: 159.03 米
+  平均值: 99.07 米
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+左岸高程:
+  最小值: 70.09 米
+  最大值: 164.03 米
+  平均值: 104.07 米
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+右岸高程:
+  最小值: 69.58 米
+  最大值: 163.72 米
+  平均值: 103.77 米
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+三、字段说明
+--------------------------------------------------------------------------------
+- river_code: 河道编码（大写）
+- lc: 里程（米）
+- river_bottom_elevation: 河底高程（米，计算值 = 堤顶高程 - 5）
+- river_left_elevation: 左岸高程（米，使用堤顶高程）
+- river_right_elevation: 右岸高程（米，使用堤顶高程）
+- river_plotline: 是否河道主线（空）
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+四、数据来源
+--------------------------------------------------------------------------------
+- 河道编码、里程: GeoJSON 字段
+- 河底高程: 根据堤顶高程计算（堤顶 - 5米）
+- 左右岸高程: 使用堤顶高程
+
+# from xlsx_common import normalize_code, read_geojson, create_backup
+================================================================================
+注意事项:
+- 河底高程为估算值（堤顶高程 - 5米）
+- 左右岸高程使用堤顶高程
+- 按里程排序并去重
+================================================================================

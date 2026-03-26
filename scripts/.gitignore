@@ -1,0 +1,9 @@
+# Quarto 生成的文件
+_variables.yml
+*.md
+!README.md
+.quarto/
+
+# 产物
+*.docx
+*.pdf

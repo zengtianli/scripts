@@ -1,0 +1,8 @@
+name: cad
+title: CAD脚本
+description: AutoCAD 自动化处理脚本集，基于 AutoLISP 编写
+type: hydraulic
+icon: "\U0001F4D0"
+status: active
+entry: {}
+tags: [CAD, AutoLISP, 制图]

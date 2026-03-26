@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-"""frontmatter_gen.py — Haiku API 批量生成 MD frontmatter
+"""frontmatter_gen.py — 智谱 API 批量生成 MD frontmatter
 
-扫描指定目录下的 Markdown 文件，调用 Claude Haiku API 生成
+扫描指定目录下的 Markdown 文件，调用智谱 API 生成
 description + tags 的 YAML frontmatter 并写入文件头部。
 """
 
 import argparse
-import json
 import os
 import re
 import sys
 import time
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
 
 IGNORE_DIRS = {".git", "_site", "__pycache__", "node_modules", ".DS_Store"}
 
@@ -34,41 +31,26 @@ def has_frontmatter(text: str) -> bool:
     return second != -1
 
 
-def call_haiku(content: str, base_url: str, token: str) -> str:
-    """调用 Claude Haiku API，返回响应文本。
+def call_llm(client, content: str) -> str:
+    """调用智谱 API，返回响应文本。
 
     包含 429 指数退避重试（1s, 2s, 4s，最多 3 次）。
     """
-    url = f"{base_url}/v1/messages"
-    payload = {
-        "model": "claude-haiku-4-5-20251001",
-        "max_tokens": 200,
-        "system": SYSTEM_PROMPT,
-        "messages": [
-            {
-                "role": "user",
-                "content": f"为以下文档生成 frontmatter：\n\n{content[:2000]}",
-            }
-        ],
-    }
-    data = json.dumps(payload).encode("utf-8")
-    headers = {
-        "x-api-key": token,
-        "content-type": "application/json",
-        "anthropic-version": "2023-06-01",
-        "user-agent": "curl/8.0",
-    }
-
     max_retries = 3
     for attempt in range(max_retries + 1):
-        req = Request(url, data=data, headers=headers, method="POST")
         try:
-            with urlopen(req) as resp:
-                body = json.loads(resp.read().decode("utf-8"))
-                return body["content"][0]["text"]
-        except HTTPError as e:
-            if e.code == 429 and attempt < max_retries:
-                wait = 2**attempt  # 1s, 2s, 4s
+            response = client.chat.completions.create(
+                model="glm-4-flash",
+                max_tokens=200,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": f"为以下文档生成 frontmatter：\n\n{content[:2000]}"},
+                ],
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            if "429" in str(e) and attempt < max_retries:
+                wait = 2**attempt
                 print(f"  Rate limited, retrying in {wait}s...")
                 time.sleep(wait)
                 continue
@@ -110,16 +92,13 @@ def scan_files(src_dir: str) -> list[tuple[str, str]]:
     return results
 
 
-def process_file(filepath: str, content: str, base_url: str, token: str) -> str | None:
+def process_file(filepath: str, content: str, client) -> str | None:
     """对单个文件调用 API 生成 frontmatter。
 
     返回 frontmatter 字符串，失败返回 None。
     """
     try:
-        raw = call_haiku(content, base_url, token)
-    except HTTPError as e:
-        print(f"  API error: {e.code} {e.reason}")
-        return None
+        raw = call_llm(client, content)
     except Exception as e:
         print(f"  Error: {e}")
         return None
@@ -132,7 +111,7 @@ def process_file(filepath: str, content: str, base_url: str, token: str) -> str 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="批量为 Markdown 文件生成 YAML frontmatter（Claude Haiku API）")
+    parser = argparse.ArgumentParser(description="批量为 Markdown 文件生成 YAML frontmatter（智谱 API）")
     parser.add_argument("src_dir", help="要扫描的目录路径")
     parser.add_argument("--dry-run", action="store_true", help="只列出会处理的文件，不调用 API")
     parser.add_argument("--file", dest="single_file", help="只处理单个文件（相对于 src_dir 的路径）")
@@ -144,17 +123,14 @@ def main():
         sys.exit(1)
 
     # 检查环境变量（dry-run 不需要）
-    base_url = os.environ.get("MMKG_BASE_URL", "")
-    token = os.environ.get("MMKG_AUTH_TOKEN", "")
+    client = None
     if not args.dry_run:
-        if not base_url:
-            print("Error: MMKG_BASE_URL not set")
+        api_key = os.environ.get("ZHIPU_API_KEY", "")
+        if not api_key:
+            print("Error: ZHIPU_API_KEY not set")
             sys.exit(1)
-        if not token:
-            print("Error: MMKG_AUTH_TOKEN not set")
-            sys.exit(1)
-        # 去掉尾部斜杠
-        base_url = base_url.rstrip("/")
+        from zhipuai import ZhipuAI
+        client = ZhipuAI(api_key=api_key)
 
     # 收集文件
     if args.single_file:
@@ -207,7 +183,7 @@ def main():
     for i, (rel, abs_path, content) in enumerate(to_process, 1):
         print(f"[{i}/{total}] Processing: {rel}")
 
-        fm = process_file(abs_path, content, base_url, token)
+        fm = process_file(abs_path, content, client)
         if fm is None:
             failed += 1
             print("  FAILED")

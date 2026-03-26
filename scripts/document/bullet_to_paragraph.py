@@ -3,7 +3,7 @@
 Bullet Point 转段落/表格工具
 
 将 Markdown 文件中的 bullet point 列表转换为符合公文规范的段落或表格形式。
-调用 Claude API 进行智能转换，排除表格内和代码块内的 `-` 符号。
+调用智谱 API 进行智能转换，排除表格内和代码块内的 `-` 符号。
 
 用法：
     python3 bullet_to_paragraph.py <输入路径> [--dry-run] [--output-dir <目录>]
@@ -57,16 +57,15 @@ def show_help():
 
 
 def get_client():
-    """初始化 Anthropic 客户端，从环境变量读取配置"""
-    import anthropic
+    """初始化智谱客户端，从环境变量读取配置"""
+    from zhipuai import ZhipuAI
 
-    auth_token = os.environ.get("MMKG_AUTH_TOKEN")
-    if not auth_token:
-        show_error("环境变量 MMKG_AUTH_TOKEN 未设置，请先配置后重试")
+    api_key = os.environ.get("ZHIPU_API_KEY")
+    if not api_key:
+        show_error("环境变量 ZHIPU_API_KEY 未设置，请先配置后重试")
         sys.exit(1)
 
-    base_url = os.environ.get("MMKG_BASE_URL", "https://api.anthropic.com")
-    return anthropic.Anthropic(base_url=base_url, auth_token=auth_token)
+    return ZhipuAI(api_key=api_key)
 
 
 NUMBERED_LIST_RE = re.compile(r"^\d+\.\s+")
@@ -186,7 +185,7 @@ def clean_api_output(text: str) -> str:
 
 
 def convert_bullet_block(client, block: dict) -> str:
-    """调用 Claude API 转换单个 bullet block"""
+    """调用智谱 API 转换单个 bullet block"""
     bullet_content = "\n".join(block["lines"])
     block_type = block.get("block_type", "bullet")
     type_desc = "有序列表（数字编号开头）" if block_type == "numbered" else "bullet point（`- ` 开头的列表）"
@@ -212,10 +211,10 @@ def convert_bullet_block(client, block: dict) -> str:
 仅输出转换后的内容，不要解释、不要思考过程。"""
 
     try:
-        message = client.messages.create(
-            model="claude-sonnet-4-6", max_tokens=2000, messages=[{"role": "user", "content": prompt}]
+        response = client.chat.completions.create(
+            model="glm-4-plus", max_tokens=2000, messages=[{"role": "user", "content": prompt}]
         )
-        raw = message.content[0].text.strip()
+        raw = response.choices[0].message.content.strip()
         return clean_api_output(raw)
     except Exception as e:
         show_error(f"API 调用失败: {e}")

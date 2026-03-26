@@ -2,7 +2,7 @@
 """
 AI 敏感词扫描器 (scan_sensitive_words.py)
 
-调用 Claude API 扫描标书 .md 文件，智能识别敏感词并维护敏感词列表。
+调用智谱 API 扫描标书 .md 文件，智能识别敏感词并维护敏感词列表。
 
 识别类型：
   - 组织名称/公司名称（竞争对手或错误引用）
@@ -31,9 +31,7 @@ from display import show_error, show_info, show_processing, show_success, show_w
 from file_ops import find_files_by_extension
 
 # === 常量 ===
-DEFAULT_MODEL = "claude-haiku-4-5-20251001"
-DEFAULT_BASE_URL = "https://code.mmkg.cloud"
-DEFAULT_AUTH_TOKEN = "sk-314b13f94f1aeba82a992b54e0100734827647a7a14a9a4956ca1947842ac6cf"
+DEFAULT_MODEL = "glm-4-flash"
 CHUNK_SIZE = 8000  # 按字符数分块
 
 
@@ -41,17 +39,19 @@ CHUNK_SIZE = 8000  # 按字符数分块
 
 
 def create_client():
-    """创建 Anthropic 客户端，优先使用环境变量"""
-    try:
-        import anthropic
-    except ImportError:
-        show_error("缺少 anthropic 包，请运行: pip install anthropic")
+    """创建智谱客户端，从环境变量读取 API Key"""
+    api_key = os.environ.get("ZHIPU_API_KEY")
+    if not api_key:
+        show_error("环境变量 ZHIPU_API_KEY 未设置，请先配置后重试")
         sys.exit(1)
 
-    base_url = os.environ.get("MMKG_BASE_URL", DEFAULT_BASE_URL)
-    auth_token = os.environ.get("MMKG_AUTH_TOKEN", DEFAULT_AUTH_TOKEN)
+    try:
+        from zhipuai import ZhipuAI
+    except ImportError:
+        show_error("缺少 zhipuai 包，请运行: pip install zhipuai")
+        sys.exit(1)
 
-    return anthropic.Anthropic(base_url=base_url, api_key=auth_token)
+    return ZhipuAI(api_key=api_key)
 
 
 def build_prompt(content: str, existing_words: list[str], filename: str) -> str:
@@ -136,15 +136,15 @@ def _parse_json_response(text: str) -> list[dict] | None:
 
 
 def call_api(client, prompt: str, max_retries: int = 2) -> list[dict] | None:
-    """调用 Claude API 分析内容，带 retry 和容错解析"""
+    """调用智谱 API 分析内容，带 retry 和容错解析"""
     for attempt in range(1, max_retries + 1):
         try:
-            response = client.messages.create(
+            response = client.chat.completions.create(
                 model=DEFAULT_MODEL,
                 max_tokens=4096,
                 messages=[{"role": "user", "content": prompt}],
             )
-            text = response.content[0].text.strip()
+            text = response.choices[0].message.content.strip()
 
             result = _parse_json_response(text)
             if result is not None:
@@ -466,7 +466,7 @@ def interactive_update(findings: list[dict], config: dict, config_path: str):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="AI 敏感词扫描器 - 调用 Claude API 扫描标书文档识别敏感词",
+        description="AI 敏感词扫描器 - 调用智谱 API 扫描标书文档识别敏感词",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 示例：

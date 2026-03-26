@@ -3,14 +3,13 @@
 
 A Chat API backend for the CC Artifact Management Center.
 Receives chat messages from a browser-embedded chat widget and uses
-Claude API with tool-use to answer questions and perform file operations.
+Zhipu API with tool-use to answer questions and perform file operations.
 
 Usage:
     python3 cc_chat_server.py
 
 Environment variables:
-    MMKG_BASE_URL   - Claude API base URL
-    MMKG_AUTH_TOKEN  - Claude API auth token
+    ZHIPU_API_KEY        - Zhipu API key
     DOCS_ROOT            - Knowledge base root (default: /var/www/docs/)
     CC_ROOT              - CC artifacts root (default: /var/www/claude-config/)
     CHAT_PORT            - Server port (default: 7892)
@@ -21,7 +20,6 @@ Test:
       -d '{"message":"hello"}'
 """
 
-import contextlib
 import glob
 import json
 import os
@@ -29,8 +27,6 @@ import subprocess
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
-from urllib.error import HTTPError
-from urllib.request import Request, urlopen
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -42,11 +38,11 @@ HOST = "127.0.0.1"
 DOCS_ROOT = os.environ.get("DOCS_ROOT", "/var/www/docs/")
 CC_ROOT = os.environ.get("CC_ROOT", "/var/www/claude-config/")
 
-BASE_URL = os.environ.get("MMKG_BASE_URL", "").rstrip("/")
-AUTH_TOKEN = os.environ.get("MMKG_AUTH_TOKEN", "")
-
-MODEL = "claude-haiku-4-5-20251001"
+MODEL = "glm-4-plus"
 MAX_TOOL_ROUNDS = 10
+
+# Initialized in main()
+_client = None
 
 SYSTEM_PROMPT = f"""\
 You are a CC (Claude Code) artifact management assistant.
@@ -72,127 +68,115 @@ Rules:
 """
 
 # ---------------------------------------------------------------------------
-# Tool definitions (Claude API format)
+# Tool definitions (OpenAI-compatible format for Zhipu API)
 # ---------------------------------------------------------------------------
 
 TOOLS = [
     {
-        "name": "read_file",
-        "description": "Read the contents of a file. Path must be within DOCS_ROOT or CC_ROOT.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Absolute path or relative path within allowed roots",
-                }
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read the contents of a file. Path must be within DOCS_ROOT or CC_ROOT.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Absolute path or relative path within allowed roots"}
+                },
+                "required": ["path"],
             },
-            "required": ["path"],
         },
     },
     {
-        "name": "write_file",
-        "description": "Write or overwrite a file. Path must be within DOCS_ROOT or CC_ROOT. Parent directories will be created if needed.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "File path to write to",
+        "type": "function",
+        "function": {
+            "name": "write_file",
+            "description": "Write or overwrite a file. Path must be within DOCS_ROOT or CC_ROOT. Parent directories will be created if needed.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "File path to write to"},
+                    "content": {"type": "string", "description": "Content to write"},
                 },
-                "content": {
-                    "type": "string",
-                    "description": "Content to write",
-                },
+                "required": ["path", "content"],
             },
-            "required": ["path", "content"],
         },
     },
     {
-        "name": "delete_file",
-        "description": "Delete a file. Path must be within DOCS_ROOT or CC_ROOT.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "File path to delete",
-                }
+        "type": "function",
+        "function": {
+            "name": "delete_file",
+            "description": "Delete a file. Path must be within DOCS_ROOT or CC_ROOT.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "File path to delete"}
+                },
+                "required": ["path"],
             },
-            "required": ["path"],
         },
     },
     {
-        "name": "list_files",
-        "description": "List directory contents. Optionally filter by glob pattern.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "path": {
-                    "type": "string",
-                    "description": "Directory path to list",
+        "type": "function",
+        "function": {
+            "name": "list_files",
+            "description": "List directory contents. Optionally filter by glob pattern.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Directory path to list"},
+                    "pattern": {"type": "string", "description": "Optional glob pattern (e.g. '*.md', '**/*.md')"},
                 },
-                "pattern": {
-                    "type": "string",
-                    "description": "Optional glob pattern (e.g. '*.md', '**/*.md')",
-                },
+                "required": ["path"],
             },
-            "required": ["path"],
         },
     },
     {
-        "name": "merge_files",
-        "description": "Merge multiple files into one. Preserves all specific details, dates, and decisions — does not compress.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "paths": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of file paths to merge",
+        "type": "function",
+        "function": {
+            "name": "merge_files",
+            "description": "Merge multiple files into one. Preserves all specific details, dates, and decisions — does not compress.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "paths": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of file paths to merge",
+                    },
+                    "output_path": {"type": "string", "description": "Output file path for merged content"},
                 },
-                "output_path": {
-                    "type": "string",
-                    "description": "Output file path for merged content",
-                },
+                "required": ["paths", "output_path"],
             },
-            "required": ["paths", "output_path"],
         },
     },
     {
-        "name": "git_commit_push",
-        "description": "Stage all changes (git add -A), commit with message, and push to remote.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "description": "Commit message",
+        "type": "function",
+        "function": {
+            "name": "git_commit_push",
+            "description": "Stage all changes (git add -A), commit with message, and push to remote.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string", "description": "Commit message"},
+                    "repo_dir": {"type": "string", "description": "Repository directory path"},
                 },
-                "repo_dir": {
-                    "type": "string",
-                    "description": "Repository directory path",
-                },
+                "required": ["message", "repo_dir"],
             },
-            "required": ["message", "repo_dir"],
         },
     },
     {
-        "name": "search_files",
-        "description": "Search file contents using grep. Returns matching lines with file paths.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "pattern": {
-                    "type": "string",
-                    "description": "Search pattern (grep regex)",
+        "type": "function",
+        "function": {
+            "name": "search_files",
+            "description": "Search file contents using grep. Returns matching lines with file paths.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string", "description": "Search pattern (grep regex)"},
+                    "path": {"type": "string", "description": "Directory to search in (defaults to DOCS_ROOT)"},
                 },
-                "path": {
-                    "type": "string",
-                    "description": "Directory to search in (defaults to DOCS_ROOT)",
-                },
+                "required": ["pattern"],
             },
-            "required": ["pattern"],
         },
     },
 ]
@@ -397,51 +381,33 @@ TOOL_DISPATCH = {
 }
 
 # ---------------------------------------------------------------------------
-# Claude API caller
+# Zhipu API caller
 # ---------------------------------------------------------------------------
 
 
-def call_claude(messages: list[dict], tools: list[dict], system: str) -> dict:
-    """Call Claude API with tool-use support. Returns the response body dict.
+def call_llm(messages: list[dict], tools: list[dict]):
+    """Call Zhipu API with tool-use support. Returns the response object.
 
-    Raises HTTPError or other exceptions on failure.
     Includes 429 exponential backoff retry (1s, 2s, 4s, max 3 retries).
     """
     import time
 
-    url = f"{BASE_URL}/v1/messages"
-    payload = {
-        "model": MODEL,
-        "max_tokens": 4096,
-        "system": system,
-        "tools": tools,
-        "messages": messages,
-    }
-    data = json.dumps(payload).encode("utf-8")
-    headers = {
-        "x-api-key": AUTH_TOKEN,
-        "content-type": "application/json",
-        "anthropic-version": "2023-06-01",
-        "user-agent": "curl/8.0",
-    }
-
     max_retries = 3
     for attempt in range(max_retries + 1):
-        req = Request(url, data=data, headers=headers, method="POST")
         try:
-            with urlopen(req, timeout=60) as resp:
-                return json.loads(resp.read().decode("utf-8"))
-        except HTTPError as e:
-            if e.code == 429 and attempt < max_retries:
+            return _client.chat.completions.create(
+                model=MODEL,
+                max_tokens=4096,
+                tools=tools,
+                messages=messages,
+            )
+        except Exception as e:
+            if "429" in str(e) and attempt < max_retries:
                 wait = 2**attempt
                 log(f"Rate limited, retrying in {wait}s...")
                 time.sleep(wait)
                 continue
-            # Read error body for debugging
-            error_body = ""
-            with contextlib.suppress(Exception):
-                error_body = e.read().decode("utf-8")
-            log(f"Claude API error {e.code}: {error_body[:500]}")
+            log(f"Zhipu API error: {e}")
             raise
 
 
@@ -452,7 +418,7 @@ def call_claude(messages: list[dict], tools: list[dict], system: str) -> dict:
 
 def run_chat(user_message: str, history: list[dict] | None = None) -> dict:
     """Run the full tool-use loop. Returns {"response": str, "tool_calls": int}."""
-    messages = []
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
     # Add conversation history if provided
     if history:
@@ -464,29 +430,33 @@ def run_chat(user_message: str, history: list[dict] | None = None) -> dict:
     total_tool_calls = 0
 
     for _ in range(MAX_TOOL_ROUNDS):
-        response = call_claude(messages, TOOLS, SYSTEM_PROMPT)
-        content_blocks = response.get("content", [])
-        _ = response.get("stop_reason", "")
+        response = call_llm(messages, TOOLS)
+        choice = response.choices[0]
+        message = choice.message
 
-        # Extract tool_use blocks
-        tool_uses = [b for b in content_blocks if b["type"] == "tool_use"]
-
-        if not tool_uses:
-            # No tool calls — extract text response and return
-            text_parts = [b["text"] for b in content_blocks if b["type"] == "text"]
-            final_text = "\n".join(text_parts) if text_parts else ""
-            return {"response": final_text, "tool_calls": total_tool_calls}
+        if not message.tool_calls:
+            # No tool calls — return text response
+            return {"response": message.content or "", "tool_calls": total_tool_calls}
 
         # There are tool calls — execute them
-        # First, append the assistant's response to messages
-        messages.append({"role": "assistant", "content": content_blocks})
+        # Append assistant message (with tool_calls) to messages
+        messages.append({
+            "role": "assistant",
+            "content": message.content or "",
+            "tool_calls": [
+                {
+                    "id": tc.id,
+                    "type": "function",
+                    "function": {"name": tc.function.name, "arguments": tc.function.arguments},
+                }
+                for tc in message.tool_calls
+            ],
+        })
 
-        # Execute each tool and build tool_result blocks
-        tool_results = []
-        for tool_use in tool_uses:
-            tool_name = tool_use["name"]
-            tool_input = tool_use["input"]
-            tool_id = tool_use["id"]
+        # Execute each tool and append results
+        for tool_call in message.tool_calls:
+            tool_name = tool_call.function.name
+            tool_input = json.loads(tool_call.function.arguments)
             total_tool_calls += 1
 
             log(f"Tool call [{total_tool_calls}]: {tool_name}({json.dumps(tool_input, ensure_ascii=False)[:200]})")
@@ -504,16 +474,11 @@ def run_chat(user_message: str, history: list[dict] | None = None) -> dict:
 
             log(f"  -> Result: {result[:200]}")
 
-            tool_results.append(
-                {
-                    "type": "tool_result",
-                    "tool_use_id": tool_id,
-                    "content": result,
-                }
-            )
-
-        # Append tool results as user message
-        messages.append({"role": "user", "content": tool_results})
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tool_call.id,
+                "content": result,
+            })
 
     # Exhausted max rounds
     return {
@@ -598,15 +563,6 @@ class ChatHandler(BaseHTTPRequestHandler):
         try:
             result = run_chat(message, history)
             self._send_json(result)
-        except HTTPError as e:
-            error_body = ""
-            with contextlib.suppress(Exception):
-                error_body = e.read().decode("utf-8")
-            log(f"Claude API error: {e.code} - {error_body[:300]}")
-            self._send_json(
-                {"error": f"Claude API error: {e.code}", "detail": error_body[:500]},
-                502,
-            )
         except Exception as e:
             log(f"Internal error: {e}")
             self._send_json({"error": f"Internal server error: {e}"}, 500)
@@ -618,12 +574,15 @@ class ChatHandler(BaseHTTPRequestHandler):
 
 
 def main():
-    if not BASE_URL:
-        print("Error: MMKG_BASE_URL not set", file=sys.stderr)
+    global _client
+
+    api_key = os.environ.get("ZHIPU_API_KEY")
+    if not api_key:
+        print("Error: ZHIPU_API_KEY not set", file=sys.stderr)
         sys.exit(1)
-    if not AUTH_TOKEN:
-        print("Error: MMKG_AUTH_TOKEN not set", file=sys.stderr)
-        sys.exit(1)
+
+    from zhipuai import ZhipuAI
+    _client = ZhipuAI(api_key=api_key)
 
     log(f"DOCS_ROOT: {DOCS_ROOT}")
     log(f"CC_ROOT:   {CC_ROOT}")

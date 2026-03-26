@@ -17,8 +17,6 @@ import os
 import re
 import sys
 import time
-import urllib.error
-import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -272,10 +270,9 @@ def read_session_content(filepath: str, max_chars: int = 8000) -> str:
 
 
 def generate_summary(content: str, title: str) -> dict | None:
-    """调用 API 生成会话摘要，返回 {summary, category, outcomes}。"""
-    base_url = os.environ.get("MMKG_BASE_URL", "")
-    auth_token = os.environ.get("MMKG_AUTH_TOKEN", "")
-    if not base_url or not auth_token:
+    """调用智谱 API 生成会话摘要，返回 {summary, category, outcomes}。"""
+    api_key = os.environ.get("ZHIPU_API_KEY", "")
+    if not api_key:
         return None
 
     prompt = f"""分析以下 Claude Code 会话内容，用中文返回 JSON（不要 markdown 代码块）：
@@ -289,48 +286,28 @@ def generate_summary(content: str, title: str) -> dict | None:
 会话内容：
 {content[:6000]}"""
 
-    payload = json.dumps(
-        {
-            "model": "claude-sonnet-4-6",
-            "max_tokens": 200,
-            "messages": [{"role": "user", "content": prompt}],
-        }
-    ).encode("utf-8")
-
-    url = base_url.rstrip("/") + "/v1/messages"
-    req = urllib.request.Request(
-        url,
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": auth_token,
-            "anthropic-version": "2023-06-01",
-            "User-Agent": "curl/8.7.1",
-        },
-        method="POST",
-    )
-
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-            text = ""
-            for block in result.get("content", []):
-                if block.get("type") == "text":
-                    text += block.get("text", "")
-            # 从返回文本中提取 JSON 对象
-            text = text.strip()
-            # 去掉可能的 markdown 代码块包裹
-            if "```" in text:
-                m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
-                if m:
-                    text = m.group(1)
-            # 如果不是以 { 开头，尝试提取 JSON 对象
-            if not text.startswith("{"):
-                m = re.search(r"\{[^{}]*\}", text, re.DOTALL)
-                if m:
-                    text = m.group(0)
-            return json.loads(text)
-    except (urllib.error.URLError, json.JSONDecodeError, Exception) as e:
+        from zhipuai import ZhipuAI
+
+        client = ZhipuAI(api_key=api_key)
+        response = client.chat.completions.create(
+            model="glm-4-flash",
+            max_tokens=200,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        text = response.choices[0].message.content.strip()
+        # 去掉可能的 markdown 代码块包裹
+        if "```" in text:
+            m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+            if m:
+                text = m.group(1)
+        # 如果不是以 { 开头，尝试提取 JSON 对象
+        if not text.startswith("{"):
+            m = re.search(r"\{[^{}]*\}", text, re.DOTALL)
+            if m:
+                text = m.group(0)
+        return json.loads(text)
+    except Exception as e:
         print(f"  Summary API error: {e}", file=sys.stderr)
         return None
 

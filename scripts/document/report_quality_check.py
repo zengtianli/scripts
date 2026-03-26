@@ -565,18 +565,17 @@ def fix_forbidden_words(text: str) -> str:
     return text
 
 
-def _get_anthropic_client():
-    """创建 Anthropic API 客户端（用于 bullet point 转换）"""
+def _get_llm_client():
+    """创建智谱 API 客户端（用于 bullet point 转换）"""
     import os
 
-    base_url = os.environ.get("MMKG_BASE_URL")
-    auth_token = os.environ.get("MMKG_AUTH_TOKEN")
-    if not base_url or not auth_token:
+    api_key = os.environ.get("ZHIPU_API_KEY")
+    if not api_key:
         return None
     try:
-        import anthropic
+        from zhipuai import ZhipuAI
 
-        return anthropic.Anthropic(base_url=base_url, api_key=auth_token)
+        return ZhipuAI(api_key=api_key)
     except Exception:
         return None
 
@@ -587,9 +586,9 @@ def fix_bullet_points(text: str) -> str:
         show_warning("bullet_to_paragraph 模块不可用，跳过 bullet point 修复")
         return text
 
-    client = _get_anthropic_client()
+    client = _get_llm_client()
     if client is None:
-        show_warning("API 不可用（需要 MMKG_BASE_URL 和 MMKG_AUTH_TOKEN），跳过 bullet point 修复")
+        show_warning("API 不可用（需要 ZHIPU_API_KEY），跳过 bullet point 修复")
         return text
 
     blocks = extract_bullet_blocks(text)
@@ -649,9 +648,9 @@ def fix_numbered_lists(text: str) -> str:
         show_warning("bullet_to_paragraph 模块不可用，跳过有序列表修复")
         return text
 
-    client = _get_anthropic_client()
+    client = _get_llm_client()
     if client is None:
-        show_warning("API 不可用（需要 MMKG_BASE_URL 和 MMKG_AUTH_TOKEN），跳过有序列表修复")
+        show_warning("API 不可用（需要 ZHIPU_API_KEY），跳过有序列表修复")
         return text
 
     blocks = extract_bullet_blocks(text)

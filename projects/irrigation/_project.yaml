@@ -1,9 +1,0 @@
-name: irrigation
-title: 灌溉需水计算
-description: 农业灌溉需水量计算工具，支持 Streamlit 界面交互
-type: hydraulic
-icon: "\U0001F33E"
-status: active
-entry:
-  web: webapp/app.py
-tags: [灌溉, 需水量, 农业用水]

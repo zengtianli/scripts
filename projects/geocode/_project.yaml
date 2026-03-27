@@ -1,9 +1,0 @@
-name: geocode
-title: 地理编码/逆编码
-description: 基于地址或坐标进行地理编码与逆编码转换的工具
-type: hydraulic
-icon: "\U0001F4CD"
-status: active
-entry:
-  web: app.py
-tags: [地理编码, 坐标转换, GIS]

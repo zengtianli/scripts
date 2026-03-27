@@ -1,9 +1,0 @@
-name: hydro_toolkit
-title: 水利工具集
-description: 水利计算工具门户，一站式展示和启动所有水利模型
-type: hydraulic
-icon: "\U0001F9F0"
-status: active
-entry:
-  web: app.py
-tags: [门户, 工具集, 水利]

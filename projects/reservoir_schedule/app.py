@@ -25,20 +25,17 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 添加 src 到路径
+# 添加 src 和 lib 到路径
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "lib"))
 from src import xlsx_bridge
 from src.hydro_core import HydroElectricity, read_info_txt, read_paras
+from hydraulic.st_utils import page_config, footer
 
 # ============================================================
 # 页面配置
 # ============================================================
-st.set_page_config(
-    page_title="浙水设计-水库群多目标联合调度系统",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+page_config("浙水设计-水库群多目标联合调度系统", "⚡")
 
 # 自定义 CSS
 st.markdown("""
@@ -666,10 +663,4 @@ else:
 # ============================================================
 # 页脚
 # ============================================================
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: gray; font-size: 14px;'>"
-    "⚡ 浙水设计-水库群多目标联合调度系统 V1.0 | 浙江省水利水电勘测设计院"
-    "</div>",
-    unsafe_allow_html=True
-)
+footer("浙水设计-水库群多目标联合调度系统 V1.0 | 浙江省水利水电勘测设计院")

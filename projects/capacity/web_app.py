@@ -331,25 +331,13 @@ if uploaded_file is not None:
             # Step 5: 下载结果
             # ============================================================
             st.header("📥 Step 5: 下载结果")
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                for name, df in all_scheme_results.items():
-                    if any('月' in str(c) for c in df.columns) and '日期' not in df.columns:
-                        export_df = reorder_month_columns(df.copy(), start_month)
-                    else:
-                        export_df = df
-                    # Excel sheet 名最长 31 字符
-                    sheet_name = name[:31]
-                    export_df.to_excel(writer, sheet_name=sheet_name, index=False)
-            output.seek(0)
-
-            st.download_button(
-                label="📥 下载计算结果.xlsx",
-                data=output,
-                file_name="计算结果.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                type="primary"
-            )
+            export_sheets = {}
+            for name, df in all_scheme_results.items():
+                if any('月' in str(c) for c in df.columns) and '日期' not in df.columns:
+                    export_sheets[name] = reorder_month_columns(df.copy(), start_month)
+                else:
+                    export_sheets[name] = df
+            excel_download(export_sheets, "计算结果.xlsx", "📥 下载计算结果.xlsx", type="primary")
 
 else:
     st.info("👆 请上传 输入.xlsx 文件开始计算")
@@ -357,10 +345,4 @@ else:
 # ============================================================
 # 页脚
 # ============================================================
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: gray;'>"
-    "🌊 水环境功能区纳污能力计算工具 | 浙水设计"
-    "</div>",
-    unsafe_allow_html=True
-)
+footer("水环境功能区纳污能力计算工具 | 浙水设计")

@@ -20,19 +20,16 @@ SRC_DIR = PROJECT_DIR / 'src'
 DATA_SAMPLE_DIR = PROJECT_DIR / 'data' / 'sample'
 DATA_OUTPUT_DIR = PROJECT_DIR / 'data' / 'output'
 
-# 添加 src 到路径
+# 添加 src 和 lib 到路径
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "lib"))
 
 from scheduler import DistrictScheduler, DISTRICT_NAME_MAPPING, SLUICE_NAME_MAPPING
+from hydraulic.st_utils import page_config, footer
 
 # 页面配置
-st.set_page_config(
-    page_title="浙东河区调度模型",
-    page_icon="🌊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+page_config("浙东河区调度模型")
 
 # 自定义样式
 st.markdown("""
@@ -325,12 +322,7 @@ def main():
             )
     
     # 页脚
-    st.divider()
-    st.markdown("""
-    <div style="text-align: center; color: #888; font-size: 0.9rem;">
-        浙东河区调度模型 · 为水资源科学调度提供专业计算支持
-    </div>
-    """, unsafe_allow_html=True)
+    footer("浙东河区调度模型 · 为水资源科学调度提供专业计算支持")
 
 
 if __name__ == "__main__":

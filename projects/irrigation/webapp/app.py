@@ -7,9 +7,7 @@
 """
 import streamlit as st
 import pandas as pd
-import io
 import sys
-import os
 import zipfile
 import tempfile
 from pathlib import Path
@@ -20,19 +18,17 @@ SRC_DIR = PROJECT_DIR / 'src'
 DATA_SAMPLE_DIR = PROJECT_DIR / 'data' / 'sample'
 DATA_OUTPUT_DIR = PROJECT_DIR / 'data' / 'output'
 
-# 添加 src 到路径
+# 添加 src 和 lib 到路径
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "lib"))
+
+from hydraulic.st_utils import page_config, excel_download, footer
 
 # ============================================================
 # 页面配置
 # ============================================================
-st.set_page_config(
-    page_title="灌溉需水计算",
-    page_icon="🌾",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+page_config("灌溉需水计算", "🌾")
 
 # ============================================================
 # 工具函数
@@ -481,34 +477,10 @@ if data_path and input_files:
         st.header("📥 Step 5: 下载结果")
         
         if result_dfs:
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                for label, df in result_dfs.items():
-                    sheet_name = label[:31]
-                    df.to_excel(writer, sheet_name=sheet_name, index=False)
-            output.seek(0)
-            
-            col1, col2 = st.columns([1, 3])
-            with col1:
-                st.download_button(
-                    label="📥 下载计算结果.xlsx",
-                    data=output,
-                    file_name="灌溉需水计算结果.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    type="primary",
-                    use_container_width=True
-                )
-            
-            with col2:
-                st.caption(f"包含 {len(result_dfs)} 个结果表")
+            excel_download(result_dfs, "灌溉需水计算结果.xlsx", type="primary")
+            st.caption(f"包含 {len(result_dfs)} 个结果表")
 
 # ============================================================
 # 页脚
 # ============================================================
-st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: gray;'>"
-    "🌾 浙东灌溉需水计算模型 | ZDWP"
-    "</div>",
-    unsafe_allow_html=True
-)
+footer("浙东灌溉需水计算模型 | ZDWP")

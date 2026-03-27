@@ -85,18 +85,6 @@ _index/               # 脚本索引（by-function, by-platform, by-type）
 - ❌ `execute/` - 已废弃，不再使用
 - ❌ `.assets/scripts/` - 已废弃，不再使用
 
-**OA 系统**：
-- OA 项目：`~/Dev/oa-project/`
-- 启动命令：`cd ~/Dev/oa-project && pnpm dev`（端口 3000）
-- 秘书系统：已整合到 OA 总控的 `/secretary` 页面
-- Raycast 命令：`sec_oa.sh` 打开 OA 总控
-
-**已删除的冗余命令**（2026-03-04）：
-- ❌ `sec_report.sh` - 功能已整合到 OA
-- ❌ `sec_review.sh` - 功能已整合到 OA
-- ❌ `sys_oa_dev.sh` - 不再需要
-- ❌ `sys_oa_zdwp.sh` - 不再需要
-
 **跨仓库路径引用**：
 - 水利公司：`~/Work/zdwp/`
 - 论文部：`~/Personal/essays/`

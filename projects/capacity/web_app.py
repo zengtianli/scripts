@@ -9,11 +9,13 @@ Web 界面版本 - 纳污能力计算（Streamlit）
 
 import streamlit as st
 import pandas as pd
-import io
 from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent / 'src'))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "lib"))
+
+from hydraulic.st_utils import page_config, excel_download, footer
 
 from calc_core import (
     calc_monthly_flow, calc_monthly_velocity, calc_monthly_capacity,
@@ -30,12 +32,7 @@ from xlsx_parser import (
 # ============================================================
 # 页面配置
 # ============================================================
-st.set_page_config(
-    page_title="纳污能力计算",
-    page_icon="🌊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+page_config("纳污能力计算")
 
 # ============================================================
 # 工具函数

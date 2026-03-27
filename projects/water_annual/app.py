@@ -14,12 +14,14 @@
 
 import streamlit as st
 import pandas as pd
-import io
 from pathlib import Path
 import sys
 
-# 添加 src 到路径
+# 添加 src 和 lib 到路径
 sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "lib"))
+
+from hydraulic.st_utils import page_config, excel_download, footer
 
 from data_loader import (
     load_csv,
@@ -34,12 +36,7 @@ from data_loader import (
 # ============================================================
 # 页面配置
 # ============================================================
-st.set_page_config(
-    page_title="水资源年报查询",
-    page_icon="🌊",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+page_config("水资源年报查询")
 
 # ============================================================
 # 样式
@@ -158,19 +155,8 @@ if selected_cities and selected_years:
         col1, col2 = st.columns(2)
         
         with col1:
-            # 导出 Excel
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False, sheet_name='查询结果')
-            excel_data = output.getvalue()
-            
             filename = f"{'_'.join(selected_cities)}_{selected_table}_{min(selected_years)}-{max(selected_years)}.xlsx"
-            st.download_button(
-                label="📥 下载 Excel",
-                data=excel_data,
-                file_name=filename,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            )
+            excel_download({"查询结果": df}, filename)
         
         with col2:
             # 导出 CSV
@@ -208,5 +194,4 @@ else:
 # ============================================================
 # 页脚
 # ============================================================
-st.divider()
-st.caption("💡 提示：CSV 文件位于 `data/input/` 目录，命名格式为 `{年份}_{市}_{表名}.csv`")
+footer("💡 CSV 文件位于 data/input/ 目录，命名格式为 {年份}_{市}_{表名}.csv")

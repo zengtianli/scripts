@@ -403,177 +403,187 @@ def make_terminal_svg(title: str, lines: list[tuple]) -> str:
 # ─────────────────────────────────────────────
 
 def make_readme_en(name: str, meta: dict) -> str:
-    demo_badge = ""
-    demo_section = ""
-    if meta["demo_url"]:
-        url = meta["demo_url"]
+    url = meta["demo_url"]
+    img_ext = "png" if url else "svg"
+
+    lines = [
+        f"# {name}",
+        "",
+        "**English** | [中文](README_CN.md)",
+        "",
+        meta["tagline_en"],
+        "",
+    ]
+
+    if url:
         domain = url.replace("https://", "")
-        demo_badge = f'[![Live Demo](https://img.shields.io/badge/Live_Demo-{domain.replace("-", "--")}-blue?style=for-the-badge)]({url})\n'
-        demo_section = f"""---
+        lines.append(f'[![Live Demo](https://img.shields.io/badge/Live_Demo-{domain.replace("-", "--")}-blue?style=for-the-badge)]({url})')
+    lines.append('[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-yellow?style=for-the-badge)](https://python.org)')
+    lines.append('[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)')
+    lines.append("")
 
-### Try it now — no install needed
+    if url:
+        lines += ["---", "", "### Try it now — no install needed", "", f"**{url}**", ""]
 
-**{url}**
+    lines += [
+        "---",
+        "",
+        f"![{name} demo](docs/screenshots/demo.{img_ext})",
+        "",
+        "---",
+        "",
+        f"## What can {name} do?",
+        "",
+        "| Feature | Description |",
+        "|---------|-------------|",
+    ]
+    for f, d in meta["features_en"]:
+        lines.append(f"| **{f}** | {d} |")
 
----
-
-"""
-
-    feature_rows = "\n".join(
-        f"| **{f}** | {d} |" for f, d in meta["features_en"]
-    )
-
-    install_cmd = "pip install " + name if name == "downloads-organizer" else dedent(f"""\
-        git clone https://github.com/zengtianli/{name}.git
-        cd {name}
-        pip install -r requirements.txt""")
+    if name == "downloads-organizer":
+        install_cmd = f"pip install {name}"
+    else:
+        install_cmd = f"git clone https://github.com/zengtianli/{name}.git\ncd {name}\npip install -r requirements.txt"
 
     quickstart = "downloads-organizer --watch" if name == "downloads-organizer" else "streamlit run app.py"
 
-    selfhost = ""
-    if meta.get("demo_url"):
-        selfhost = dedent(f"""\
-            ## Self-host
+    lines += [
+        "",
+        "## Install",
+        "",
+        "```bash",
+        install_cmd,
+        "```",
+        "",
+        "## Quick Start",
+        "",
+        "```bash",
+        quickstart,
+        "```",
+        "",
+    ]
 
-            ```bash
-            git clone https://github.com/zengtianli/{name}.git
-            cd {name}
-            pip install -r requirements.txt
-            streamlit run app.py
-            ```
+    if url:
+        lines += [
+            "## Self-host",
+            "",
+            "```bash",
+            f"git clone https://github.com/zengtianli/{name}.git",
+            f"cd {name}",
+            "pip install -r requirements.txt",
+            "streamlit run app.py",
+            "```",
+            "",
+            f"Or use the hosted version: **{url}**",
+            "",
+        ]
 
-            Or use the hosted version: **{meta["demo_url"]}**
+    streamlit_req = "Streamlit 1.36+" if (url or name not in ["downloads-organizer", "hydro-qgis"]) else "See requirements.txt"
+    lines += [
+        "## Requirements",
+        "",
+        "- Python 3.9+",
+        f"- {streamlit_req}",
+        "",
+        "## License",
+        "",
+        "MIT",
+        "",
+    ]
 
-            """)
-
-    return dedent(f"""\
-        # {name}
-
-        **English** | [中文](README_CN.md)
-
-        {meta["tagline_en"]}
-
-        {demo_badge}[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-yellow?style=for-the-badge)](https://python.org)
-        [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-
-        {demo_section}![{name} demo](docs/screenshots/demo.svg)
-
-        ---
-
-        ## What can {name} do?
-
-        | Feature | Description |
-        |---------|-------------|
-        {feature_rows}
-
-        ## Install
-
-        ```bash
-        {install_cmd}
-        ```
-
-        ## Quick Start
-
-        ```bash
-        {quickstart}
-        ```
-
-        {selfhost}## Requirements
-
-        - Python 3.9+
-        - {"Streamlit 1.36+" if meta.get("demo_url") or name not in ["downloads-organizer", "hydro-qgis"] else "See requirements.txt"}
-
-        ## License
-
-        MIT
-        """)
+    return "\n".join(lines)
 
 
 def make_readme_cn(name: str, meta: dict) -> str:
-    demo_badge = ""
-    demo_section = ""
-    if meta["demo_url"]:
-        url = meta["demo_url"]
+    url = meta["demo_url"]
+    img_ext = "png" if url else "svg"
+
+    lines = [
+        f"# {name}",
+        "",
+        "[English](README.md) | **中文**",
+        "",
+        meta["tagline_cn"],
+        "",
+    ]
+
+    if url:
         domain = url.replace("https://", "")
-        demo_badge = f'[![在线演示](https://img.shields.io/badge/在线演示-{domain.replace("-", "--")}-blue?style=for-the-badge)]({url})\n'
-        demo_section = f"""---
+        lines.append(f'[![在线演示](https://img.shields.io/badge/在线演示-{domain.replace("-", "--")}-blue?style=for-the-badge)]({url})')
+    lines.append('[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-yellow?style=for-the-badge)](https://python.org)')
+    lines.append('[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)')
+    lines.append("")
 
-### 无需安装，立即体验
+    if url:
+        lines += ["---", "", "### 无需安装，立即体验", "", f"**{url}**", ""]
 
-**{url}**
+    lines += [
+        "---",
+        "",
+        f"![{name} demo](docs/screenshots/demo.{img_ext})",
+        "",
+        "---",
+        "",
+        "## 功能一览",
+        "",
+        "| 功能 | 说明 |",
+        "|------|------|",
+    ]
+    for f, d in meta["features_cn"]:
+        lines.append(f"| **{f}** | {d} |")
 
----
-
-"""
-
-    feature_rows = "\n".join(
-        f"| **{f}** | {d} |" for f, d in meta["features_cn"]
-    )
-
-    install_cmd = "pip install " + name if name == "downloads-organizer" else dedent(f"""\
-        git clone https://github.com/zengtianli/{name}.git
-        cd {name}
-        pip install -r requirements.txt""")
+    if name == "downloads-organizer":
+        install_cmd = f"pip install {name}"
+    else:
+        install_cmd = f"git clone https://github.com/zengtianli/{name}.git\ncd {name}\npip install -r requirements.txt"
 
     quickstart = "downloads-organizer --watch" if name == "downloads-organizer" else "streamlit run app.py"
 
-    selfhost = ""
-    if meta.get("demo_url"):
-        selfhost = dedent(f"""\
-            ## 自托管
+    lines += [
+        "",
+        "## 安装",
+        "",
+        "```bash",
+        install_cmd,
+        "```",
+        "",
+        "## 快速开始",
+        "",
+        "```bash",
+        quickstart,
+        "```",
+        "",
+    ]
 
-            ```bash
-            git clone https://github.com/zengtianli/{name}.git
-            cd {name}
-            pip install -r requirements.txt
-            streamlit run app.py
-            ```
+    if url:
+        lines += [
+            "## 自托管",
+            "",
+            "```bash",
+            f"git clone https://github.com/zengtianli/{name}.git",
+            f"cd {name}",
+            "pip install -r requirements.txt",
+            "streamlit run app.py",
+            "```",
+            "",
+            f"或直接使用托管版本：**{url}**",
+            "",
+        ]
 
-            或直接使用托管版本：**{meta["demo_url"]}**
+    streamlit_req = "Streamlit 1.36+" if (url or name not in ["downloads-organizer", "hydro-qgis"]) else "详见 requirements.txt"
+    lines += [
+        "## 环境要求",
+        "",
+        "- Python 3.9+",
+        f"- {streamlit_req}",
+        "",
+        "## License",
+        "",
+        "MIT",
+        "",
+    ]
 
-            """)
-
-    return dedent(f"""\
-        # {name}
-
-        [English](README.md) | **中文**
-
-        {meta["tagline_cn"]}
-
-        {demo_badge}[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-yellow?style=for-the-badge)](https://python.org)
-        [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-
-        {demo_section}![{name} demo](docs/screenshots/demo.svg)
-
-        ---
-
-        ## 功能一览
-
-        | 功能 | 说明 |
-        |------|------|
-        {feature_rows}
-
-        ## 安装
-
-        ```bash
-        {install_cmd}
-        ```
-
-        ## 快速开始
-
-        ```bash
-        {quickstart}
-        ```
-
-        {selfhost}## 环境要求
-
-        - Python 3.9+
-        - {"Streamlit 1.36+" if meta.get("demo_url") or name not in ["downloads-organizer", "hydro-qgis"] else "详见 requirements.txt"}
-
-        ## License
-
-        MIT
-        """)
+    return "\n".join(lines)
 
 
 # ─────────────────────────────────────────────

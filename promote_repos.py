@@ -456,8 +456,6 @@ def make_readme_en(name: str, meta: dict) -> str:
         {demo_badge}[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-yellow?style=for-the-badge)](https://python.org)
         [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-        ---
-
         {demo_section}![{name} demo](docs/screenshots/demo.svg)
 
         ---
@@ -544,8 +542,6 @@ def make_readme_cn(name: str, meta: dict) -> str:
 
         {demo_badge}[![Python 3.9+](https://img.shields.io/badge/Python-3.9+-yellow?style=for-the-badge)](https://python.org)
         [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-
-        ---
 
         {demo_section}![{name} demo](docs/screenshots/demo.svg)
 

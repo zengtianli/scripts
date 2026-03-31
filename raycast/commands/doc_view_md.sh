@@ -15,4 +15,4 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PYTHON=$(which python3)
 
-"$PYTHON" "$REPO_ROOT/scripts/document/md_to_html.py" "$1"
+"$PYTHON" "$REPO_ROOT/scripts/document/md_tools.py" to-html "$1"

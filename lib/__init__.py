@@ -69,5 +69,3 @@ from progress import ProgressTracker  # noqa: F401
 # === usage_log ===
 from usage_log import log_usage  # noqa: F401
 
-# === 兼容别名（过渡期）===
-# 允许 `import common_utils` 继续工作（通过 __init__.py re-export）

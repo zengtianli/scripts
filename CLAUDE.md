@@ -12,28 +12,16 @@ scripts/              # 功能脚本，按类别分组
 ├── system/           # 系统工具（sys_ + display_）
 ├── network/          # 网络代理（clashx_）
 ├── window/           # 窗口管理（yabai_）
-└── tools/            # 杂项工具（tts, gantt, quarto, app_open）
+└── tools/            # 杂项工具（tts, app_open, git_smart_push, llm_client）
 
 lib/                  # 统一公共库
-├── core/             # 核心处理逻辑（csv_core, docx_core, xlsx_core）
 ├── hydraulic/        # 水利领域专用库（编码映射、QGIS 配置）
-├── tools/            # 项目维护工具（health_check, sync_index）
+├── tools/            # 项目维护工具（health_check, sync_index, cf_api, gen_claude_md）
 ├── asr/              # 语音识别词表数据
-└── *.py / *.sh       # 公共模块（display, file_ops, finder, excel_ops 等）
+└── *.py / *.sh       # 公共模块（display, file_ops, finder, progress, docx_xml 等）
 
 projects/             # 复杂多文件项目（内部自治）
-├── capacity/         # 纳污能力计算（Streamlit）
-├── geocode/          # 地理编码（Streamlit）
-├── reservoir_schedule/  # 水库调度（Streamlit）
-├── irrigation/       # 灌溉需水（Streamlit）
-├── district_scheduler/  # 区域调度（Streamlit）
-├── risk_data/        # 风险分析表填充（CLI）
-├── qgis/             # QGIS 空间处理（Pipeline）
-├── company_query/    # 企业查询（CLI）
-├── cad/              # CAD 脚本
-├── rainfall/         # 降雨数据
-├── water_annual/     # 年度水资源数据
-└── water_efficiency/ # 用水效率（Streamlit）
+└── company_query/    # 企业查询（CLI）
 
 templates/            # 模板文件（zdwp_template.docx 等）
 
@@ -42,8 +30,23 @@ raycast/              # Raycast 入口
 └── lib/              # 运行器（run_python.sh → 调用 lib/common.sh）
 
 _index/               # 脚本索引（by-function, by-platform, by-type）
-.oa/                  # Next.js Web 应用（统一管理脚本和项目）
 ```
+
+## Claude CLI 依赖脚本
+
+以下脚本通过 `scripts/tools/llm_client.py` 调用 `claude -p`：
+
+| 脚本 | 功能 | 模型 |
+|------|------|------|
+| `document/bullet_to_paragraph.py` | 要点转公文段落/表格 | haiku |
+| `document/frontmatter_gen.py` | 批量生成 MD frontmatter | haiku |
+| `document/scan_sensitive_words.py` | 标书敏感词检测 | haiku |
+| `document/session_indexer.py` | CC 会话索引（--summarize 时） | haiku |
+| `file/smart_rename.py` | AI 驱动文件重命名 | haiku |
+| `tools/git_smart_push.py` | 智能 commit message 生成 | haiku |
+| `lib/tools/gen_claude_md.py` | 批量生成 CLAUDE.md | sonnet |
+
+`llm_client.py` 接口：`chat(system, message, model="haiku")` → `claude -p --model <model>`
 
 ## 开发约定
 
@@ -51,9 +54,8 @@ _index/               # 脚本索引（by-function, by-platform, by-type）
 - Shell 引用库：`source "$(dirname "$0")/../../lib/xxx.sh"`
 - `scripts/xxx/` 下的 Python 脚本：`sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))`
 - `projects/xxx/` 下的 Python 脚本：`sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "lib"))`
-- 水利领域导入：`from hydraulic import ...`，`from hydraulic.qgis_config import ...`
-- Excel 操作导入：`from excel_ops import ...`
-- Core 模块导入：`from core.docx_core import ...`
+- 水利领域导入：`from hydraulic import ...`
+- LLM 调用：`from tools.llm_client import chat`
 
 ### 命名规则
 - 脚本保留功能前缀：`docx_`、`xlsx_`、`csv_`、`md_`、`pptx_`、`yabai_`、`clashx_`
@@ -79,11 +81,13 @@ _index/               # 脚本索引（by-function, by-platform, by-type）
 
 ## 路径规范
 
-**当前目录结构**（2026-03-04 清理后）：
-- ✅ `scripts/{data,document,file,network,secretary,system,tools,window}/` - 功能脚本（按类别分组）
-- ✅ `raycast/commands/` - Raycast 入口脚本（51 个命令）
-- ❌ `execute/` - 已废弃，不再使用
-- ❌ `.assets/scripts/` - 已废弃，不再使用
+**当前目录结构**（2026-03-31 清理后）：
+- ✅ `scripts/{data,document,file,network,secretary,system,tools,window}/` - 功能脚本
+- ✅ `raycast/commands/` - Raycast 入口脚本
+- ❌ `execute/` - 已删除
+- ❌ `.assets/scripts/` - 已删除
+- ❌ `lib/core/` - 已删除（未使用）
+- ❌ `lib/common.py` / `lib/common_utils.py` - 已删除（deprecated shim）
 
 **跨仓库路径引用**：
 - 水利公司：`~/Work/zdwp/`
@@ -92,9 +96,3 @@ _index/               # 脚本索引（by-function, by-platform, by-type）
 - 求职管理：`~/Personal/resume/`
 - 工作报告：`~/Work/reports/`
 - 学习笔记：`~/Learn/`
-
-**禁止的路径模式**：
-- ❌ `execute/` 目录（已废弃）
-- ❌ `.assets/` 目录（已废弃）
-- ✅ `scripts/{category}/xxx`
-- ✅ `raycast/commands/xxx`

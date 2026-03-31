@@ -31,7 +31,6 @@ from display import show_error, show_info, show_processing, show_success, show_w
 from file_ops import find_files_by_extension
 
 # === 常量 ===
-DEFAULT_MODEL = "glm-4-flash"
 CHUNK_SIZE = 8000  # 按字符数分块
 
 
@@ -39,19 +38,8 @@ CHUNK_SIZE = 8000  # 按字符数分块
 
 
 def create_client():
-    """创建智谱客户端，从环境变量读取 API Key"""
-    api_key = os.environ.get("ZHIPU_API_KEY")
-    if not api_key:
-        show_error("环境变量 ZHIPU_API_KEY 未设置，请先配置后重试")
-        sys.exit(1)
-
-    try:
-        from zhipuai import ZhipuAI
-    except ImportError:
-        show_error("缺少 zhipuai 包，请运行: pip install zhipuai")
-        sys.exit(1)
-
-    return ZhipuAI(api_key=api_key)
+    """保留接口兼容，返回 None（已改用 claude CLI）"""
+    return None
 
 
 def build_prompt(content: str, existing_words: list[str], filename: str) -> str:
@@ -136,21 +124,20 @@ def _parse_json_response(text: str) -> list[dict] | None:
 
 
 def call_api(client, prompt: str, max_retries: int = 2) -> list[dict] | None:
-    """调用智谱 API 分析内容，带 retry 和容错解析"""
+    """调用 Claude 分析内容，带 retry 和容错解析"""
+    from tools.llm_client import chat as llm_chat
+
     for attempt in range(1, max_retries + 1):
         try:
-            response = client.chat.completions.create(
-                model=DEFAULT_MODEL,
-                max_tokens=4096,
-                messages=[{"role": "user", "content": prompt}],
+            text = llm_chat(
+                system="你是标书文档审阅专家。只输出纯 JSON 数组，不要 markdown 代码块。",
+                message=prompt,
             )
-            text = response.choices[0].message.content.strip()
 
             result = _parse_json_response(text)
             if result is not None:
                 return result
 
-            # 解析失败，决定是否 retry
             if attempt < max_retries:
                 show_warning(f"  JSON 解析失败（第 {attempt} 次），重试中...")
                 continue

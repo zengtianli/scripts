@@ -57,15 +57,8 @@ def show_help():
 
 
 def get_client():
-    """初始化智谱客户端，从环境变量读取配置"""
-    from zhipuai import ZhipuAI
-
-    api_key = os.environ.get("ZHIPU_API_KEY")
-    if not api_key:
-        show_error("环境变量 ZHIPU_API_KEY 未设置，请先配置后重试")
-        sys.exit(1)
-
-    return ZhipuAI(api_key=api_key)
+    """保留接口兼容，返回 None（已改用 claude CLI）"""
+    return None
 
 
 NUMBERED_LIST_RE = re.compile(r"^\d+\.\s+")
@@ -185,7 +178,9 @@ def clean_api_output(text: str) -> str:
 
 
 def convert_bullet_block(client, block: dict) -> str:
-    """调用智谱 API 转换单个 bullet block"""
+    """调用 Claude 转换单个 bullet block"""
+    from tools.llm_client import chat as llm_chat
+
     bullet_content = "\n".join(block["lines"])
     block_type = block.get("block_type", "bullet")
     type_desc = "有序列表（数字编号开头）" if block_type == "numbered" else "bullet point（`- ` 开头的列表）"
@@ -211,10 +206,10 @@ def convert_bullet_block(client, block: dict) -> str:
 仅输出转换后的内容，不要解释、不要思考过程。"""
 
     try:
-        response = client.chat.completions.create(
-            model="glm-4-plus", max_tokens=2000, messages=[{"role": "user", "content": prompt}]
+        raw = llm_chat(
+            system="你是公文格式转换器。只输出转换后的内容，不要解释。",
+            message=prompt,
         )
-        raw = response.choices[0].message.content.strip()
         return clean_api_output(raw)
     except Exception as e:
         show_error(f"API 调用失败: {e}")

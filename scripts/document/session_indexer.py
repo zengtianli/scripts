@@ -271,10 +271,6 @@ def read_session_content(filepath: str, max_chars: int = 8000) -> str:
 
 def generate_summary(content: str, title: str) -> dict | None:
     """调用智谱 API 生成会话摘要，返回 {summary, category, outcomes}。"""
-    api_key = os.environ.get("ZHIPU_API_KEY", "")
-    if not api_key:
-        return None
-
     prompt = f"""分析以下 Claude Code 会话内容，用中文返回 JSON（不要 markdown 代码块）：
 {{
   "summary": "一句话总结做了什么（20-40字）",
@@ -287,15 +283,12 @@ def generate_summary(content: str, title: str) -> dict | None:
 {content[:6000]}"""
 
     try:
-        from zhipuai import ZhipuAI
+        from tools.llm_client import chat
 
-        client = ZhipuAI(api_key=api_key)
-        response = client.chat.completions.create(
-            model="glm-4-flash",
-            max_tokens=200,
-            messages=[{"role": "user", "content": prompt}],
+        text = chat(
+            system="你是一个 JSON 生成器。只输出纯 JSON，不要 markdown 代码块。",
+            message=prompt,
         )
-        text = response.choices[0].message.content.strip()
         # 去掉可能的 markdown 代码块包裹
         if "```" in text:
             m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)

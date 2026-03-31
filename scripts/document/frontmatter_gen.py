@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""frontmatter_gen.py — 智谱 API 批量生成 MD frontmatter
+"""frontmatter_gen.py — 批量生成 MD frontmatter
 
-扫描指定目录下的 Markdown 文件，调用智谱 API 生成
+扫描指定目录下的 Markdown 文件，调用 Claude 生成
 description + tags 的 YAML frontmatter 并写入文件头部。
 """
 
@@ -32,29 +32,13 @@ def has_frontmatter(text: str) -> bool:
 
 
 def call_llm(client, content: str) -> str:
-    """调用智谱 API，返回响应文本。
+    """调用 Claude 生成 frontmatter。"""
+    from tools.llm_client import chat
 
-    包含 429 指数退避重试（1s, 2s, 4s，最多 3 次）。
-    """
-    max_retries = 3
-    for attempt in range(max_retries + 1):
-        try:
-            response = client.chat.completions.create(
-                model="glm-4-flash",
-                max_tokens=200,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": f"为以下文档生成 frontmatter：\n\n{content[:2000]}"},
-                ],
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            if "429" in str(e) and attempt < max_retries:
-                wait = 2**attempt
-                print(f"  Rate limited, retrying in {wait}s...")
-                time.sleep(wait)
-                continue
-            raise
+    return chat(
+        system=SYSTEM_PROMPT,
+        message=f"为以下文档生成 frontmatter：\n\n{content[:2000]}",
+    )
 
 
 def parse_frontmatter_response(text: str) -> str | None:
@@ -122,15 +106,7 @@ def main():
         print(f"Error: '{src_dir}' is not a directory")
         sys.exit(1)
 
-    # 检查环境变量（dry-run 不需要）
-    client = None
-    if not args.dry_run:
-        api_key = os.environ.get("ZHIPU_API_KEY", "")
-        if not api_key:
-            print("Error: ZHIPU_API_KEY not set")
-            sys.exit(1)
-        from zhipuai import ZhipuAI
-        client = ZhipuAI(api_key=api_key)
+    client = None  # kept for interface compatibility
 
     # 收集文件
     if args.single_file:

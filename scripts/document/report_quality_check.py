@@ -566,18 +566,8 @@ def fix_forbidden_words(text: str) -> str:
 
 
 def _get_llm_client():
-    """创建智谱 API 客户端（用于 bullet point 转换）"""
-    import os
-
-    api_key = os.environ.get("ZHIPU_API_KEY")
-    if not api_key:
-        return None
-    try:
-        from zhipuai import ZhipuAI
-
-        return ZhipuAI(api_key=api_key)
-    except Exception:
-        return None
+    """保留接口兼容，返回占位对象（已改用 claude CLI）"""
+    return True  # non-None so callers proceed
 
 
 def fix_bullet_points(text: str) -> str:
@@ -588,7 +578,7 @@ def fix_bullet_points(text: str) -> str:
 
     client = _get_llm_client()
     if client is None:
-        show_warning("API 不可用（需要 ZHIPU_API_KEY），跳过 bullet point 修复")
+        show_warning("API 不可用，跳过 bullet point 修复")
         return text
 
     blocks = extract_bullet_blocks(text)
@@ -650,7 +640,7 @@ def fix_numbered_lists(text: str) -> str:
 
     client = _get_llm_client()
     if client is None:
-        show_warning("API 不可用（需要 ZHIPU_API_KEY），跳过有序列表修复")
+        show_warning("API 不可用，跳过有序列表修复")
         return text
 
     blocks = extract_bullet_blocks(text)

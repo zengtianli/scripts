@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""批量 commit + push 所有 GitHub 仓库，用智谱 GLM 生成 commit message。
+"""批量 commit + push 所有 auto_push 仓库，用智谱 GLM 生成 commit message。
+
+repo 列表从 ~/Dev/configs/repo-map.json 读取（auto_push: true 的条目）。
 
 用法:
     python3 git_smart_push.py           # AI 生成 commit message
     python3 git_smart_push.py --simple  # 简单 message（给 launchd 用）
+    python3 git_smart_push.py --all     # 推所有 repo（不限 auto_push）
 """
 
 import argparse
+import json
 import subprocess
 import sys
 from datetime import datetime
@@ -15,17 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from tools.llm_client import chat as llm_chat
 
-REPOS = [
-    Path.home() / "Dev/scripts",
-    Path.home() / "Dev/learn",
-    Path.home() / "Dev/website",
-    Path.home() / "Dev/essays",
-    Path.home() / "Dev/resume",
-    Path.home() / "Dev/docs",
-    Path.home() / "Work/zdwp",
-    Path.home() / "Work/reports",
-    Path.home() / ".claude",
-]
+REPO_MAP = Path.home() / "Dev/configs/repo-map.json"
 
 SYSTEM_PROMPT = (
     "你是 Git commit message 生成器。根据 diff 生成一行简洁的中文 commit message。"
@@ -34,6 +28,25 @@ SYSTEM_PROMPT = (
 )
 
 MAX_DIFF_CHARS = 3000
+
+
+def load_repos(all_repos: bool = False) -> list[Path]:
+    """从 repo-map.json 读取 repo 路径列表。"""
+    with open(REPO_MAP) as f:
+        data = json.load(f)
+
+    repos = []
+    for name, info in data["repos"].items():
+        if all_repos or info.get("auto_push", False):
+            local = Path(info["local"]).expanduser()
+            repos.append(local)
+
+    # 始终包含 ~/.claude（不在 registry 中，但需要 auto-push）
+    claude_dir = Path.home() / ".claude"
+    if claude_dir.is_dir() and (claude_dir / ".git").is_dir():
+        repos.append(claude_dir)
+
+    return sorted(repos)
 
 
 def run(cmd: list[str], cwd: Path) -> str:
@@ -98,13 +111,16 @@ def process_repo(repo: Path, use_ai: bool) -> bool:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--simple", action="store_true", help="跳过 AI，用简单 message")
+    parser.add_argument("--all", action="store_true", help="推所有 repo（不限 auto_push）")
     args = parser.parse_args()
 
     use_ai = not args.simple
+    repos = load_repos(all_repos=args.all)
     pushed = 0
     skipped = 0
 
-    for repo in REPOS:
+    print(f"扫描 {len(repos)} 个仓库...\n")
+    for repo in repos:
         if process_repo(repo, use_ai):
             pushed += 1
         else:

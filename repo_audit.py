@@ -21,7 +21,7 @@ DEV = Path.home() / "Dev"
 # ─────────────────────────────────────────────
 
 # Projects to audit (skip private/experimental ones)
-SKIP = {"configs", "hydro-app-tauri", ".claude", ".DS_Store"}
+SKIP = {"configs", ".claude", ".DS_Store"}
 
 GITIGNORE_BASELINE = {
     "# Python": ["__pycache__/", "*.py[cod]", "*.egg-info/", "dist/", "build/", "*.egg"],

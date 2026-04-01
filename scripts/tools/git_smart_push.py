@@ -17,14 +17,13 @@ from tools.llm_client import chat as llm_chat
 
 REPOS = [
     Path.home() / "Dev/scripts",
-    Path.home() / "Dev/oa-project",
-    Path.home() / "Learn",
-    Path.home() / "Personal/website",
-    Path.home() / "Personal/essays",
-    Path.home() / "Personal/resume",
+    Path.home() / "Dev/learn",
+    Path.home() / "Dev/website",
+    Path.home() / "Dev/essays",
+    Path.home() / "Dev/resume",
+    Path.home() / "Dev/docs",
     Path.home() / "Work/zdwp",
     Path.home() / "Work/reports",
-    Path.home() / "docs",
     Path.home() / ".claude",
 ]
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Unified repository screenshot tool — supports Streamlit apps and CLI tools.
+Unified repository screenshot tool — supports Streamlit apps, CLI tools, and Tauri desktop apps.
 
 Usage:
     # Screenshot a live Streamlit app
@@ -8,6 +8,9 @@ Usage:
 
     # Screenshot a CLI tool by running a command
     python3 repo_screenshot.py cli cc-harness "python3 harness.py ~/Dev/dockit"
+
+    # Screenshot Tauri desktop apps (opens each app, captures window via screencapture -R)
+    python3 repo_screenshot.py tauri hydro-apps
 
     # Screenshot all registered repos (Streamlit only)
     python3 repo_screenshot.py batch
@@ -51,6 +54,22 @@ REPOS = {
     "hydro-risk":           {"type": "cli", "cmd": "python3 01_build_database.py --help 2>&1 || echo 'hydro-risk pipeline'", "title": "hydro-risk"},
     "hydro-qgis":           {"type": "cli", "cmd": "python3 -c \"print('hydro-qgis pipeline')\"", "title": "hydro-qgis"},
     "downloads-organizer":  {"type": "cli", "cmd": "python3 -m downloads_organizer --help 2>&1 || echo 'downloads-organizer'", "title": "downloads-organizer"},
+
+    # Tauri desktop apps (DMG in hydro-apps/release/)
+    "hydro-apps": {
+        "type": "tauri",
+        "dmg_dir": "hydro-apps/release",
+        "apps": {
+            "水效评估工具": "efficiency",
+            "纳污能力计算": "capacity",
+            "水库群调度":   "reservoir",
+            "水资源年报查询": "annual",
+            "灌溉需水计算": "irrigation",
+            "河区调度模型": "district",
+            "地理编码工具": "geocode",
+            "降雨数据分析": "rainfall",
+        },
+    },
 }
 
 

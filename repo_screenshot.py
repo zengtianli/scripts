@@ -235,6 +235,104 @@ def screenshot_cli(cmd: str, cwd: str, out_path: Path, title: str = "Terminal") 
 
 
 # ─────────────────────────────────────────────
+# Tauri desktop app screenshot (via screencapture -R)
+# ─────────────────────────────────────────────
+
+def screenshot_tauri(config: dict, repo_dir: Path) -> bool:
+    """Screenshot Tauri desktop apps by opening each, capturing the window region."""
+    apps = config["apps"]  # {"中文名": "slug", ...}
+    dmg_dir = DEV / config.get("dmg_dir", "")
+    out_dir = repo_dir / "docs" / "screenshots"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    success = 0
+    for app_name, slug in apps.items():
+        out_path = out_dir / f"{slug}.png"
+        print(f"\n  [{slug}] {app_name}")
+
+        # Install from DMG if not in /Applications
+        app_path = Path(f"/Applications/{app_name}.app")
+        if not app_path.exists():
+            dmg_file = dmg_dir / f"{slug}.dmg"
+            if dmg_file.exists():
+                print(f"    Installing from {dmg_file.name} ...")
+                subprocess.run(["hdiutil", "attach", str(dmg_file), "-nobrowse", "-quiet"],
+                               capture_output=True)
+                # Find and copy the .app from the mounted volume
+                vol = Path(f"/Volumes/{app_name}")
+                if vol.exists():
+                    found = list(vol.glob("*.app"))
+                    if found:
+                        subprocess.run(["cp", "-R", str(found[0]), "/Applications/"],
+                                       capture_output=True)
+                    subprocess.run(["hdiutil", "detach", str(vol), "-quiet"],
+                                   capture_output=True)
+            if not app_path.exists():
+                print(f"    ✗ App not found: {app_path}")
+                continue
+
+        # Open app
+        print(f"    Opening ...")
+        subprocess.run(["open", "-a", app_name], capture_output=True)
+        time.sleep(4)
+
+        # Get window position and size via osascript
+        try:
+            pos = subprocess.run(
+                ["osascript", "-e",
+                 f'tell application "System Events" to tell process "{app_name}" to get position of window 1'],
+                capture_output=True, text=True, timeout=5,
+            ).stdout.strip()
+            sz = subprocess.run(
+                ["osascript", "-e",
+                 f'tell application "System Events" to tell process "{app_name}" to get size of window 1'],
+                capture_output=True, text=True, timeout=5,
+            ).stdout.strip()
+
+            if not pos or not sz:
+                print(f"    ✗ Could not get window bounds")
+                subprocess.run(["osascript", "-e", f'tell application "{app_name}" to quit'],
+                               capture_output=True)
+                time.sleep(1)
+                continue
+
+            x, y = pos.split(", ")
+            w, h = sz.split(", ")
+        except Exception as e:
+            print(f"    ✗ osascript error: {e}")
+            subprocess.run(["osascript", "-e", f'tell application "{app_name}" to quit'],
+                           capture_output=True)
+            time.sleep(1)
+            continue
+
+        # Capture window region (non-interactive, silent)
+        subprocess.run(["screencapture", "-R", f"{x},{y},{w},{h}", "-x", str(out_path)])
+
+        if out_path.exists() and out_path.stat().st_size > 0:
+            print(f"    ✓ {out_path.relative_to(DEV)}")
+            success += 1
+        else:
+            print(f"    ✗ Screenshot failed")
+
+        # Close app
+        subprocess.run(["osascript", "-e", f'tell application "{app_name}" to quit'],
+                       capture_output=True)
+        time.sleep(1)
+
+    # Copy first screenshot as demo.png
+    demo = out_dir / "demo.png"
+    first_slug = list(apps.values())[0]
+    first_shot = out_dir / f"{first_slug}.png"
+    if first_shot.exists():
+        import shutil
+        shutil.copy2(first_shot, demo)
+        print(f"\n  ✓ demo.png → {first_slug}.png")
+
+    print(f"\n  Done: {success}/{len(apps)} apps screenshotted")
+    return success > 0
+
+
+# ─────────────────────────────────────────────
 # Unified entry point
 # ─────────────────────────────────────────────
 
@@ -304,6 +402,22 @@ def main():
         title = sys.argv[4] if len(sys.argv) > 4 else name
         process_repo(name, {"type": "cli", "cmd": cmd, "title": title})
 
+    elif mode == "tauri":
+        # python3 repo_screenshot.py tauri <repo>
+        if len(sys.argv) < 3:
+            print("Usage: repo_screenshot.py tauri <repo-name>")
+            sys.exit(1)
+        name = sys.argv[2]
+        config = REPOS.get(name)
+        if not config or config.get("type") != "tauri":
+            print(f"  ✗ No tauri config for: {name}")
+            sys.exit(1)
+        repo_dir = DEV / name
+        if not repo_dir.exists():
+            print(f"  ✗ Directory not found: {repo_dir}")
+            sys.exit(1)
+        screenshot_tauri(config, repo_dir)
+
     elif mode == "batch":
         include_cli = "--include-cli" in sys.argv
         targets = sys.argv[2:] if len(sys.argv) > 2 else list(REPOS.keys())
@@ -332,7 +446,7 @@ def main():
 
     else:
         print(f"Unknown mode: {mode}")
-        print("Modes: streamlit, cli, batch")
+        print("Modes: streamlit, cli, tauri, batch")
         sys.exit(1)
 
 

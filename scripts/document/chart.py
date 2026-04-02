@@ -19,26 +19,94 @@ import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import matplotlib as mpl
 import matplotlib.dates as mdates
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.font_manager import FontProperties
 from matplotlib.patches import FancyBboxPatch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
-from chart_common import (
-    BG_COLOR,
-    CHART_AUTHOR,
-    CHART_UPDATED,
-    DEFAULT_DPI,
-    GRID_COLOR,
-    MILESTONE_COLOR,
-    MILESTONE_EDGE,
-    get_phase_color,
-    save_figure,
-    setup_chinese_fonts,
-)
 from display import show_error, show_info, show_success
+
+# ── 版本信息（原 chart_common.py）──────────────────────────────
+
+CHART_VERSION = "1.0.0"
+CHART_AUTHOR = "tianli"
+CHART_UPDATED = "2026-03-14"
+
+# ── 输出参数 ──────────────────────────────────────────────────
+
+DEFAULT_DPI = 300
+DEFAULT_FIGSIZE_GANTT = (16, 8)
+DEFAULT_FIGSIZE_BAR = (12, 7)
+DEFAULT_FIGSIZE_FLOW = (14, 10)
+
+# ── ZDWP 配色方案 ────────────────────────────────────────────
+
+# 阶段色板（最多 8 个阶段）
+PHASE_COLORS = [
+    "#2E86AB",  # 深蓝
+    "#A23B72",  # 紫红
+    "#F18F01",  # 橙色
+    "#C73E1D",  # 红色
+    "#3B7A57",  # 绿色
+    "#6C5B7B",  # 灰紫
+    "#45B7D1",  # 浅蓝
+    "#F5A623",  # 黄色
+]
+
+# 里程碑颜色
+MILESTONE_COLOR = "#E74C3C"
+MILESTONE_EDGE = "#333333"
+
+# 背景和网格
+BG_COLOR = "#FAFAFA"
+GRID_COLOR = "#E0E0E0"
+
+
+# ── 中文字体 ──────────────────────────────────────────────────
+
+
+def setup_chinese_fonts() -> FontProperties:
+    """设置 matplotlib 中文字体支持（macOS 优先）"""
+    font_candidates = [
+        "Arial Unicode MS",
+        "PingFang SC",
+        "Microsoft YaHei",
+        "SimHei",
+        "DejaVu Sans",
+    ]
+    plt.rcParams.update(
+        {
+            "font.sans-serif": font_candidates,
+            "axes.unicode_minus": False,
+            "font.family": "sans-serif",
+        }
+    )
+    mpl.rc("font", **{"sans-serif": font_candidates})
+
+    # macOS 字体路径
+    font_paths = [
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/System/Library/Fonts/PingFang.ttc",
+    ]
+    for fp in font_paths:
+        if Path(fp).exists():
+            return FontProperties(fname=fp)
+    return FontProperties()
+
+
+def get_phase_color(index: int) -> str:
+    """获取阶段颜色，循环使用"""
+    return PHASE_COLORS[index % len(PHASE_COLORS)]
+
+
+def save_figure(fig, output_path: str, dpi: int = DEFAULT_DPI):
+    """统一保存图片"""
+    fig.savefig(output_path, dpi=dpi, bbox_inches="tight", facecolor="white", edgecolor="none")
+    plt.close(fig)
 from file_ops import show_version_info
 
 SCRIPT_VERSION = "3.0.0"

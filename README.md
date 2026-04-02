@@ -111,6 +111,12 @@ ClashX Pro management via Raycast quick commands.
 | `clashx_status.sh` | Show current proxy status | Raycast: "ClashX Status" |
 | `clashx_proxy.sh` | Toggle system proxy on/off | Raycast: "ClashX Proxy" |
 
+## Window Management (`scripts/window/`)
+
+| Script | Description | Usage |
+|--------|-------------|-------|
+| `yabai.py` | Yabai window manager control (float, mouse-follow, organize, service toggle) | `python3 yabai.py float` / `python3 yabai.py mouse` / `python3 yabai.py org` / `python3 yabai.py toggle` |
+
 ## Developer Tools (`scripts/tools/`)
 
 | Script | Description | Usage |
@@ -179,7 +185,8 @@ scripts/
 │   ├── file/              # File operations
 │   ├── system/            # System tools
 │   ├── network/           # Network proxy (ClashX)
-│   └── tools/             # Dev tools (Git, LLM, TTS, CC sessions)
+│   ├── tools/             # Dev tools (Git, LLM, TTS, CC sessions)
+│   └── window/            # Window management (Yabai)
 ├── lib/                   # Shared libraries
 │   ├── hydraulic/         # Water engineering domain
 │   └── tools/             # Maintenance tools (health check, CF API)

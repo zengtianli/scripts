@@ -11,7 +11,8 @@ scripts/              # 功能脚本，按类别分组
 ├── file/             # 文件操作（file_ + folder_ + downloads + smart_rename）
 ├── system/           # 系统工具（sys_ + display_ + dingtalk + reminder）
 ├── network/          # 网络代理（clashx_）
-└── tools/            # 开发工具（llm_client, cc_sessions, git_, tts, app_open, printer）
+├── tools/            # 开发工具（llm_client, cc_sessions, git_, tts, app_open, printer）
+└── window/           # 窗口管理（yabai）
 
 lib/                  # 统一公共库
 ├── hydraulic/        # 水利领域专用库（编码映射、QGIS 配置）

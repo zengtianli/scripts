@@ -1,17 +1,51 @@
 #!/usr/bin/env python3
-"""Batch GitHub promotion script — zengtianli repos."""
+"""
+Unified repository management tool — promote, audit, and screenshot repos.
 
+Subcommands:
+    promote     Batch GitHub promotion (README, SVG, metadata)
+    audit       Audit ~/Dev projects against gold standard template
+    screenshot  Take screenshots of repos (Streamlit, CLI, Tauri)
+
+Usage:
+    python3 repo_manager.py promote
+    python3 repo_manager.py audit [project ...] [--fix-gitignore]
+    python3 repo_manager.py screenshot streamlit <repo> <url>
+    python3 repo_manager.py screenshot cli <repo> "<command>" [title]
+    python3 repo_manager.py screenshot tauri <repo>
+    python3 repo_manager.py screenshot batch [--include-cli]
+"""
+
+import argparse
+import html
 import os
-import subprocess
+import re
 import shutil
+import subprocess
+import sys
+import tempfile
+import time
 from pathlib import Path
 from textwrap import dedent
 
+# ═════════════════════════════════════════════════════════════
+# Shared constants
+# ═════════════════════════════════════════════════════════════
+
+DEV = Path.home() / "Dev"
+
+
+# ═════════════════════════════════════════════════════════════
+#
+#   SECTION 1: PROMOTE — batch GitHub promotion
+#
+# ═════════════════════════════════════════════════════════════
+
 # ─────────────────────────────────────────────
-# Repo metadata
+# Repo metadata (promote)
 # ─────────────────────────────────────────────
 
-REPOS = {
+PROMOTE_REPOS = {
     "hydro-rainfall": {
         "description": "Rainfall-runoff calculator for lake irrigation — 6-step pipeline across 228 lakes",
         "topics": ["hydrology", "rainfall", "runoff", "streamlit", "python", "water-resources"],
@@ -316,11 +350,12 @@ REPOS = {
     },
 }
 
+
 # ─────────────────────────────────────────────
-# SVG generators
+# SVG generators (promote)
 # ─────────────────────────────────────────────
 
-def make_streamlit_svg(title: str, subtitle: str, items: list[str]) -> str:
+def _make_streamlit_svg(title: str, subtitle: str, items: list[str]) -> str:
     """Generate a browser/Streamlit app mockup SVG."""
     item_lines = ""
     y = 200
@@ -364,7 +399,7 @@ def make_streamlit_svg(title: str, subtitle: str, items: list[str]) -> str:
 </svg>"""
 
 
-def make_terminal_svg(title: str, lines: list[tuple]) -> str:
+def _make_terminal_svg(title: str, lines: list[tuple]) -> str:
     """Generate a terminal window SVG. lines = [(prompt, text, style), ...]"""
     STYLES = {
         "cmd": "#cdd6f4",
@@ -399,10 +434,10 @@ def make_terminal_svg(title: str, lines: list[tuple]) -> str:
 
 
 # ─────────────────────────────────────────────
-# README generators
+# README generators (promote)
 # ─────────────────────────────────────────────
 
-def make_readme_en(name: str, meta: dict) -> str:
+def _make_readme_en(name: str, meta: dict) -> str:
     url = meta["demo_url"]
     img_ext = "png" if url else "svg"
 
@@ -494,7 +529,7 @@ def make_readme_en(name: str, meta: dict) -> str:
     return "\n".join(lines)
 
 
-def make_readme_cn(name: str, meta: dict) -> str:
+def _make_readme_cn(name: str, meta: dict) -> str:
     url = meta["demo_url"]
     img_ext = "png" if url else "svg"
 
@@ -587,17 +622,17 @@ def make_readme_cn(name: str, meta: dict) -> str:
 
 
 # ─────────────────────────────────────────────
-# Git & GitHub helpers
+# Git & GitHub helpers (promote)
 # ─────────────────────────────────────────────
 
-def run(cmd: str, cwd: str = None, check: bool = True):
+def _promote_run(cmd: str, cwd: str = None, check: bool = True):
     result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
     if check and result.returncode != 0:
         raise RuntimeError(f"Command failed: {cmd}\n{result.stderr}")
     return result.stdout.strip()
 
 
-def process_repo(name: str, meta: dict, tmp_base: Path):
+def _promote_process_repo(name: str, meta: dict, tmp_base: Path):
     print(f"\n{'='*60}")
     print(f"  {name}")
     print(f"{'='*60}")
@@ -608,7 +643,7 @@ def process_repo(name: str, meta: dict, tmp_base: Path):
     if repo_dir.exists():
         shutil.rmtree(repo_dir)
     print(f"  Cloning...")
-    run(f"git clone https://github.com/zengtianli/{name}.git {repo_dir}")
+    _promote_run(f"git clone https://github.com/zengtianli/{name}.git {repo_dir}")
 
     # Create docs/screenshots/
     screenshots_dir = repo_dir / "docs" / "screenshots"
@@ -616,55 +651,51 @@ def process_repo(name: str, meta: dict, tmp_base: Path):
 
     # Generate SVG
     if meta["svg_type"] == "streamlit":
-        svg = make_streamlit_svg(meta["svg_title"], meta["svg_subtitle"], meta["svg_items"])
+        svg = _make_streamlit_svg(meta["svg_title"], meta["svg_subtitle"], meta["svg_items"])
     else:
-        svg = make_terminal_svg(meta["svg_title"], meta["svg_lines"])
+        svg = _make_terminal_svg(meta["svg_title"], meta["svg_lines"])
 
     (screenshots_dir / "demo.svg").write_text(svg, encoding="utf-8")
     print(f"  ✓ SVG generated")
 
     # Generate READMEs
-    (repo_dir / "README.md").write_text(make_readme_en(name, meta), encoding="utf-8")
-    (repo_dir / "README_CN.md").write_text(make_readme_cn(name, meta), encoding="utf-8")
+    (repo_dir / "README.md").write_text(_make_readme_en(name, meta), encoding="utf-8")
+    (repo_dir / "README_CN.md").write_text(_make_readme_cn(name, meta), encoding="utf-8")
     print(f"  ✓ README.md + README_CN.md written")
 
     # Commit & push
-    run("git add README.md README_CN.md docs/screenshots/demo.svg", cwd=str(repo_dir))
+    _promote_run("git add README.md README_CN.md docs/screenshots/demo.svg", cwd=str(repo_dir))
 
     # Check if there's anything to commit
-    status = run("git status --porcelain", cwd=str(repo_dir))
+    status = _promote_run("git status --porcelain", cwd=str(repo_dir))
     if not status:
         print(f"  ✓ Nothing to commit, skipping push")
     else:
-        run(
+        _promote_run(
             'git commit -m "docs: add bilingual README, badges, and demo screenshot\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"',
             cwd=str(repo_dir)
         )
-        run("git push", cwd=str(repo_dir))
+        _promote_run("git push", cwd=str(repo_dir))
         print(f"  ✓ Committed and pushed")
 
     # Update GitHub metadata
     topics_arg = " ".join(f"--add-topic {t}" for t in meta["topics"])
-    run(f'gh repo edit zengtianli/{name} --description "{meta["description"]}" {topics_arg}')
+    _promote_run(f'gh repo edit zengtianli/{name} --description "{meta["description"]}" {topics_arg}')
     print(f"  ✓ GitHub description + topics updated")
     print(f"  → https://github.com/zengtianli/{name}")
 
 
-# ─────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────
-
-def main():
+def _promote_main():
     tmp_base = Path("/tmp/batch_promote")
     tmp_base.mkdir(exist_ok=True)
 
-    total = len(REPOS)
+    total = len(PROMOTE_REPOS)
     success = 0
 
-    for i, (name, meta) in enumerate(REPOS.items(), 1):
+    for i, (name, meta) in enumerate(PROMOTE_REPOS.items(), 1):
         print(f"\n[{i}/{total}] Processing {name}...")
         try:
-            process_repo(name, meta, tmp_base)
+            _promote_process_repo(name, meta, tmp_base)
             success += 1
         except Exception as e:
             print(f"  ✗ FAILED: {e}")
@@ -672,6 +703,698 @@ def main():
     print(f"\n{'='*60}")
     print(f"Done: {success}/{total} repos promoted")
     print(f"{'='*60}")
+
+
+# ═════════════════════════════════════════════════════════════
+#
+#   SECTION 2: AUDIT — project auditing
+#
+# ═════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────
+# Config (audit)
+# ─────────────────────────────────────────────
+
+# Projects to audit (skip private/experimental ones)
+AUDIT_SKIP = {"configs", ".claude", ".DS_Store"}
+
+GITIGNORE_BASELINE = {
+    "# Python": ["__pycache__/", "*.py[cod]", "*.egg-info/", "dist/", "build/", "*.egg"],
+    "# Virtual env": [".venv/", "venv/"],
+    "# Environment": [".env"],
+    "# IDE": [".idea/", ".vscode/"],
+    "# OS": [".DS_Store"],
+    "# Cache": [".pytest_cache/", ".ruff_cache/", ".mypy_cache/"],
+}
+
+
+# ─────────────────────────────────────────────
+# Checkers (audit)
+# ─────────────────────────────────────────────
+
+def _audit_check_readme(project_dir: Path, lang: str = "en") -> list[str]:
+    """Check README against gold standard template. Returns list of issues."""
+    fname = "README.md" if lang == "en" else "README_CN.md"
+    path = project_dir / fname
+    issues = []
+
+    if not path.exists():
+        issues.append(f"Missing {fname}")
+        return issues
+
+    content = path.read_text(encoding="utf-8")
+    lines = content.split("\n")
+
+    # 1. Language selector
+    if lang == "en":
+        if not any("**English**" in l and "中文" in l for l in lines[:5]):
+            issues.append(f"{fname}: missing language selector (expected '**English** | [中文](README_CN.md)')")
+    else:
+        if not any("**中文**" in l and "English" in l for l in lines[:5]):
+            issues.append(f"{fname}: missing language selector (expected '[English](README.md) | **中文**')")
+
+    # 2. Badge style
+    badge_lines = [l for l in lines if "img.shields.io/badge" in l]
+    non_ftb = [l for l in badge_lines if "style=for-the-badge" not in l]
+    if non_ftb:
+        issues.append(f"{fname}: {len(non_ftb)} badge(s) not using for-the-badge style")
+
+    # 3. Separator after badges
+    if badge_lines:
+        last_badge_idx = max(i for i, l in enumerate(lines) if "img.shields.io/badge" in l)
+        # Look for --- within 3 lines after last badge
+        found_sep = any(lines[j].strip() == "---" for j in range(last_badge_idx + 1, min(last_badge_idx + 4, len(lines))))
+        if not found_sep:
+            issues.append(f"{fname}: missing separator '---' after badges")
+
+    # 4. Screenshot
+    has_screenshot = any(re.search(r"!\[.*\]\(docs/screenshots/", l) for l in lines)
+    if not has_screenshot:
+        issues.append(f"{fname}: missing screenshot reference (docs/screenshots/)")
+
+    # 5. Screenshot file exists
+    if has_screenshot:
+        screenshot_path = project_dir / "docs" / "screenshots" / "demo.png"
+        homepage_path = project_dir / "docs" / "screenshots" / "homepage.png"
+        if not screenshot_path.exists() and not homepage_path.exists():
+            issues.append(f"{fname}: screenshot referenced but file not found in docs/screenshots/")
+
+    # 6. Feature table
+    has_table = any(l.strip().startswith("|") and "---" not in l and "|" in l[1:] for l in lines)
+    if not has_table:
+        issues.append(f"{fname}: missing feature table")
+
+    # 7. Install section
+    has_install = any(re.match(r"^#{1,3}\s*(Install|安装)", l) for l in lines)
+    if not has_install:
+        issues.append(f"{fname}: missing Install/安装 section")
+
+    # 8. Quick Start section
+    has_quickstart = any(re.match(r"^#{1,3}\s*(Quick Start|快速|Usage|使用|快速上手)", l) for l in lines)
+    if not has_quickstart:
+        issues.append(f"{fname}: missing Quick Start section")
+
+    return issues
+
+
+def _audit_check_gitignore(project_dir: Path) -> tuple[list[str], list[tuple[str, list[str]]]]:
+    """Check .gitignore for baseline entries. Returns (issues, missing_sections)."""
+    path = project_dir / ".gitignore"
+    issues = []
+    missing_sections = []
+
+    if not path.exists():
+        issues.append("Missing .gitignore")
+        return issues, []
+
+    content = path.read_text(encoding="utf-8")
+    existing = set()
+    for line in content.split("\n"):
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            existing.add(stripped.rstrip("/"))
+
+    for section, entries in GITIGNORE_BASELINE.items():
+        section_missing = []
+        for entry in entries:
+            normalized = entry.rstrip("/")
+            if normalized not in existing:
+                section_missing.append(entry)
+        if section_missing:
+            missing_sections.append((section, section_missing))
+            issues.append(f".gitignore: missing {len(section_missing)} entries from {section}")
+
+    return issues, missing_sections
+
+
+def _audit_check_deps(project_dir: Path) -> list[str]:
+    """Check dependency version pinning."""
+    issues = []
+    req_path = project_dir / "requirements.txt"
+
+    if req_path.exists():
+        for line in req_path.read_text().strip().split("\n"):
+            line = line.strip()
+            if not line or line.startswith("#") or line.startswith("-"):
+                continue
+            if ">=" not in line and "==" not in line and "~=" not in line:
+                issues.append(f"requirements.txt: unpinned dependency '{line}'")
+
+    return issues
+
+
+def _audit_fix_gitignore(project_dir: Path, missing_sections: list[tuple[str, list[str]]]):
+    """Append missing gitignore entries."""
+    path = project_dir / ".gitignore"
+    if not path.exists():
+        return
+
+    content = path.read_text(encoding="utf-8")
+    if not content.endswith("\n"):
+        content += "\n"
+
+    append_lines = ["\n"]
+    for comment, entries in missing_sections:
+        append_lines.append(comment)
+        for e in entries:
+            append_lines.append(e)
+        append_lines.append("")
+
+    content += "\n".join(append_lines).rstrip() + "\n"
+    path.write_text(content, encoding="utf-8")
+
+
+# ─────────────────────────────────────────────
+# Reporter (audit)
+# ─────────────────────────────────────────────
+
+def _audit_project(name: str, fix: bool = False) -> list[str]:
+    """Run all checks on a single project. Returns list of issues."""
+    project_dir = DEV / name
+    if not project_dir.is_dir():
+        return [f"Directory not found: {project_dir}"]
+
+    all_issues = []
+
+    # Detect project type
+    has_python = any(project_dir.glob("*.py")) or (project_dir / "requirements.txt").exists()
+
+    if has_python:
+        # README checks
+        all_issues.extend(_audit_check_readme(project_dir, "en"))
+        all_issues.extend(_audit_check_readme(project_dir, "cn"))
+
+        # Gitignore
+        gi_issues, missing_sections = _audit_check_gitignore(project_dir)
+        all_issues.extend(gi_issues)
+        if fix and missing_sections:
+            _audit_fix_gitignore(project_dir, missing_sections)
+            all_issues.append(f".gitignore: ✓ FIXED ({sum(len(s) for _, s in missing_sections)} entries added)")
+
+        # Dependencies
+        all_issues.extend(_audit_check_deps(project_dir))
+
+    return all_issues
+
+
+def _audit_main(args):
+    fix_gi = args.fix_gitignore
+    targets = args.projects
+
+    if not targets:
+        # Auto-discover projects
+        targets = sorted(
+            d.name for d in DEV.iterdir()
+            if d.is_dir() and not d.name.startswith(".") and d.name not in AUDIT_SKIP
+        )
+
+    total_issues = 0
+    clean_count = 0
+
+    for name in targets:
+        issues = _audit_project(name, fix=fix_gi)
+        if not issues:
+            clean_count += 1
+            continue
+
+        print(f"\n{'─'*50}")
+        print(f"  {name}")
+        print(f"{'─'*50}")
+        for issue in issues:
+            marker = "  ✓" if "FIXED" in issue else "  ✗"
+            print(f"{marker} {issue}")
+        total_issues += len([i for i in issues if "FIXED" not in i])
+
+    print(f"\n{'='*50}")
+    print(f"Audited {len(targets)} projects: {clean_count} clean, {total_issues} issues found")
+    if fix_gi:
+        print(f"(--fix-gitignore applied)")
+    print(f"{'='*50}")
+
+
+# ═════════════════════════════════════════════════════════════
+#
+#   SECTION 3: SCREENSHOT — repo screenshot tool
+#
+# ═════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────
+# Registry: repos with screenshot configs
+# ─────────────────────────────────────────────
+
+SCREENSHOT_REPOS = {
+    # Streamlit apps (have live demo URLs)
+    "hydro-rainfall":   {"type": "streamlit", "url": "https://hydro-rainfall.tianlizeng.cloud"},
+    "hydro-geocode":    {"type": "streamlit", "url": "https://hydro-geocode.tianlizeng.cloud"},
+    "hydro-district":   {"type": "streamlit", "url": "https://hydro-district.tianlizeng.cloud"},
+    "hydro-irrigation": {"type": "streamlit", "url": "https://hydro-irrigation.tianlizeng.cloud"},
+    "hydro-annual":     {"type": "streamlit", "url": "https://hydro-annual.tianlizeng.cloud"},
+    "hydro-efficiency": {"type": "streamlit", "url": "https://hydro-efficiency.tianlizeng.cloud"},
+    "hydro-reservoir":  {"type": "streamlit", "url": "https://hydro-reservoir.tianlizeng.cloud"},
+    "hydro-capacity":   {"type": "streamlit", "url": "https://hydro-capacity.tianlizeng.cloud"},
+    "hydro-toolkit":    {"type": "streamlit", "url": "https://hydro.tianlizeng.cloud"},
+    "dockit":           {"type": "streamlit", "url": "https://dockit.tianlizeng.cloud"},
+    "cclog":            {"type": "streamlit", "url": "https://cclog.tianlizeng.cloud"},
+
+    # CLI tools (run command locally)
+    "cc-harness":           {"type": "cli", "cmd": "python3 harness.py {DEV}/dockit", "title": "cc-harness"},
+    "cc-context":           {"type": "cli", "cmd": "python3 context.py monitor",       "title": "cc-context"},
+    "hydro-risk":           {"type": "cli", "cmd": "python3 01_build_database.py --help 2>&1 || echo 'hydro-risk pipeline'", "title": "hydro-risk"},
+    "hydro-qgis":           {"type": "cli", "cmd": "python3 -c \"print('hydro-qgis pipeline')\"", "title": "hydro-qgis"},
+    "downloads-organizer":  {"type": "cli", "cmd": "python3 -m downloads_organizer --help 2>&1 || echo 'downloads-organizer'", "title": "downloads-organizer"},
+
+    # Tauri desktop apps (DMG in hydro-apps/release/)
+    "hydro-apps": {
+        "type": "tauri",
+        "dmg_dir": "hydro-apps/release",
+        "apps": {
+            "水效评估工具": "efficiency",
+            "纳污能力计算": "capacity",
+            "水库群调度":   "reservoir",
+            "水资源年报查询": "annual",
+            "灌溉需水计算": "irrigation",
+            "河区调度模型": "district",
+            "地理编码工具": "geocode",
+            "降雨数据分析": "rainfall",
+        },
+    },
+}
+
+
+# ─────────────────────────────────────────────
+# Streamlit screenshot (via Playwright)
+# ─────────────────────────────────────────────
+
+def _screenshot_streamlit(url: str, out_path: Path) -> bool:
+    """Take a Playwright screenshot of a live Streamlit app."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print("  ✗ playwright not installed. Run: pip install playwright && playwright install chromium")
+        return False
+
+    print(f"  Opening {url} ...")
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(viewport={"width": 1280, "height": 800})
+            page.goto(url, timeout=30000)
+
+            # Wait for Streamlit to finish rendering
+            try:
+                page.wait_for_selector(".stApp", timeout=20000)
+            except Exception:
+                pass
+
+            # Extra wait for charts / dynamic content
+            time.sleep(3)
+
+            # Hide the Streamlit toolbar/deploy button
+            page.evaluate("""
+                const toolbar = document.querySelector('[data-testid="stToolbar"]');
+                if (toolbar) toolbar.style.display = 'none';
+                const deploy = document.querySelector('[data-testid="stDecoration"]');
+                if (deploy) deploy.style.display = 'none';
+            """)
+
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            page.screenshot(path=str(out_path), full_page=False)
+            browser.close()
+
+        print(f"  ✓ Screenshot saved → {out_path.relative_to(DEV)}")
+        return True
+
+    except Exception as e:
+        print(f"  ✗ Screenshot failed: {e}")
+        return False
+
+
+# ─────────────────────────────────────────────
+# CLI screenshot (terminal-style rendering)
+# ─────────────────────────────────────────────
+
+_TERMINAL_HTML_TEMPLATE = """<!DOCTYPE html>
+<html>
+<head><style>
+body {{ margin: 0; padding: 0; background: #0d1117; }}
+.terminal {{
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 20px 24px;
+    min-height: 760px;
+    box-sizing: border-box;
+}}
+.titlebar {{
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}}
+.dot {{ width: 12px; height: 12px; border-radius: 50%; }}
+.dot-red {{ background: #ff5f57; }}
+.dot-yellow {{ background: #febc2e; }}
+.dot-green {{ background: #28c840; }}
+.title {{ color: #8b949e; margin-left: 12px; font-family: -apple-system, sans-serif; font-size: 13px; }}
+b {{ color: #f0f6fc; }}
+</style></head>
+<body>
+<div class="titlebar">
+    <span class="dot dot-red"></span>
+    <span class="dot dot-yellow"></span>
+    <span class="dot dot-green"></span>
+    <span class="title">{title}</span>
+</div>
+<pre class="terminal">{content}</pre>
+</body>
+</html>"""
+
+
+def _screenshot_colorize_output(raw: str) -> str:
+    """Apply terminal-style colors to CLI output."""
+    escaped = html.escape(raw)
+    colored = escaped
+    colored = colored.replace('🔴', '<span style="color:#ff6b6b">🔴</span>')
+    colored = colored.replace('🟡', '<span style="color:#ffd93d">🟡</span>')
+    colored = colored.replace('🟢', '<span style="color:#6bcb77">🟢</span>')
+    colored = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', colored)
+    # Markdown headers
+    colored = re.sub(
+        r'^(#{1,3}) (.+)$',
+        lambda m: f'<span style="color:#58a6ff;font-weight:bold">{"#"*len(m.group(1))} {m.group(2)}</span>',
+        colored, flags=re.MULTILINE,
+    )
+    # Table separators
+    colored = re.sub(
+        r'^(\|[-|: ]+\|)$',
+        lambda m: f'<span style="color:#555">{m.group(1)}</span>',
+        colored, flags=re.MULTILINE,
+    )
+    return colored
+
+
+def _screenshot_cli(cmd: str, cwd: str, out_path: Path, title: str = "Terminal") -> bool:
+    """Run a CLI command, render output as terminal HTML, screenshot with Playwright."""
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
+        print("  ✗ playwright not installed. Run: pip install playwright && playwright install chromium")
+        return False
+
+    print(f"  Running: {cmd}")
+    cmd_expanded = cmd.replace("{DEV}", str(DEV))
+    result = subprocess.run(cmd_expanded, shell=True, cwd=cwd, capture_output=True, text=True)
+    raw = result.stdout + result.stderr
+
+    if not raw.strip():
+        print("  ✗ Command produced no output")
+        return False
+
+    colored = _screenshot_colorize_output(raw)
+    page_html = _TERMINAL_HTML_TEMPLATE.format(title=html.escape(title), content=colored)
+
+    with tempfile.NamedTemporaryFile(suffix='.html', delete=False, mode='w') as f:
+        f.write(page_html)
+        html_path = f.name
+
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(viewport={"width": 1280, "height": 800})
+            page.goto(f"file://{html_path}")
+            time.sleep(0.5)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            page.screenshot(path=str(out_path), full_page=False)
+            browser.close()
+
+        print(f"  ✓ Screenshot saved → {out_path.relative_to(DEV)}")
+        return True
+
+    except Exception as e:
+        print(f"  ✗ Screenshot failed: {e}")
+        return False
+
+    finally:
+        os.unlink(html_path)
+
+
+# ─────────────────────────────────────────────
+# Tauri desktop app screenshot (via screencapture -R)
+# ─────────────────────────────────────────────
+
+def _screenshot_tauri(config: dict, repo_dir: Path) -> bool:
+    """Screenshot Tauri desktop apps by opening each, capturing the window region."""
+    apps = config["apps"]  # {"中文名": "slug", ...}
+    dmg_dir = DEV / config.get("dmg_dir", "")
+    out_dir = repo_dir / "docs" / "screenshots"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    success = 0
+    for app_name, slug in apps.items():
+        out_path = out_dir / f"{slug}.png"
+        print(f"\n  [{slug}] {app_name}")
+
+        # Install from DMG if not in /Applications
+        app_path = Path(f"/Applications/{app_name}.app")
+        if not app_path.exists():
+            dmg_file = dmg_dir / f"{slug}.dmg"
+            if dmg_file.exists():
+                print(f"    Installing from {dmg_file.name} ...")
+                subprocess.run(["hdiutil", "attach", str(dmg_file), "-nobrowse", "-quiet"],
+                               capture_output=True)
+                # Find and copy the .app from the mounted volume
+                vol = Path(f"/Volumes/{app_name}")
+                if vol.exists():
+                    found = list(vol.glob("*.app"))
+                    if found:
+                        subprocess.run(["cp", "-R", str(found[0]), "/Applications/"],
+                                       capture_output=True)
+                    subprocess.run(["hdiutil", "detach", str(vol), "-quiet"],
+                                   capture_output=True)
+            if not app_path.exists():
+                print(f"    ✗ App not found: {app_path}")
+                continue
+
+        # Open app
+        print(f"    Opening ...")
+        subprocess.run(["open", "-a", app_name], capture_output=True)
+        time.sleep(4)
+
+        # Get window position and size via osascript
+        try:
+            pos = subprocess.run(
+                ["osascript", "-e",
+                 f'tell application "System Events" to tell process "{app_name}" to get position of window 1'],
+                capture_output=True, text=True, timeout=5,
+            ).stdout.strip()
+            sz = subprocess.run(
+                ["osascript", "-e",
+                 f'tell application "System Events" to tell process "{app_name}" to get size of window 1'],
+                capture_output=True, text=True, timeout=5,
+            ).stdout.strip()
+
+            if not pos or not sz:
+                print(f"    ✗ Could not get window bounds")
+                subprocess.run(["osascript", "-e", f'tell application "{app_name}" to quit'],
+                               capture_output=True)
+                time.sleep(1)
+                continue
+
+            x, y = pos.split(", ")
+            w, h = sz.split(", ")
+        except Exception as e:
+            print(f"    ✗ osascript error: {e}")
+            subprocess.run(["osascript", "-e", f'tell application "{app_name}" to quit'],
+                           capture_output=True)
+            time.sleep(1)
+            continue
+
+        # Capture window region (non-interactive, silent)
+        subprocess.run(["screencapture", "-R", f"{x},{y},{w},{h}", "-x", str(out_path)])
+
+        if out_path.exists() and out_path.stat().st_size > 0:
+            print(f"    ✓ {out_path.relative_to(DEV)}")
+            success += 1
+        else:
+            print(f"    ✗ Screenshot failed")
+
+        # Close app
+        subprocess.run(["osascript", "-e", f'tell application "{app_name}" to quit'],
+                       capture_output=True)
+        time.sleep(1)
+
+    # Copy first screenshot as demo.png
+    demo = out_dir / "demo.png"
+    first_slug = list(apps.values())[0]
+    first_shot = out_dir / f"{first_slug}.png"
+    if first_shot.exists():
+        import shutil as _shutil
+        _shutil.copy2(first_shot, demo)
+        print(f"\n  ✓ demo.png → {first_slug}.png")
+
+    print(f"\n  Done: {success}/{len(apps)} apps screenshotted")
+    return success > 0
+
+
+# ─────────────────────────────────────────────
+# Unified entry point (screenshot)
+# ─────────────────────────────────────────────
+
+def _screenshot_process_repo(name: str, config: dict = None) -> bool:
+    """Take screenshot for a single repo using registry config or override."""
+    config = config or SCREENSHOT_REPOS.get(name)
+    if not config:
+        print(f"  ✗ Unknown repo: {name}")
+        return False
+
+    repo_dir = DEV / name
+    if not repo_dir.exists():
+        print(f"  ✗ Directory not found: {repo_dir}")
+        return False
+
+    out_path = repo_dir / "docs" / "screenshots" / "demo.png"
+
+    if config["type"] == "streamlit":
+        return _screenshot_streamlit(config["url"], out_path)
+    elif config["type"] == "cli":
+        title = config.get("title", name)
+        cmd = config["cmd"]
+        return _screenshot_cli(cmd, str(repo_dir), out_path, f"{title} — {cmd.split()[0]} ...")
+    else:
+        print(f"  ✗ Unknown type: {config['type']}")
+        return False
+
+
+def _screenshot_update_readme_refs(repo_dir: Path, name: str):
+    """Replace demo.svg with demo.png in README files."""
+    for readme in ["README.md", "README_CN.md"]:
+        path = repo_dir / readme
+        if not path.exists():
+            continue
+        content = path.read_text(encoding="utf-8")
+        new_content = content.replace(
+            f"![{name} demo](docs/screenshots/demo.svg)",
+            f"![{name} demo](docs/screenshots/demo.png)",
+        )
+        if new_content != content:
+            path.write_text(new_content, encoding="utf-8")
+            print(f"  ✓ Updated {readme}: demo.svg → demo.png")
+
+
+def _screenshot_main(args):
+    mode = args.screenshot_mode
+
+    if mode == "streamlit":
+        name, url = args.repo, args.url
+        _screenshot_process_repo(name, {"type": "streamlit", "url": url})
+        _screenshot_update_readme_refs(DEV / name, name)
+
+    elif mode == "cli":
+        name, cmd = args.repo, args.command
+        title = args.title if args.title else name
+        _screenshot_process_repo(name, {"type": "cli", "cmd": cmd, "title": title})
+
+    elif mode == "tauri":
+        name = args.repo
+        config = SCREENSHOT_REPOS.get(name)
+        if not config or config.get("type") != "tauri":
+            print(f"  ✗ No tauri config for: {name}")
+            sys.exit(1)
+        repo_dir = DEV / name
+        if not repo_dir.exists():
+            print(f"  ✗ Directory not found: {repo_dir}")
+            sys.exit(1)
+        _screenshot_tauri(config, repo_dir)
+
+    elif mode == "batch":
+        include_cli = args.include_cli
+        targets = list(SCREENSHOT_REPOS.keys())
+
+        total = 0
+        success = 0
+        for name in targets:
+            config = SCREENSHOT_REPOS.get(name)
+            if not config:
+                continue
+            if config["type"] == "cli" and not include_cli:
+                continue
+            total += 1
+            print(f"\n{'='*55}\n  [{total}] {name}\n{'='*55}")
+            if _screenshot_process_repo(name, config):
+                _screenshot_update_readme_refs(DEV / name, name)
+                success += 1
+
+        print(f"\n{'='*55}")
+        print(f"Done: {success}/{total} repos screenshotted")
+        print(f"{'='*55}")
+
+
+# ═════════════════════════════════════════════════════════════
+#
+#   MAIN — argparse subcommands
+#
+# ═════════════════════════════════════════════════════════════
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Unified repository management tool — promote, audit, and screenshot repos.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=dedent("""\
+            Examples:
+              %(prog)s promote
+              %(prog)s audit
+              %(prog)s audit cc-harness dockit --fix-gitignore
+              %(prog)s screenshot streamlit hydro-rainfall https://hydro-rainfall.tianlizeng.cloud
+              %(prog)s screenshot cli cc-harness "python3 harness.py ~/Dev/dockit"
+              %(prog)s screenshot tauri hydro-apps
+              %(prog)s screenshot batch --include-cli
+        """),
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # ── promote ──
+    subparsers.add_parser("promote", help="Batch GitHub promotion (README, SVG, metadata)")
+
+    # ── audit ──
+    audit_parser = subparsers.add_parser("audit", help="Audit ~/Dev projects against gold standard template")
+    audit_parser.add_argument("projects", nargs="*", help="Specific projects to audit (default: all)")
+    audit_parser.add_argument("--fix-gitignore", action="store_true", help="Auto-fix gitignore gaps")
+
+    # ── screenshot ──
+    screenshot_parser = subparsers.add_parser("screenshot", help="Take screenshots of repos")
+    ss_sub = screenshot_parser.add_subparsers(dest="screenshot_mode", required=True)
+
+    # screenshot streamlit
+    ss_streamlit = ss_sub.add_parser("streamlit", help="Screenshot a live Streamlit app")
+    ss_streamlit.add_argument("repo", help="Repository name")
+    ss_streamlit.add_argument("url", help="Live demo URL")
+
+    # screenshot cli
+    ss_cli = ss_sub.add_parser("cli", help="Screenshot a CLI tool by running a command")
+    ss_cli.add_argument("repo", help="Repository name")
+    ss_cli.add_argument("command", help="Command to run")
+    ss_cli.add_argument("title", nargs="?", default=None, help="Window title (optional)")
+
+    # screenshot tauri
+    ss_tauri = ss_sub.add_parser("tauri", help="Screenshot Tauri desktop apps")
+    ss_tauri.add_argument("repo", help="Repository name")
+
+    # screenshot batch
+    ss_batch = ss_sub.add_parser("batch", help="Screenshot all registered repos")
+    ss_batch.add_argument("--include-cli", action="store_true", help="Include CLI tools in batch")
+
+    args = parser.parse_args()
+
+    if args.command == "promote":
+        _promote_main()
+    elif args.command == "audit":
+        _audit_main(args)
+    elif args.command == "screenshot":
+        _screenshot_main(args)
 
 
 if __name__ == "__main__":

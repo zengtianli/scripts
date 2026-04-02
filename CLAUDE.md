@@ -6,13 +6,13 @@ macOS 个人效率工具脚本库，主要通过 Raycast 调用。
 
 ```
 scripts/              # 功能脚本，按类别分组
-├── document/         # 文档处理（docx_ + md_ + pptx_ + chart + bid + table）
-├── data/             # 数据转换（xlsx_ + csv_ + convert）
-├── file/             # 文件操作（file_ + folder_ + downloads + smart_rename）
-├── system/           # 系统工具（sys_ + display_ + dingtalk + reminder）
-├── network/          # 网络代理（clashx_）
-├── tools/            # 开发工具（llm_client, cc_sessions, git_, tts, app_open, printer）
-└── window/           # 窗口管理（yabai）
+├── document/ (13)    # 文档处理（docx_ + md_ + pptx_ + chart）
+├── data/ (4)         # 数据转换（xlsx_ + convert）
+├── file/ (5)         # 文件操作（file_ + folder_ + downloads + smart_rename）
+├── system/ (5)       # 系统工具（sys_ + display_ + dingtalk + reminder）
+├── network/ (6)      # 网络代理（clashx_）
+├── tools/ (6)        # 开发工具（llm_client, cc_sessions, git_, tts, app_open）
+└── window/ (1)       # 窗口管理（yabai）
 
 lib/                  # 统一公共库
 ├── hydraulic/        # 水利领域专用库（编码映射、QGIS 配置）

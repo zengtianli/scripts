@@ -39,7 +39,7 @@ repo_manager.py       # GitHub 仓库管理（promote/audit/screenshot 子命令
 | 脚本 | 功能 | 模型 |
 |------|------|------|
 | `document/bullet_to_paragraph.py` | 要点转公文段落/表格 | haiku |
-| `document/frontmatter_gen.py` | 批量生成 MD frontmatter | haiku |
+| `document/md_tools.py frontmatter` | 批量生成 MD frontmatter | haiku |
 | `document/scan_sensitive_words.py` | 标书敏感词检测 | haiku |
 | `tools/cc_sessions.py index --summarize` | CC 会话摘要 | haiku |
 | `file/smart_rename.py` | AI 驱动文件重命名 | haiku |

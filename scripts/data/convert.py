@@ -12,6 +12,7 @@
   xlsx-from-xls   XLS → XLSX（旧格式转新格式）
   xlsx-to-csv     XLSX → CSV（支持多工作表）
   xlsx-to-txt     XLSX → TXT（支持多工作表）
+  encode-duplicates  为 Excel 中重复企业编码生成唯一用户编码
 
 版本: 3.0.0
 作者: tianli
@@ -21,6 +22,7 @@ import argparse
 import csv
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "lib"))
@@ -213,6 +215,59 @@ def _csv_merge_txt(target_dir: Path, output_file: Path | None = None, **_kw) -> 
     return True
 
 
+def _encode_duplicates(input_file: Path, output_file: Path | None = None, **_kw) -> bool:
+    """为 Excel 中重复的企业编码生成唯一用户编码"""
+    if not validate_input_file(input_file) or not check_file_extension(input_file, "xlsx"):
+        return False
+    show_processing(f"处理: {input_file.name}")
+    from openpyxl import load_workbook
+
+    wb = load_workbook(str(input_file))
+    ws = wb.active
+
+    # 查找"企业编码"列
+    header_row = list(ws.iter_rows(min_row=1, max_row=1, values_only=True))[0]
+    try:
+        code_col_idx = header_row.index("企业编码") + 1  # openpyxl 列索引从1开始
+    except ValueError:
+        show_error("未找到'企业编码'列")
+        return False
+
+    # 统计企业编码出现次数
+    codes = []
+    for row in ws.iter_rows(min_row=2, min_col=code_col_idx, max_col=code_col_idx, values_only=True):
+        if row[0]:
+            codes.append(row[0])
+
+    code_counts = Counter(codes)
+    code_sequence = {}
+
+    # 在"企业编码"列后插入"用户编码"列
+    ws.insert_cols(code_col_idx + 1)
+    ws.cell(row=1, column=code_col_idx + 1, value="用户编码")
+
+    # 生成用户编码
+    for row_idx in range(2, ws.max_row + 1):
+        enterprise_code = ws.cell(row=row_idx, column=code_col_idx).value
+        if not enterprise_code:
+            continue
+        if enterprise_code not in code_sequence:
+            code_sequence[enterprise_code] = 1
+        else:
+            code_sequence[enterprise_code] += 1
+        user_code = f"{enterprise_code}B{code_sequence[enterprise_code]:04d}"
+        ws.cell(row=row_idx, column=code_col_idx + 1, value=user_code)
+
+    # 保存文件
+    if output_file is None:
+        output_file = input_file.parent / f"{input_file.stem}_已编号{input_file.suffix}"
+
+    wb.save(str(output_file))
+    show_success(f"处理完成: {output_file.name}")
+    show_info(f"共处理 {len(codes)} 条记录，重复编码数: {sum(1 for c in code_counts.values() if c > 1)}")
+    return True
+
+
 # ── 子命令注册表 ─────────────────────────────────────────────
 
 CONVERTERS = {
@@ -224,6 +279,7 @@ CONVERTERS = {
     "xlsx-from-xls": {"fn": _xlsx_from_xls, "src_ext": "xls", "deps": ["xlrd", "openpyxl"]},
     "xlsx-to-csv": {"fn": _xlsx_to_csv, "src_ext": "xlsx", "deps": ["openpyxl"]},
     "xlsx-to-txt": {"fn": _xlsx_to_txt, "src_ext": "xlsx", "deps": ["pandas", "openpyxl"]},
+    "encode-duplicates": {"fn": _encode_duplicates, "src_ext": "xlsx", "deps": ["openpyxl"]},
 }
 
 

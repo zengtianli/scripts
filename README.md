@@ -60,7 +60,7 @@ cp .env.example .env
 | `table_tools.py` | Table name/intro standardization | `python3 table_tools.py check report.docx` / `python3 table_tools.py reorder report.docx` |
 | `chart.py` | Data-driven chart generation (bar, Gantt, flow) from JSON | `python3 chart.py config.json` / `python3 chart.py --type gantt config.json` |
 | `chart_insert.py` | Replace ASCII art code blocks with PNG images | `python3 chart_insert.py check doc.md` / `python3 chart_insert.py fix doc.md` |
-| `frontmatter_gen.py` | Batch generate YAML frontmatter for Markdown files (AI) | `python3 frontmatter_gen.py docs/` |
+| `md_tools.py frontmatter` | Batch generate YAML frontmatter for Markdown files (AI) | `python3 md_tools.py frontmatter docs/` |
 
 ## Data Conversion (`scripts/data/`)
 

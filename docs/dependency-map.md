@@ -22,7 +22,7 @@ graph TD
         docx_md["docx_to_md.sh<br/>DOCX→MD"]
         scan_sw["scan_sensitive_words.py<br/>AI 敏感词"]
         bullet["bullet_to_paragraph.py<br/>AI 要点转公文"]
-        front["frontmatter_gen.py<br/>AI 生成 frontmatter"]
+        front["md_tools.py frontmatter<br/>AI 生成 frontmatter"]
         rqc["report_quality_check.py<br/>报告质量检查"]
         bid["bid_standardize.py<br/>标书标准化"]
         table["table_tools.py<br/>表格规范"]
@@ -168,7 +168,7 @@ graph TD
 | `document/docx_track_changes.py` | 0 次使用，高度专用 |
 | `document/bid_standardize.py` | 0 次使用，标书专用 |
 | `document/table_tools.py` | 0 次使用，表格专用 |
-| `document/frontmatter_gen.py` | 0 次使用，docs 站专用 |
+| `document/md_tools.py frontmatter` | 0 次使用，docs 站专用 |
 | `file/project_sort.py` | 0 次使用，按项目名分组 |
 | `file/scan_binary_manifest.py` | 0 次使用，生成文件清单 |
 | `tools/dereference_links.py` | 0 次使用，prepare_share 已用 rsync 替代 |
